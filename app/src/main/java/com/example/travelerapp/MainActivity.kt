@@ -11,12 +11,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.example.travelerapp.ui.theme.TravelerAppTheme
 
 class MainActivity : ComponentActivity() {
+
+    lateinit var navController: NavHostController
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            TravelerApp()
+            TravelerAppTheme {
+
+                navController = rememberNavController()
+                SetUpNavGraph(navController = navController)
+
+            }
         }
     }
 }
@@ -38,9 +48,6 @@ fun TravelerApp() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text("Hello, Jetpack Compose!")
-            Button.CustomButton {
-
-            }
         }
     }
 }
