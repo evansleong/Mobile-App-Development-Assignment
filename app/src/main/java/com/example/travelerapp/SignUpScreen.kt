@@ -35,7 +35,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun LoginScreen(
+fun SignUpScreen(
     navController: NavController
 ) {
     val checked = remember { mutableStateOf(false) }
@@ -68,7 +68,7 @@ fun LoginScreen(
                             }
                         }
                     },
-                    text = "Log In",
+                    text = "Sign Up",
                     fontSize = 40.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -76,6 +76,22 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    text = "Username",
+                    modifier = Modifier.align(Alignment.Start)
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                ReuseComponents.RoundedOutlinedTextField(
+                    value = "",
+                    onValueChange = {},
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(15.dp))
 
                 Text(
                     text = "Email",
@@ -120,25 +136,12 @@ fun LoginScreen(
                             onCheckedChange = { isChecked -> checked.value = isChecked },
                             colors = CheckboxDefaults.colors(checkedColor = Color.Green)
                         )
-                        Text("I would like to receive your newsletter and other promotional information")
-                    }
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Checkbox(
-                            checked = checked.value,
-                            onCheckedChange = { isChecked -> checked.value = isChecked },
-                            colors = CheckboxDefaults.colors(checkedColor = Color.Green)
-                        )
-                        Text("Remember me")
+                        Text("I had read and agreed the Term and Privacy")
                     }
                 }
 
                 ReuseComponents.CustomButton(
-                    text = "Login",
+                    text = "Sign Up",
                     onClick = {
                         navController.navigate(route = Screen.Home.route) {
                             popUpTo(Screen.Home.route) {
@@ -149,7 +152,7 @@ fun LoginScreen(
                 )
 
                 Text(
-                    text = "Don't have an account yet? Sign up now",
+                    text = "Already have an account? Login now",
                     color = Color.Blue,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
@@ -157,8 +160,8 @@ fun LoginScreen(
                         .padding(top = 16.dp)
                         .clickable {
                             // Navigate to the signup screen
-                            navController.navigate(Screen.Signup.route) {
-                                popUpTo(Screen.Signup.route) {
+                            navController.navigate(Screen.Login.route) {
+                                popUpTo(Screen.Login.route) {
                                     inclusive = true
                                 }
                             }
@@ -171,7 +174,7 @@ fun LoginScreen(
 
 @Composable
 @Preview
-fun LoginScreenPreview(){
+fun SignUpScreenPreview(){
     LoginScreen(
         navController = rememberNavController()
     )
