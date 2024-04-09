@@ -32,6 +32,7 @@ object ReuseComponents {
         modifier: Modifier = Modifier,
         value: String,
         onValueChange: (String) -> Unit,
+        label: @Composable (String) -> Unit,
         shape: Shape = RoundedCornerShape(8.dp), // Default rounded corner shape
     ) {
         OutlinedTextField(

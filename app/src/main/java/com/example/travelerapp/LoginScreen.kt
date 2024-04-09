@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -88,6 +89,7 @@ fun LoginScreen(
                     value = "",
                     onValueChange = {},
                     shape = RoundedCornerShape(16.dp),
+                    label = { BasicText(text = "Email") },
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -104,6 +106,7 @@ fun LoginScreen(
                     value = "",
                     onValueChange = {},
                     shape = RoundedCornerShape(16.dp),
+                    label = { BasicText(text = "Password") },
                     modifier = Modifier.fillMaxWidth()
                 )
 
