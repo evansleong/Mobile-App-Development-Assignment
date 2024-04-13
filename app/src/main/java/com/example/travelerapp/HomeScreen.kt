@@ -47,7 +47,16 @@ fun HomeScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+<<<<<<< Updated upstream
             Text(text = title)
+=======
+            Text(
+                modifier = Modifier.clickable {
+                    navController.navigate(route = Screen.AgencyHome.route)
+                },
+                text = "Home Screen")
+            // Add other components as needed
+>>>>>>> Stashed changes
         }
 
         ReuseComponents.NavBar(text = title, navController = navController)
