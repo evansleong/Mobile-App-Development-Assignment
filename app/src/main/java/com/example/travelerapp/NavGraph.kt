@@ -29,5 +29,30 @@ fun SetUpNavGraph(
         ){
             SignUpScreen(navController)
         }
+        composable(
+            route = Screen.Trip.route
+        ){
+            TripScreen(navController)
+        }
+        composable(
+            route = Screen.Package.route
+        ){
+            PackageScreen(navController)
+        }
+        composable(
+            route = Screen.Wallet.route
+        ){
+            WalletScreen(navController)
+        }
+        composable(
+            route = Screen.Profile.route
+        ){
+            ProfileScreen(navController)
+        }
+        composable(
+            route = Screen.Settings.route
+        ){
+            SettingsScreen(navController)
+        }
     }
 }
