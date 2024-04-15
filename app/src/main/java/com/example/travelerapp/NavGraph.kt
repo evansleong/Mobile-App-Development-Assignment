@@ -30,7 +30,6 @@ fun SetUpNavGraph(
             SignUpScreen(navController)
         }
         composable(
-<<<<<<< Updated upstream
             route = Screen.Trip.route
         ){
             TripScreen(navController)
@@ -52,16 +51,21 @@ fun SetUpNavGraph(
         }
         composable(
             route = Screen.Settings.route
-        ){
+        ) {
             SettingsScreen(navController)
-=======
+        }
+        composable(
             route = Screen.AgencyHome.route
         ){ backStackEntry ->
             // Extracting arguments from NavBackStackEntry
             val loggedInUserName = backStackEntry.arguments?.getString("loggedInUserName")
             // Passing the argument to AgencyHomeScreen
             AgencyHomeScreen(navController, loggedInUserName ?: "", onExpandClicked = {}, onPackageClicked = {}, soldPackagesCount = 0, userTravelPackages = listOf())
->>>>>>> Stashed changes
+        }
+        composable(
+            route = Screen.Reload.route
+        ) {
+            ReloadScreen(navController)
         }
     }
 }
