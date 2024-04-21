@@ -52,7 +52,7 @@ fun HomeScreen(
                 modifier = Modifier.clickable {
                     navController.navigate(route = Screen.AgencyHome.route)
                 },
-                text = "Home Screen")
+                text = "Agency Home Screen")
             // Add other components as needed
         }
 

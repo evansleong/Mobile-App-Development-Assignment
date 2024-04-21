@@ -60,7 +60,7 @@ fun SetUpNavGraph(
             // Extracting arguments from NavBackStackEntry
             val loggedInUserName = backStackEntry.arguments?.getString("loggedInUserName")
             // Passing the argument to AgencyHomeScreen
-            AgencyHomeScreen(navController, loggedInUserName ?: "", onExpandClicked = {}, onPackageClicked = {}, soldPackagesCount = 0, userTravelPackages = listOf())
+            AgencyHomeScreen(navController, loggedInUserName ?: "", onExpandClicked = {}, onPackageClicked = {}, soldPackagesCount = 0, userTravelPackages = listOf(), packageChartData = listOf())
         }
         composable(
             route = Screen.Reload.route
