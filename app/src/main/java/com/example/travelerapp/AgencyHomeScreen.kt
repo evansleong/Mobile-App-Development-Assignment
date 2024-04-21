@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
@@ -121,15 +122,24 @@ fun AgencyHomeScreen(
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(horizontal = 8.dp)
             ) {
-                items(userTravelPackages) { packageItem ->
+                items(userTravelPackages.take(2)) { packageItem ->
                     PackageItemCard(packageItem = packageItem, onClick = { /* Handle package item click */ })
                 }
             }
             Button(
-                onClick = onExpandClicked,
-                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
+                onClick = {
+                    navController.navigate(route = Screen.PkgManagement.route) },
+                modifier = Modifier.align(Alignment.BottomEnd)
+                    .height(90.dp)
+                    .width(120.dp)
+                    .padding(20.dp)
+                    .align(Alignment.BottomEnd)
+                    .offset(y = (-200).dp)
             ) {
-                Text(text = "Expand")
+                Text(
+                    text = ">",
+                    fontSize = 25.sp
+                )
             }
         }
         ReuseComponents.NavBar(text = title, navController = navController)
