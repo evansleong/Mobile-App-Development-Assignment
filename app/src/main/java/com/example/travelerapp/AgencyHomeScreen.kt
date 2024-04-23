@@ -41,7 +41,6 @@ fun AgencyHomeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
     ) {
         val dataList = mutableListOf(30,60,90,50,70)
         val floatValue = mutableListOf<Float>()
@@ -128,7 +127,7 @@ fun AgencyHomeScreen(
             }
             Button(
                 onClick = {
-                    navController.navigate(route = Screen.PkgManagement.route) },
+                    navController.navigate(route = Screen.AgencyPackage.route) },
                 modifier = Modifier.align(Alignment.BottomEnd)
                     .height(90.dp)
                     .width(120.dp)

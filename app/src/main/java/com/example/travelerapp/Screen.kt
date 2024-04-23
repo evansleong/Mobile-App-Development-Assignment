@@ -10,6 +10,6 @@ sealed class Screen(val route: String) {
     object Profile: Screen(route = "profile_screen")
     object Settings: Screen(route = "settings_screen")
     object AgencyHome: Screen(route = "agency_home_screen")
-    object PkgManagement: Screen(route = "pkg_management_screen")
+    object AgencyPackage: Screen(route = "agency_package_screen")
     object Reload: Screen(route = "reload_screen")
 }

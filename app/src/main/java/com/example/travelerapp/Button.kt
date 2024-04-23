@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Button
@@ -116,7 +117,7 @@ object ReuseComponents {
     }
 
     @Composable
-    fun TopBar(title: String, navController: NavController) {
+    fun TopBar(title: String, navController: NavController, showBackButton : Boolean = false) {
         var expanded by remember { mutableStateOf(false) }
 
         val items = listOf("Profile", "Settings")
@@ -131,6 +132,17 @@ object ReuseComponents {
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
+                if (showBackButton) {
+                    IconButton(
+                        onClick = { navController.popBackStack() } // Navigate back to previous screen
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.Black
+                        )
+                    }
+                }
                 Text(
                     text = title,
                     color = Color.Black,

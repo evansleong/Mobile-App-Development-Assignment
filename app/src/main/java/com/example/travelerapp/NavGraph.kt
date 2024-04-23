@@ -63,6 +63,11 @@ fun SetUpNavGraph(
             AgencyHomeScreen(navController, loggedInUserName ?: "", onExpandClicked = {}, onPackageClicked = {}, soldPackagesCount = 0, userTravelPackages = listOf(), packageChartData = listOf())
         }
         composable(
+            route = Screen.AgencyPackage.route
+        ) {
+            AgencyPackageScreen(navController)
+        }
+        composable(
             route = Screen.Reload.route
         ) {
             ReloadScreen(navController)
