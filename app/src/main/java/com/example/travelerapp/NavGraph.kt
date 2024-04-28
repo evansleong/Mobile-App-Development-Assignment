@@ -2,6 +2,10 @@ package com.example.travelerapp
 
 import SignUpScreen
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -60,12 +64,17 @@ fun SetUpNavGraph(
             // Extracting arguments from NavBackStackEntry
             val loggedInUserName = backStackEntry.arguments?.getString("loggedInUserName")
             // Passing the argument to AgencyHomeScreen
-            AgencyHomeScreen(navController, loggedInUserName ?: "", onExpandClicked = {}, onPackageClicked = {}, soldPackagesCount = 0, userTravelPackages = listOf(), packageChartData = listOf())
+            AgencyHomeScreen(navController, loggedInUserName ?: "", soldPackagesCount = 0, userTravelPackages = listOf())
         }
         composable(
-            route = Screen.AgencyPackage.route
+            route = Screen.AgencyAddPackage.route
         ) {
-            AgencyPackageScreen(navController)
+            AgencyAddPackageScreen(navController = navController, context = LocalContext.current)
+        }
+        composable(
+            route = Screen.AgencyPackageList.route
+        ) {
+            AgencyPackageList(navController)
         }
         composable(
             route = Screen.Reload.route

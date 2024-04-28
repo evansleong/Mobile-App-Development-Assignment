@@ -18,45 +18,25 @@ import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import com.example.custombargraph.BarType
-import com.example.travelerapp.ui.theme.Green500
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.example.travelerapp.data.TravelPackage
 
 @Composable
 fun AgencyHomeScreen(
     navController: NavController,
     loggedInUserName: String,
     soldPackagesCount: Int,
-    userTravelPackages: List<PackageItem>,
-    packageChartData: List<Pair<String, Int>>,
-    onPackageClicked: (String) -> Unit,
-    onExpandClicked: () -> Unit
+    userTravelPackages: List<TravelPackage>,
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        val dataList = mutableListOf(30,60,90,50,70)
-        val floatValue = mutableListOf<Float>()
-        val datesList = mutableListOf(2,3,4,5,6)
-
-        dataList.forEachIndexed { index, value ->
-
-            floatValue.add(index = index, element = value.toFloat()/dataList.max().toFloat())
-
-        }
-
-        val userTravelPackages = listOf(
-            PackageItem(name = "Package 1", imageResId = R.drawable.invoker),
-            PackageItem(name = "Package 2", imageResId = R.drawable.invoker),
-            PackageItem(name = "Package 3", imageResId = R.drawable.invoker)
-        )
         val title = "Welcome, $loggedInUserName"
         ReuseComponents.TopBar(title = title, navController)
 
@@ -78,17 +58,6 @@ fun AgencyHomeScreen(
         )
 
         Spacer(modifier = Modifier.height(20.dp))
-
-        BarGraph(
-            graphBarData = floatValue,
-            xAxisScaleData = datesList,
-            barData_ = dataList,
-            height = 100.dp,
-            roundType = BarType.TOP_CURVED,
-            barWidth = 50.dp,
-            barColor = Green500,
-            barArrangement = Arrangement.SpaceEvenly
-        )
 
         Text(
             text = "$soldPackagesCount Pkgs booked",
@@ -127,7 +96,8 @@ fun AgencyHomeScreen(
             }
             Button(
                 onClick = {
-                    navController.navigate(route = Screen.AgencyPackage.route) },
+                    navController.navigate(route = Screen.AgencyPackageList.route)
+                },
                 modifier = Modifier.align(Alignment.BottomEnd)
                     .height(90.dp)
                     .width(120.dp)
@@ -145,14 +115,8 @@ fun AgencyHomeScreen(
     }
 }
 
-// Data class to hold package item information
-data class PackageItem(
-    val name: String,
-    val imageResId: Int // Resource ID for the image
-)
-
 @Composable
-fun PackageItemCard(packageItem: PackageItem, onClick: () -> Unit) {
+fun PackageItemCard(packageItem: TravelPackage, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .padding(end = 8.dp)
@@ -185,17 +149,14 @@ fun PreviewAgencyHomeScreen() {
     val loggedInUserName = "John Doe"
     val soldPackagesCount = 10
     val userTravelPackages = listOf(
-        PackageItem(name = "Package 1", imageResId = R.drawable.invoker),
-        PackageItem(name = "Package 2", imageResId = R.drawable.invoker),
-        PackageItem(name = "Package 3", imageResId = R.drawable.invoker)
+        TravelPackage(name = "Package 1", imageResId = R.drawable.invoker),
+        TravelPackage(name = "Package 2", imageResId = R.drawable.invoker),
+        TravelPackage(name = "Package 3", imageResId = R.drawable.invoker)
     )
-    val packageChartData = listOf("Package 1" to 10, "Package 2" to 15, "Package 3" to 8)
     AgencyHomeScreen(
         navController = rememberNavController(),
         loggedInUserName = loggedInUserName,
         soldPackagesCount = soldPackagesCount,
         userTravelPackages = userTravelPackages,
-        packageChartData = packageChartData,
-        onPackageClicked = {}
-    ) {}
+    )
 }

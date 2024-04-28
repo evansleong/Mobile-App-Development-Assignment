@@ -62,6 +62,12 @@ fun HomeScreen(
                     navController.navigate(route = Screen.AgencyHome.route)
                 },
                 text = "Agency Home Screen")
+
+            Text(
+                modifier = Modifier.clickable {
+                    navController.navigate(route = Screen.AgencyAddPackage.route)
+                },
+                text = "Add Package Screen")
             // Add other components as needed
         }
 
