@@ -5,20 +5,20 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.health.connect.datatypes.units.Length
-import com.example.travelerapp.data.Trip
 
-class DBHandler(context: Context) :
+    class DBHandler(context: Context) :
         SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
         override fun onCreate(db: SQLiteDatabase) {
             val createTripTable = """
             CREATE TABLE TRIP_TABLE (
                 trip_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 trip_name TEXT NOT NULL,
-                trip_length TEXT NOT NULL,
+                trip_length TEXT NOT NULL,               
                 trip_fees REAL NOT NULL,
                 trip_deposit REAL NOT NULL,
-                trip_desc TEXT NOT NULL
+                trip_desc TEXT NOT NULL,
+                trip_dep_date TEXT NOT NULL,
+                trip_ret_date TEXT NOT NULL
             )
             """
 
@@ -40,22 +40,7 @@ class DBHandler(context: Context) :
                 user_id INTEGER,
                 FOREIGN KEY (user_id) REFERENCES users(id)
             )
-            """
-
-//            val createTripTable = """
-//            CREATE TABLE trips (
-//                id INTEGER PRIMARY KEY AUTOINCREMENT,
-//                name TEXT NOT NULL,
-//                fees REAL NOT NULL,
-//                deposit REAL NOT NULL,
-//                departure_date INTEGER NOT NULL,
-//                return_date INTEGER NOT NULL,
-//                description TEXT,
-//                is_active INTEGER DEFAULT 1 CHECK(is_active IN (0,1)),
-//                user_id INTEGER,
-//                FOREIGN KEY (user_id) REFERENCES users(id)
-//            )
-//        """
+        """
             val createTransactionTable = """
             CREATE TABLE transactions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -82,8 +67,6 @@ class DBHandler(context: Context) :
                 FOREIGN KEY (user_id) REFERENCES users(id)
             )
         """
-
-
             db.execSQL(createTripTable)
             db.execSQL(createUserTable)
             db.execSQL(createWalletTable)
@@ -92,6 +75,7 @@ class DBHandler(context: Context) :
         }
 
         override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+            db.execSQL("DROP TABLE IF EXISTS TRIP_TABLE")
             db.execSQL("DROP TABLE IF EXISTS users")
             db.execSQL("DROP TABLE IF EXISTS wallets")
             db.execSQL("DROP TABLE IF EXISTS trips")
@@ -125,25 +109,25 @@ class DBHandler(context: Context) :
 
         // this method is use to add new course to our sqlite database.
         fun addNewTrip(
-            name: String,
-            fees: Double,
-            deposit: Double,
-            description: String,
-            departure_date: Int,
-            return_date: Int,
-            is_active: Int,
+            tripName: String,
+            tripLength: String,
+            tripFees: Double,
+            tripDeposit: Double,
+            tripDesc: String,
+            depDate: String,
+            retDate: String,
         ) {
             val db = this.writableDatabase
             val values = ContentValues().apply {
-                put("name", name)
-                put("fees", fees)
-                put("deposit", deposit)
-                put("description", description)
-                put("departure_date", departure_date)
-                put("return_date", return_date)
-                put("is_active", is_active)
+                put("trip_name", tripName)
+                put("trip_length",tripLength )
+                put("trip_fees", tripFees)
+                put("trip_deposit", tripDeposit)
+                put("trip_desc", tripDesc)
+                put("trip_dep_date", depDate)
+                put("trip_ret_date", retDate)
             }
-            db.insert("trips", null, values)
+            db.insert("TRIP_TABLE", null, values)
             db.close()
         }
 
@@ -153,9 +137,8 @@ class DBHandler(context: Context) :
             db.close()
         }
 
-
         companion object {
             private const val DB_NAME = "travelerDB"
-            private const val DB_VERSION = 6
+            private const val DB_VERSION = 10
         }
     }

@@ -24,7 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.shape.RoundedCornerShape
-//import com.example.travelerapp.data.TravelPackage
 
 @Composable
 fun AgencyHomeScreen(
@@ -138,7 +137,7 @@ fun AgencyHomeScreen(
 //                fontWeight = FontWeight.Bold
 //            )
 //        }
-////    }
+//    }
 //}
 
 
@@ -147,10 +146,10 @@ fun AgencyHomeScreen(
 fun PreviewAgencyHomeScreen() {
     val loggedInUserName = "John Doe"
     val soldPackagesCount = 10
-////    val userTravelPackages = listOf(
-////        TravelPackage(name = "Package 1", imageResId = R.drawable.invoker),
-////        TravelPackage(name = "Package 2", imageResId = R.drawable.invoker),
-////        TravelPackage(name = "Package 3", imageResId = R.drawable.invoker)
+//    val userTravelPackages = listOf(
+//        TravelPackage(name = "Package 1", imageResId = R.drawable.invoker),
+//        TravelPackage(name = "Package 2", imageResId = R.drawable.invoker),
+//        TravelPackage(name = "Package 3", imageResId = R.drawable.invoker)
 //    )
     AgencyHomeScreen(
         navController = rememberNavController(),

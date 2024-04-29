@@ -5,5 +5,7 @@ data class Trip(
     val tripLength: String,
     val tripFees: Double,
     val tripDeposit: Double,
-    val tripDesc: String
+    val tripDesc: String,
+    val depDate: String,
+    val retDate: String
 )
