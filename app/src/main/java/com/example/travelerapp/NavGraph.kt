@@ -74,7 +74,7 @@ fun SetUpNavGraph(
         composable(
             route = Screen.AgencyPackageList.route
         ) {
-            AgencyPackageList(navController)
+            AgencyPackageList(navController, context = LocalContext.current)
         }
         composable(
             route = Screen.Reload.route
