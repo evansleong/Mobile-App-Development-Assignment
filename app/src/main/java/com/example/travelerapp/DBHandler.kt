@@ -7,6 +7,7 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.example.travelerapp.data.Trip
+import com.example.travelerapp.data.User
 
 class DBHandler(context: Context) :
         SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
@@ -114,10 +115,11 @@ class DBHandler(context: Context) :
                 val idColIdx = cursor.getColumnIndex("id")
                 if (idColIdx != -1 && cursor.moveToFirst()) {
                     user = User(
-                        id = cursor.getLong(cursor.getColumnIndex("id")),
-                        username = cursor.getString(cursor.getColumnIndex("username")),
-                        email = cursor.getString(cursor.getColumnIndex("email")),
-                        password = cursor.getString(cursor.getColumnIndex("password"))
+                        userId = cursor.getLong(cursor.getColumnIndex("id")),
+                        userName = cursor.getString(cursor.getColumnIndex("username")),
+                        userEmail = cursor.getString(cursor.getColumnIndex("email")),
+                        userPw = cursor.getString(cursor.getColumnIndex("password")),
+                        userWalletPin = 0
                     )
                 }
             }

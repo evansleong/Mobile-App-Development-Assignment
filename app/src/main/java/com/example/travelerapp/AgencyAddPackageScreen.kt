@@ -86,49 +86,56 @@ fun AgencyAddPackageScreen(
         ReuseComponents.TopBar(title = title, navController, showBackButton = true)
 
         Spacer(modifier = Modifier.height(20.dp))
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(32.dp)
         ) {
-            Text(
-                text = "Trip Duration"
-            )
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = {
-                    expanded = it
-                },
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                TextField(
-                    value = tripLength.value,
-                    onValueChange = {},
-                    readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                    modifier = Modifier.menuAnchor()
+                Text(
+                    text = "Trip Duration",
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = {
+                        expanded = it
+                    },
+                ) {
+                    TextField(
+                        value = tripLength.value,
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        modifier = Modifier.menuAnchor()
+                            .width(350.dp)
+                    )
 
-                if (expanded) {
-                    ExposedDropdownMenu(
-                        expanded = true,
-                        onDismissRequest = {
-                            expanded = false
-                        }
-                    ) {
-                        tripLengthOptions.forEach { tripLengthOptions: String ->
-                            DropdownMenuItem(
-                                text = { Text(text = tripLengthOptions) },
-                                onClick = {
-                                    tripLength.value = tripLengthOptions
-                                    expanded = false
-                                }
-                            )
+                    if (expanded) {
+                        ExposedDropdownMenu(
+                            expanded = true,
+                            onDismissRequest = {
+                                expanded = false
+                            }
+                        ) {
+                            tripLengthOptions.forEach { tripLengthOptions: String ->
+                                DropdownMenuItem(
+                                    text = { Text(text = tripLengthOptions) },
+                                    onClick = {
+                                        tripLength.value = tripLengthOptions
+                                        expanded = false
+                                    }
+                                )
+                            }
                         }
                     }
                 }
             }
         }
+
 
         Box(
             modifier = Modifier
