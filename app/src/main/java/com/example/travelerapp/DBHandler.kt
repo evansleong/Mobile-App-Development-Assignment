@@ -19,6 +19,8 @@ class DBHandler(context: Context) :
                 trip_fees REAL NOT NULL,
                 trip_deposit REAL NOT NULL,
                 trip_desc TEXT NOT NULL
+            )
+            """
 
             val createUserTable = """
             CREATE TABLE users (
@@ -40,20 +42,20 @@ class DBHandler(context: Context) :
             )
             """
 
-            val createTripTable = """
-            CREATE TABLE trips (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                fees REAL NOT NULL,
-                deposit REAL NOT NULL,
-                departure_date INTEGER NOT NULL,
-                return_date INTEGER NOT NULL,
-                description TEXT,
-                is_active INTEGER DEFAULT 1 CHECK(is_active IN (0,1)),
-                user_id INTEGER,
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            )
-        """
+//            val createTripTable = """
+//            CREATE TABLE trips (
+//                id INTEGER PRIMARY KEY AUTOINCREMENT,
+//                name TEXT NOT NULL,
+//                fees REAL NOT NULL,
+//                deposit REAL NOT NULL,
+//                departure_date INTEGER NOT NULL,
+//                return_date INTEGER NOT NULL,
+//                description TEXT,
+//                is_active INTEGER DEFAULT 1 CHECK(is_active IN (0,1)),
+//                user_id INTEGER,
+//                FOREIGN KEY (user_id) REFERENCES users(id)
+//            )
+//        """
             val createTransactionTable = """
             CREATE TABLE transactions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
