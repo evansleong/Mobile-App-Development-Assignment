@@ -24,14 +24,13 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.example.travelerapp.data.TravelPackage
+//import com.example.travelerapp.data.TravelPackage
 
 @Composable
 fun AgencyHomeScreen(
     navController: NavController,
     loggedInUserName: String,
     soldPackagesCount: Int,
-    userTravelPackages: List<TravelPackage>,
 ) {
     Column(
         modifier = Modifier
@@ -90,9 +89,9 @@ fun AgencyHomeScreen(
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(horizontal = 8.dp)
             ) {
-                items(userTravelPackages.take(2)) { packageItem ->
-                    PackageItemCard(packageItem = packageItem, onClick = { /* Handle package item click */ })
-                }
+//                items(userTravelPackages.take(2)) { packageItem ->
+//                    PackageItemCard(packageItem = packageItem, onClick = { /* Handle package item click */ })
+//                }
             }
             Button(
                 onClick = {
@@ -115,32 +114,32 @@ fun AgencyHomeScreen(
     }
 }
 
-@Composable
-fun PackageItemCard(packageItem: TravelPackage, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .padding(end = 8.dp)
-            .background(Color.LightGray, RoundedCornerShape(8.dp))
-            .padding(8.dp)
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Image(
-                painter = painterResource(id = packageItem.imageResId),
-                contentDescription = null, // Provide content description if needed
-                modifier = Modifier
-                    .clickable(onClick = onClick) // Make the image clickable
-                    .size(100.dp)
-            )
-            Text(
-                text = packageItem.name,
-                modifier = Modifier.padding(top = 4.dp),
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
-}
+//@Composable
+//fun PackageItemCard(packageItem: TravelPackage, onClick: () -> Unit) {
+//    Box(
+//        modifier = Modifier
+//            .padding(end = 8.dp)
+//            .background(Color.LightGray, RoundedCornerShape(8.dp))
+//            .padding(8.dp)
+//    ) {
+//        Column(
+//            horizontalAlignment = Alignment.CenterHorizontally,
+//        ) {
+//            Image(
+//                painter = painterResource(id = packageItem.imageResId),
+//                contentDescription = null, // Provide content description if needed
+//                modifier = Modifier
+//                    .clickable(onClick = onClick) // Make the image clickable
+//                    .size(100.dp)
+//            )
+//            Text(
+//                text = packageItem.name,
+//                modifier = Modifier.padding(top = 4.dp),
+//                fontWeight = FontWeight.Bold
+//            )
+//        }
+////    }
+//}
 
 
 @Preview
@@ -148,15 +147,15 @@ fun PackageItemCard(packageItem: TravelPackage, onClick: () -> Unit) {
 fun PreviewAgencyHomeScreen() {
     val loggedInUserName = "John Doe"
     val soldPackagesCount = 10
-    val userTravelPackages = listOf(
-        TravelPackage(name = "Package 1", imageResId = R.drawable.invoker),
-        TravelPackage(name = "Package 2", imageResId = R.drawable.invoker),
-        TravelPackage(name = "Package 3", imageResId = R.drawable.invoker)
-    )
+////    val userTravelPackages = listOf(
+////        TravelPackage(name = "Package 1", imageResId = R.drawable.invoker),
+////        TravelPackage(name = "Package 2", imageResId = R.drawable.invoker),
+////        TravelPackage(name = "Package 3", imageResId = R.drawable.invoker)
+//    )
     AgencyHomeScreen(
         navController = rememberNavController(),
         loggedInUserName = loggedInUserName,
         soldPackagesCount = soldPackagesCount,
-        userTravelPackages = userTravelPackages,
+//        userTravelPackages = userTravelPackages,
     )
 }

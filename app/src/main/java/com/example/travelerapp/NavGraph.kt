@@ -64,7 +64,7 @@ fun SetUpNavGraph(
             // Extracting arguments from NavBackStackEntry
             val loggedInUserName = backStackEntry.arguments?.getString("loggedInUserName")
             // Passing the argument to AgencyHomeScreen
-            AgencyHomeScreen(navController, loggedInUserName ?: "", soldPackagesCount = 0, userTravelPackages = listOf())
+            AgencyHomeScreen(navController, loggedInUserName ?: "", soldPackagesCount = 0)
         }
         composable(
             route = Screen.AgencyAddPackage.route
@@ -74,7 +74,7 @@ fun SetUpNavGraph(
         composable(
             route = Screen.AgencyPackageList.route
         ) {
-            AgencyPackageList(navController)
+            AgencyPackageList(navController, context = LocalContext.current)
         }
         composable(
             route = Screen.Reload.route

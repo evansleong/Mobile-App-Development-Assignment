@@ -11,7 +11,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
@@ -31,12 +40,21 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AgencyAddPackageScreen(
     navController: NavController,
     context: Context
 ) {
     val activity = context as Activity
+
+    var expanded by remember { mutableStateOf(false) }
+
+    val tripLengthOptions = listOf("1 DAY TRIP", "2 DAYS 1 NIGHT", "3 DAYS 2 NIGHTS")
+
+    val tripLength = remember {
+        mutableStateOf(tripLengthOptions[0])
+    }
 
     val tripPackageName = remember {
         mutableStateOf(TextFieldValue())
@@ -71,6 +89,49 @@ fun AgencyAddPackageScreen(
 
         Box(
             modifier = Modifier
+                .fillMaxWidth()
+                .padding(32.dp)
+        ) {
+            Text(
+                text = "Trip Duration"
+            )
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = {
+                    expanded = it
+                },
+            ) {
+                TextField(
+                    value = tripLength.value,
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                    modifier = Modifier.menuAnchor()
+                )
+
+                if (expanded) {
+                    ExposedDropdownMenu(
+                        expanded = true,
+                        onDismissRequest = {
+                            expanded = false
+                        }
+                    ) {
+                        tripLengthOptions.forEach { tripLengthOptions: String ->
+                            DropdownMenuItem(
+                                text = { Text(text = tripLengthOptions) },
+                                onClick = {
+                                    tripLength.value = tripLengthOptions
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        Box(
+            modifier = Modifier
                 .width(350.dp)
                 .fillMaxHeight(),
             contentAlignment = Alignment.Center
@@ -79,9 +140,6 @@ fun AgencyAddPackageScreen(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
                 item {
                     Text(
                         text = "Trip Name"
@@ -199,6 +257,7 @@ fun AgencyAddPackageScreen(
                         onClick = {
                             dbHandler.addNewTrip(
                                 tripPackageName.value.text,
+                                tripLength.value,
                                 tripPackageFees.value.text.toDouble(),
                                 tripPackageDeposit.value.text.toDouble(),
                                 tripPackageDesc.value.text
