@@ -1,5 +1,6 @@
 package com.example.travelerapp
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -26,10 +27,13 @@ class MainActivity : ComponentActivity() {
     lateinit var navController: NavHostController
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val appContext:Context = this
+        val mainDbHandler =DBHandler(appContext)
         setContent {
             TravelerAppTheme {
                 navController = rememberNavController()
-                SetUpNavGraph(navController = navController)
+                SetUpNavGraph(navController = navController, dbHandler = mainDbHandler)
+
             }
         }
     }

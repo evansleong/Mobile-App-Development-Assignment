@@ -2,17 +2,15 @@ package com.example.travelerapp
 
 import SignUpScreen
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 
 @Composable
 fun SetUpNavGraph(
-    navController: NavHostController
+    navController: NavHostController,
+    dbHandler: DBHandler
 ) {
     NavHost(
         navController = navController,
@@ -26,7 +24,7 @@ fun SetUpNavGraph(
         composable(
             route = Screen.Login.route
         ){
-            LoginScreen(navController)
+            LoginScreen(navController,dbHandler)
         }
         composable(
             route = Screen.Signup.route

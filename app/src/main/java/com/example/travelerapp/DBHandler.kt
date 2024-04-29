@@ -1,5 +1,6 @@
 package com.example.travelerapp
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
@@ -102,6 +103,29 @@ class DBHandler(context: Context) :
             db.close()
         }
 
+        @SuppressLint("Range")
+        fun getUserByEmailNPw(username: String, password: String): User?{
+            val db = readableDatabase
+            val cursor = db.rawQuery("SELECT * FROM users WHERE email=? AND password=?",
+                arrayOf(username, password))
+            var user: User?=null
+
+            if (cursor != null) {
+                val idColIdx = cursor.getColumnIndex("id")
+                if (idColIdx != -1 && cursor.moveToFirst()) {
+                    user = User(
+                        id = cursor.getLong(cursor.getColumnIndex("id")),
+                        username = cursor.getString(cursor.getColumnIndex("username")),
+                        email = cursor.getString(cursor.getColumnIndex("email")),
+                        password = cursor.getString(cursor.getColumnIndex("password"))
+                    )
+                }
+            }
+            cursor.close()
+            db.close()
+            return user
+        }
+
         fun deleteAllUser() {
             val db = this.writableDatabase
             db.delete("users", null, null)
@@ -166,6 +190,6 @@ class DBHandler(context: Context) :
 
         companion object {
             private const val DB_NAME = "travelerDB"
-            private const val DB_VERSION = 10
+            private const val DB_VERSION = 11
         }
     }

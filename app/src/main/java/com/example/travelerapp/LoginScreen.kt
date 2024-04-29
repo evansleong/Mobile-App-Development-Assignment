@@ -1,5 +1,7 @@
 package com.example.travelerapp
 
+import ReuseComponents.getValueAsString
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,20 +16,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -35,11 +33,24 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 
+
+
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun LoginScreen(
-    navController: NavController
+    navController: NavController,
+    dbHandler: DBHandler
 ) {
+//    val lsContext: Context = this
     val checked = remember { mutableStateOf(false) }
+    val logInEmail = remember {
+        mutableStateOf("")
+    }
+
+    val logInPw = remember {
+        mutableStateOf("")
+    }
+
 
     Column(
         modifier = Modifier
@@ -87,7 +98,9 @@ fun LoginScreen(
 
                 ReuseComponents.RoundedOutlinedTextField(
                     value = "",
-                    onValueChange = {},
+                    onValueChange = {
+                                    logInEmail.value = it
+                    },
                     shape = RoundedCornerShape(16.dp),
                     label = { BasicText(text = "Email") },
                     modifier = Modifier.fillMaxWidth()
@@ -104,9 +117,12 @@ fun LoginScreen(
 
                 ReuseComponents.RoundedOutlinedTextField(
                     value = "",
-                    onValueChange = {},
+                    onValueChange = {
+                                    logInPw.value = it
+                    },
                     shape = RoundedCornerShape(16.dp),
                     label = { BasicText(text = "Password") },
+
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -143,9 +159,16 @@ fun LoginScreen(
                 ReuseComponents.CustomButton(
                     text = "Login",
                     onClick = {
+                        val emailTemp = logInEmail.getValueAsString()
+                        val pwTemp = logInPw.getValueAsString()
+
+                        val userExst = dbHandler.getUserByEmailNPw(emailTemp, pwTemp)
+
+                        if(userExst!=null){
                         navController.navigate(route = Screen.Home.route) {
                             popUpTo(Screen.Home.route) {
                                 inclusive = true
+                            }
                             }
                         }
                     }
@@ -172,10 +195,14 @@ fun LoginScreen(
     }
 }
 
+
 @Composable
 @Preview
 fun LoginScreenPreview(){
+    val context = LocalContext.current
+    val DBH = DBHandler(context)
     LoginScreen(
-        navController = rememberNavController()
+        navController = rememberNavController(),
+        dbHandler = DBH
     )
 }

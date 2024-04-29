@@ -8,6 +8,8 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -22,18 +24,23 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Green
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.DpOffset
 import androidx.navigation.NavController
 import com.example.travelerapp.R
 import com.example.travelerapp.Screen
+
+
 
 object ReuseComponents {
 
@@ -41,10 +48,18 @@ object ReuseComponents {
     fun CustomButton(text: String, onClick: () -> Unit) {
         Button(
             onClick = onClick,
+            colors = ButtonDefaults.buttonColors(
+            Color(0xFF5DB075)
+            ),
             modifier = Modifier.padding(16.dp)
+                .fillMaxWidth()
         ) {
             Text(text)
         }
+    }
+
+    fun MutableState<String>.getValueAsString():String{
+        return this.value
     }
 
     @Composable
@@ -59,6 +74,7 @@ object ReuseComponents {
             value = value,
             onValueChange = onValueChange,
             shape = shape,
+            singleLine = true,
             modifier = modifier.padding(4.dp)
         )
     }
