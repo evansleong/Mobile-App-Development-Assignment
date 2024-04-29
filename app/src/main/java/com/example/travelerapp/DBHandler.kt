@@ -21,7 +21,9 @@ class DBHandler(context: Context) :
                 trip_deposit REAL NOT NULL,
                 trip_desc TEXT NOT NULL,
                 trip_dep_date TEXT NOT NULL,
-                trip_ret_date TEXT NOT NULL
+                trip_ret_date TEXT NOT NULL,
+                trip_image_uri TEXT,
+                trip_options TEXT
             )
             """
 
@@ -159,8 +161,6 @@ class DBHandler(context: Context) :
             return tripList
         }
 
-
-        // this method is use to add new course to our sqlite database.
         fun addNewTrip(
             tripName: String,
             tripLength: String,
@@ -169,7 +169,10 @@ class DBHandler(context: Context) :
             tripDesc: String,
             depDate: String,
             retDate: String,
+            imageUri: String?,
+            tripOptions: List<String>
         ) {
+            val optionsString = tripOptions.joinToString(", ")
             val db = this.writableDatabase
             val values = ContentValues().apply {
                 put("trip_name", tripName)
@@ -179,6 +182,8 @@ class DBHandler(context: Context) :
                 put("trip_desc", tripDesc)
                 put("trip_dep_date", depDate)
                 put("trip_ret_date", retDate)
+                put("trip_image_uri", imageUri)
+                put("trip_options", optionsString)
             }
             db.insert("TRIP_TABLE", null, values)
             db.close()
@@ -192,6 +197,6 @@ class DBHandler(context: Context) :
 
         companion object {
             private const val DB_NAME = "travelerDB"
-            private const val DB_VERSION = 11
+            private const val DB_VERSION = 13
         }
     }
