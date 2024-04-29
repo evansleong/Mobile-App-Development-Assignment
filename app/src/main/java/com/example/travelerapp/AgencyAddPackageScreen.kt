@@ -72,6 +72,18 @@ fun AgencyAddPackageScreen(
         mutableStateOf(TextFieldValue())
     }
 
+    val tripPackageDeptDate = remember {
+        mutableStateOf(TextFieldValue())
+    }
+
+    val tripPackageRetDate = remember {
+        mutableStateOf(TextFieldValue())
+    }
+
+    var isChecked by remember { mutableStateOf(false) }
+
+    val value = if(isChecked) 1 else 0
+
     // Initialize a mutable state for the selected radio button option
     var selectedOption by remember { mutableStateOf("") }
 
@@ -192,6 +204,40 @@ fun AgencyAddPackageScreen(
                     )
                 }
                 item {
+                    Text(
+                        text = "Departure Date"
+                    )
+                    TextField(
+                        value = tripPackageDeptDate.value,
+                        onValueChange = { tripPackageDeptDate.value = it},
+                        placeholder = { Text(text = "Enter the trip dept date:")},
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                }
+                item {
+                    Text(
+                        text = "Return Date"
+                    )
+                    TextField(
+                        value = tripPackageRetDate.value,
+                        onValueChange = { tripPackageRetDate.value = it},
+                        placeholder = { Text(text = "Enter the trip Ret date:")},
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                }
+                item {
+                    Text(
+                        text = "Active"
+                    )
+                    Checkbox(
+                        checked = isChecked,
+                        onCheckedChange = { isChecked = it },
+                        modifier = Modifier.clickable { isChecked = !isChecked }
+                    )
+                }
+                item {
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
@@ -260,7 +306,10 @@ fun AgencyAddPackageScreen(
                                 tripLength.value,
                                 tripPackageFees.value.text.toDouble(),
                                 tripPackageDeposit.value.text.toDouble(),
-                                tripPackageDesc.value.text
+                                tripPackageDesc.value.text,
+                                tripPackageDeptDate.value.text.toInt(),
+                                tripPackageRetDate.value.text.toInt(),
+                                value
                             )
                             Toast.makeText(context, "Trip Added to Database", Toast.LENGTH_SHORT).show()
                         },
