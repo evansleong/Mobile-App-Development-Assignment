@@ -11,6 +11,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.travelerapp.data.Trip
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 
 //import com.example.travelerapp.Screen.AgencyAddPackage
 
@@ -26,7 +31,19 @@ fun AgencyPackageList(
     navController: NavController,
     context: Context
 ) {
+    val db = Firebase.firestore
     val activity = context as Activity
+
+    // State to hold the list of trips
+    val tripListState = remember { mutableStateOf<List<Trip>>(emptyList()) }
+
+    // Call readDataFromFirestore when this composable is composed
+    LaunchedEffect(key1 = true) {
+        readDataFromFirestore(db) { trips ->
+            // Update the tripListState with the fetched trips
+            tripListState.value = trips
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -37,12 +54,10 @@ fun AgencyPackageList(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        val tripList = dbHandler.getAllTrips()
-
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            items(tripList) { trip ->
+            items(tripListState.value) { trip ->
                 TripItem(trip = trip)
             }
         }

@@ -20,13 +20,14 @@ fun addDataToFirestore(
     selectedOption: List<String>,
 //    isChecked: Boolean
 ) {
+
     val tripData = hashMapOf(
-        "packageName" to tripPackageName,
+        "tripName" to tripPackageName,
         "tripLength" to tripLength,
-        "fees" to tripPackageFees,
-        "deposit" to tripPackageDeposit,
-        "description" to tripPackageDesc,
-        "deptDate" to tripPackageDeptDate,
+        "tripFees" to tripPackageFees,
+        "tripDeposit" to tripPackageDeposit,
+        "tripDesc" to tripPackageDesc,
+        "depDate" to tripPackageDeptDate,
         "retDate" to tripPackageRetDate,
         "imageUri" to uploadedImageUri,
         "options" to selectedOption,
@@ -52,12 +53,16 @@ fun readDataFromFirestore(db: FirebaseFirestore, callback: (List<Trip>) -> Unit)
         .addOnSuccessListener { documents ->
             val trips = mutableListOf<Trip>()
             for (document in documents) {
-                val trip = document.toObject(Trip::class.java)
-                trips.add(trip)
+                try {
+                    val trip: Trip = document.toObject(Trip::class.java)
+                    trips.add(trip)
+                } catch (e: Exception) {
+                    Log.e("Firestore", "Error converting document to Trip: ${e.message}")
+                }
             }
             callback(trips)
         }
         .addOnFailureListener { e ->
-            Log.e("Firestore", "Error getting documents", e)
+            Log.e("Firestore", "Error getting documents: ${e.message}", e)
         }
 }
