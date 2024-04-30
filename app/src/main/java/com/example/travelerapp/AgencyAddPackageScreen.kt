@@ -4,6 +4,7 @@ import ReuseComponents
 import android.app.Activity
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -42,6 +43,9 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
+
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalCoilApi::class)
 @Composable
@@ -49,6 +53,8 @@ fun AgencyAddPackageScreen(
     navController: NavController,
     context: Context
 ) {
+    val db = Firebase.firestore
+
     val activity = context as Activity
 
     var uploadedImageUri by remember {
@@ -56,8 +62,10 @@ fun AgencyAddPackageScreen(
     }
 
     val imagePicker =
-        rememberLauncherForActivityResult(contract =
-        ActivityResultContracts.GetContent()) { uri: Uri? ->
+        rememberLauncherForActivityResult(
+            contract =
+            ActivityResultContracts.GetContent()
+        ) { uri: Uri? ->
             uploadedImageUri = uri
         }
 
@@ -95,7 +103,7 @@ fun AgencyAddPackageScreen(
 
     var isChecked by remember { mutableStateOf(false) }
 
-    val value = if(isChecked) 1 else 0
+    val value = if (isChecked) 1 else 0
 
     var selectedOption by remember { mutableStateOf(emptyList<String>()) }
 
@@ -147,7 +155,6 @@ fun AgencyAddPackageScreen(
                 Text(
                     text = "Upload Photo",
                     modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
                         .aspectRatio(16f / 9f)
                 )
             }
@@ -215,8 +222,8 @@ fun AgencyAddPackageScreen(
                     )
                     TextField(
                         value = tripPackageName.value,
-                        onValueChange = { tripPackageName.value = it},
-                        placeholder = { Text(text = "Enter the trip name:")},
+                        onValueChange = { tripPackageName.value = it },
+                        placeholder = { Text(text = "Enter the trip name:") },
                         modifier = Modifier
                             .fillMaxWidth(),
                         shape = RoundedCornerShape(20.dp),
@@ -230,8 +237,8 @@ fun AgencyAddPackageScreen(
                     )
                     TextField(
                         value = tripPackageFees.value,
-                        onValueChange = { tripPackageFees.value = it},
-                        placeholder = { Text(text = "Enter the trip fees:")},
+                        onValueChange = { tripPackageFees.value = it },
+                        placeholder = { Text(text = "Enter the trip fees:") },
                         modifier = Modifier
                             .fillMaxWidth(),
                         shape = RoundedCornerShape(20.dp)
@@ -245,8 +252,8 @@ fun AgencyAddPackageScreen(
                     )
                     TextField(
                         value = tripPackageDeposit.value,
-                        onValueChange = { tripPackageDeposit.value = it},
-                        placeholder = { Text(text = "Enter the trip deposit:")},
+                        onValueChange = { tripPackageDeposit.value = it },
+                        placeholder = { Text(text = "Enter the trip deposit:") },
                         modifier = Modifier
                             .fillMaxWidth(),
                         shape = RoundedCornerShape(20.dp)
@@ -260,8 +267,8 @@ fun AgencyAddPackageScreen(
                     )
                     TextField(
                         value = tripPackageDesc.value,
-                        onValueChange = { tripPackageDesc.value = it},
-                        placeholder = { Text(text = "Enter the trip desc:")},
+                        onValueChange = { tripPackageDesc.value = it },
+                        placeholder = { Text(text = "Enter the trip desc:") },
                         modifier = Modifier
                             .fillMaxWidth(),
                         shape = RoundedCornerShape(20.dp)
@@ -274,8 +281,8 @@ fun AgencyAddPackageScreen(
                     )
                     TextField(
                         value = tripPackageDeptDate.value,
-                        onValueChange = { tripPackageDeptDate.value = it},
-                        placeholder = { Text(text = "Enter the trip dept date:")},
+                        onValueChange = { tripPackageDeptDate.value = it },
+                        placeholder = { Text(text = "Enter the trip dept date:") },
                         modifier = Modifier
                             .fillMaxWidth(),
                         shape = RoundedCornerShape(20.dp)
@@ -288,8 +295,8 @@ fun AgencyAddPackageScreen(
                     )
                     TextField(
                         value = tripPackageRetDate.value,
-                        onValueChange = { tripPackageRetDate.value = it},
-                        placeholder = { Text(text = "Enter the trip Ret date:")},
+                        onValueChange = { tripPackageRetDate.value = it },
+                        placeholder = { Text(text = "Enter the trip Ret date:") },
                         modifier = Modifier
                             .fillMaxWidth(),
                         shape = RoundedCornerShape(20.dp)
@@ -323,7 +330,8 @@ fun AgencyAddPackageScreen(
                         Checkbox(
                             checked = selectedOption.contains("Included breakfast"),
                             onCheckedChange = {
-                                selectedOption = if (it) selectedOption + "Included breakfast" else selectedOption - "Included breakfast"
+                                selectedOption =
+                                    if (it) selectedOption + "Included breakfast" else selectedOption - "Included breakfast"
                             }
                         )
                     }
@@ -342,7 +350,8 @@ fun AgencyAddPackageScreen(
                         Checkbox(
                             checked = selectedOption.contains("Free Parking"),
                             onCheckedChange = {
-                                selectedOption = if (it) selectedOption + "Free Parking" else selectedOption - "Free Parking"
+                                selectedOption =
+                                    if (it) selectedOption + "Free Parking" else selectedOption - "Free Parking"
                             }
                         )
                     }
@@ -361,7 +370,8 @@ fun AgencyAddPackageScreen(
                         Checkbox(
                             checked = selectedOption.contains("Travel Insurance"),
                             onCheckedChange = {
-                                selectedOption = if (it) selectedOption + "Travel Insurance" else selectedOption - "Travel Insurance"
+                                selectedOption =
+                                    if (it) selectedOption + "Travel Insurance" else selectedOption - "Travel Insurance"
                             }
                         )
                     }
@@ -380,7 +390,8 @@ fun AgencyAddPackageScreen(
                         Checkbox(
                             checked = selectedOption.contains("Tipping and Taxes"),
                             onCheckedChange = {
-                                selectedOption = if (it) selectedOption + "Tipping and Taxes" else selectedOption - "Tipping and Taxes"
+                                selectedOption =
+                                    if (it) selectedOption + "Tipping and Taxes" else selectedOption - "Tipping and Taxes"
                             }
                         )
                     }
@@ -399,7 +410,8 @@ fun AgencyAddPackageScreen(
                         Checkbox(
                             checked = selectedOption.contains("Full Board Meals"),
                             onCheckedChange = {
-                                selectedOption = if (it) selectedOption + "Full Board Meals" else selectedOption - "Full Board Meals"
+                                selectedOption =
+                                    if (it) selectedOption + "Full Board Meals" else selectedOption - "Full Board Meals"
                             }
                         )
                     }
@@ -418,7 +430,8 @@ fun AgencyAddPackageScreen(
                         Checkbox(
                             checked = selectedOption.contains("Airport transport"),
                             onCheckedChange = {
-                                selectedOption = if (it) selectedOption + "Airport transport" else selectedOption - "Airport transport"
+                                selectedOption =
+                                    if (it) selectedOption + "Airport transport" else selectedOption - "Airport transport"
                             }
                         )
                     }
@@ -429,23 +442,41 @@ fun AgencyAddPackageScreen(
                 item {
                     ReuseComponents.CustomButton(
                         text = "Save",
-                        onClick = {dbHandler.addNewTrip(
-                            tripPackageName.value.text,
-                            tripLength.value,
-                            tripPackageFees.value.text.toDouble(),
-                            tripPackageDeposit.value.text.toDouble(),
-                            tripPackageDesc.value.text,
-                            tripPackageDeptDate.value.text,
-                            tripPackageRetDate.value.text,
-                            uploadedImageUri?.toString(),
-                            selectedOption
-                        )
-                            Toast.makeText(context, "Trip Added to Database", Toast.LENGTH_SHORT).show()})
+                        onClick = {
+                            dbHandler.addNewTrip(
+                                tripPackageName.value.text,
+                                tripLength.value,
+                                tripPackageFees.value.text.toDouble(),
+                                tripPackageDeposit.value.text.toDouble(),
+                                tripPackageDesc.value.text,
+                                tripPackageDeptDate.value.text,
+                                tripPackageRetDate.value.text,
+                                uploadedImageUri?.toString(),
+                                selectedOption
+                            )
+                            addDataToFirestore(
+                                context = context,
+                                db = db,
+                                tripPackageName = tripPackageName.value.text,
+                                tripLength = tripLength.value,
+                                tripPackageFees = tripPackageFees.value.text.toDouble(),
+                                tripPackageDeposit = tripPackageDeposit.value.text.toDouble(),
+                                tripPackageDesc = tripPackageDesc.value.text,
+                                tripPackageDeptDate = tripPackageDeptDate.value.text,
+                                tripPackageRetDate = tripPackageRetDate.value.text,
+                                uploadedImageUri = uploadedImageUri?.toString(),
+                                selectedOption = selectedOption
+//                                isChecked = isChecked
+                            )
+                            Toast.makeText(context, "Trip Added to Database", Toast.LENGTH_SHORT)
+                                .show()
+                        })
                 }
             }
         }
     }
 }
+
 
 @Preview
 @Composable

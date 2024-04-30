@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <drawable name="rectangle" />
+    <drawable name="rectangle3351" />
+    <drawable name="bell" />
+    <drawable name="rectangle468" />
+    <drawable name="home02" />
+    <drawable name="map01" />
+    <drawable name="pkg01" />
+    <drawable name="more_vertical" />
+    <drawable name="cellular" />
+    <drawable name="wifi" />
+    <drawable name="battery" />
+    <drawable name="image2" />
+    <drawable name="chevronright" />
+    <drawable name="vector" />
+    <drawable name="union" />
+    <drawable name="user" />
+</resources>

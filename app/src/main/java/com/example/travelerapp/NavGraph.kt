@@ -2,6 +2,7 @@ package com.example.travelerapp
 
 import SignUpScreen
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -79,5 +80,10 @@ fun SetUpNavGraph(
         ) {
             ReloadScreen(navController)
         }
+//        composable(
+//            route = Screen.Testing.route
+//        ) {
+//            Testing(Modifier)
+//        }
     }
 }

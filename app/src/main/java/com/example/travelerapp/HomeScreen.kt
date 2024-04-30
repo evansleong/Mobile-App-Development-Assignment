@@ -68,7 +68,6 @@ fun HomeScreen(
                     navController.navigate(route = Screen.AgencyAddPackage.route)
                 },
                 text = "Add Package Screen")
-            // Add other components as needed
         }
 
         ReuseComponents.NavBar(text = title, navController = navController)
