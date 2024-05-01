@@ -144,8 +144,8 @@ fun SignUpScreen(
                                 .addOnCompleteListener { task ->
                                     if (task.isSuccessful) {
                                         // User created successfully
-                                        navController.navigate(Screen.Home.route) {
-                                            popUpTo(Screen.Home.route) {
+                                        navController.navigate(Screen.AddPIN.route) {
+                                            popUpTo(Screen.AddPIN.route) {
                                                 inclusive = true
                                             }
                                         }

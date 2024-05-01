@@ -1,8 +1,8 @@
 package com.example.travelerapp
 
+import AddPINScreen
 import SignUpScreen
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -15,7 +15,8 @@ fun SetUpNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.UserOrAdmin.route
+//        startDestination = Screen.UserOrAdmin.route
+        startDestination = Screen.Review.route
     ) {
         composable(
             route = Screen.UserOrAdmin.route
@@ -38,9 +39,20 @@ fun SetUpNavGraph(
             SignUpScreen(navController)
         }
         composable(
-            route = Screen.Trip.route
+            route = Screen.AddPIN.route
         ){
-            TripScreen(navController)
+            AddPINScreen(navController, context = LocalContext.current)
+        }
+        composable(
+            route = Screen.Review.route
+        ){
+            ReviewScreen(navController, context = LocalContext.current)
+        }
+        composable(
+             route = Screen.EditReview.route + "/{id}"
+        ){ backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id")
+            EditReviewScreen(navController, id ?: "", context = LocalContext.current)
         }
         composable(
             route = Screen.Package.route
@@ -98,7 +110,7 @@ fun SetUpNavGraph(
         composable(
             route = Screen.Reload.route
         ) {
-            ReloadScreen(navController)
+            ReloadScreen(navController, context = LocalContext.current)
         }
 //        composable(
 //            route = Screen.Testing.route

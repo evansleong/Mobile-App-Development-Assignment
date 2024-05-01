@@ -165,8 +165,8 @@ fun LoginScreen(
                         val userExst = dbHandler.getUserByEmailNPw(emailTemp, pwTemp)
 
 //                        if(userExst!=null){
-                        navController.navigate(route = Screen.Home.route) {
-                            popUpTo(Screen.Home.route) {
+                        navController.navigate(route = Screen.AddPIN.route) {
+                            popUpTo(Screen.AddPIN.route) {
                                 inclusive = true
                             }
                             }

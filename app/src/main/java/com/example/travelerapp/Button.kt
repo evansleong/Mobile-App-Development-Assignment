@@ -49,7 +49,7 @@ object ReuseComponents {
         Button(
             onClick = onClick,
             colors = ButtonDefaults.buttonColors(
-            Color(0xFF5DB075)
+                Color(0xFF5DB075)
             ),
             modifier = Modifier.padding(16.dp)
                 .fillMaxWidth()
@@ -58,7 +58,7 @@ object ReuseComponents {
         }
     }
 
-    fun MutableState<String>.getValueAsString():String{
+    fun MutableState<String>.getValueAsString(): String {
         return this.value
     }
 
@@ -82,6 +82,7 @@ object ReuseComponents {
     @Composable
     fun NavBar(text: String, navController: NavController) {
         Surface(
+            color = Color.White,
             modifier = Modifier
                 .fillMaxWidth()
         ) {
@@ -94,21 +95,21 @@ object ReuseComponents {
                 val homeColor = if (text == "Home") Color.Blue else Color.Black
                 val packageColor = if (text == "Package") Color.Blue else Color.Black
                 val walletColor = if (text == "Wallet") Color.Blue else Color.Black
-                val tripColor = if (text == "Trip") Color.Blue else Color.Black
+                val reviewColor = if (text == "Review") Color.Blue else Color.Black
 
                 Icon(
                     painter = painterResource(R.drawable.home),
                     contentDescription = "Home",
                     tint = homeColor,
-                    modifier = Modifier.clickable {
-                        navController.navigate(route = Screen.Home.route)
-                    }
+                    modifier = Modifier.size(20.dp).clickable {
+                            navController.navigate(route = Screen.Home.route)
+                        }
                 )
                 Icon(
                     painter = painterResource(R.drawable.resource_package),
                     contentDescription = "Package",
                     tint = packageColor,
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.size(20.dp).clickable {
                         navController.navigate(route = Screen.Package.route)
                     }
                 )
@@ -116,16 +117,16 @@ object ReuseComponents {
                     painter = painterResource(R.drawable.wallet),
                     contentDescription = "Wallet",
                     tint = walletColor,
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.size(20.dp).clickable {
                         navController.navigate(route = Screen.Wallet.route)
                     }
                 )
                 Icon(
                     painter = painterResource(R.drawable.map),
                     contentDescription = "Trip",
-                    tint = tripColor,
-                    modifier = Modifier.clickable {
-                        navController.navigate(route = Screen.Trip.route)
+                    tint = reviewColor,
+                    modifier = Modifier.size(20.dp).clickable {
+                        navController.navigate(route = Screen.Review.route)
                     }
                 )
             }
@@ -133,12 +134,13 @@ object ReuseComponents {
     }
 
     @Composable
-    fun TopBar(title: String, navController: NavController, showBackButton : Boolean = false) {
+    fun TopBar(title: String, navController: NavController, showBackButton: Boolean = false) {
         var expanded by remember { mutableStateOf(false) }
 
         val items = listOf("Profile", "Settings")
 
         Surface(
+            color = Color.White,
             modifier = Modifier
                 .fillMaxWidth()
         ) {
@@ -153,9 +155,10 @@ object ReuseComponents {
                         onClick = { navController.popBackStack() } // Navigate back to previous screen
                     ) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            painter = painterResource(R.drawable.back_button),
                             contentDescription = "Back",
-                            tint = Color.Black
+                            tint = Color.Black,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
@@ -173,7 +176,7 @@ object ReuseComponents {
                         tint = Color.Black
                     )
                 }
-                Box{
+                Box {
                     IconButton(
                         onClick = { expanded = true }
                     ) {
@@ -197,6 +200,7 @@ object ReuseComponents {
                                     "Profile" -> {
                                         navController.navigate(route = Screen.Profile.route)
                                     }
+
                                     "Settings" -> {
                                         navController.navigate(route = Screen.Settings.route)
                                     }
@@ -210,5 +214,4 @@ object ReuseComponents {
             }
         }
     }
-
 }

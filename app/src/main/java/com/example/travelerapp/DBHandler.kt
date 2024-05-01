@@ -6,13 +6,14 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import com.example.travelerapp.data.Review
 import com.example.travelerapp.data.Trip
 import com.example.travelerapp.data.User
 
 class DBHandler(context: Context) :
         SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
-        override fun onCreate(db: SQLiteDatabase) {
-            val createTripTable = """
+    override fun onCreate(db: SQLiteDatabase) {
+        val createTripTable = """
             CREATE TABLE TRIP_TABLE (
                 trip_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 trip_name TEXT NOT NULL,
@@ -27,7 +28,7 @@ class DBHandler(context: Context) :
             )
             """
 
-            val createUserTable = """
+        val createUserTable = """
             CREATE TABLE users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT NOT NULL,
@@ -37,7 +38,7 @@ class DBHandler(context: Context) :
                 is_user INTEGER DEFAULT 1 CHECK (is_user IN (0,1)) NOT NULL
             )
         """
-            val createWalletTable = """
+        val createWalletTable = """
                 CREATE TABLE wallets (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 available REAL NOT NULL,
@@ -46,7 +47,7 @@ class DBHandler(context: Context) :
                 FOREIGN KEY (user_id) REFERENCES users(id)
             )
         """
-            val createTransactionTable = """
+        val createTransactionTable = """
             CREATE TABLE transactions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 operation TEXT CHECK (operation IN ('top_up', 'subscribe')) NOT NULL,
@@ -59,7 +60,7 @@ class DBHandler(context: Context) :
                 FOREIGN KEY (user_id) REFERENCES users(id)
             )
         """
-            val createReviewTable = """
+        val createReviewTable = """
             CREATE TABLE reviews (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 rating INTEGER NOT NULL,
@@ -72,131 +73,197 @@ class DBHandler(context: Context) :
                 FOREIGN KEY (user_id) REFERENCES users(id)
             )
         """
-            db.execSQL(createTripTable)
-            db.execSQL(createUserTable)
-            db.execSQL(createWalletTable)
-            db.execSQL(createTransactionTable)
-            db.execSQL(createReviewTable)
-        }
-
-        override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-            db.execSQL("DROP TABLE IF EXISTS TRIP_TABLE")
-            db.execSQL("DROP TABLE IF EXISTS users")
-            db.execSQL("DROP TABLE IF EXISTS wallets")
-            db.execSQL("DROP TABLE IF EXISTS trips")
-            db.execSQL("DROP TABLE IF EXISTS transactions")
-            db.execSQL("DROP TABLE IF EXISTS reviews")
-            onCreate(db)
-        }
-
-        fun addNewUser(
-            username: String,
-            email: String,
-            password: String,
-            is_user: Int,
-        ) {
-            val db = this.writableDatabase
-            val values = ContentValues().apply {
-                put("username", username)
-                put("email", email)
-                put("password", password)
-                put("is_user", is_user)
-            }
-            db.insert("users", null, values)
-            db.close()
-        }
-
-        @SuppressLint("Range")
-        fun getUserByEmailNPw(username: String, password: String): User?{
-            val db = readableDatabase
-            val cursor = db.rawQuery("SELECT * FROM users WHERE email=? AND password=?",
-                arrayOf(username, password))
-            var user: User?=null
-
-            if (cursor != null) {
-                val idColIdx = cursor.getColumnIndex("id")
-                if (idColIdx != -1 && cursor.moveToFirst()) {
-                    user = User(
-                        userId = cursor.getLong(cursor.getColumnIndex("id")),
-                        userName = cursor.getString(cursor.getColumnIndex("username")),
-                        userEmail = cursor.getString(cursor.getColumnIndex("email")),
-                        userPw = cursor.getString(cursor.getColumnIndex("password")),
-                        userWalletPin = 0
-                    )
-                }
-            }
-            cursor.close()
-            db.close()
-            return user
-        }
-
-        fun deleteAllUser() {
-            val db = this.writableDatabase
-            db.delete("users", null, null)
-            db.close()
-        }
-
-        fun getAllTrips(): List<Trip> {
-            val tripList: ArrayList<Trip> = ArrayList()
-            val db = this.readableDatabase
-            val cursorTrips: Cursor = db.rawQuery("SELECT * FROM TRIP_TABLE", null)
-            if (cursorTrips.moveToFirst()){
-                do {
-                    tripList.add(
-                        Trip(
-                            tripName = cursorTrips.getString(1),
-                            tripLength = cursorTrips.getString(2),
-                            tripFees = cursorTrips.getDouble(3),
-                            tripDeposit = cursorTrips.getDouble(4),
-                            tripDesc = cursorTrips.getString(5),
-                            depDate = cursorTrips.getString(6),
-                            retDate = cursorTrips.getString(7)
-                        )
-                    )
-                }while (cursorTrips.moveToNext())
-
-            }
-            cursorTrips.close()
-            db.close()
-            return tripList
-        }
-
-        fun addNewTrip(
-            tripName: String,
-            tripLength: String,
-            tripFees: Double,
-            tripDeposit: Double,
-            tripDesc: String,
-            depDate: String,
-            retDate: String,
-            imageUri: String?,
-            tripOptions: List<String>
-        ) {
-            val optionsString = tripOptions.joinToString(", ")
-            val db = this.writableDatabase
-            val values = ContentValues().apply {
-                put("trip_name", tripName)
-                put("trip_length",tripLength )
-                put("trip_fees", tripFees)
-                put("trip_deposit", tripDeposit)
-                put("trip_desc", tripDesc)
-                put("trip_dep_date", depDate)
-                put("trip_ret_date", retDate)
-                put("trip_image_uri", imageUri)
-                put("trip_options", optionsString)
-            }
-            db.insert("TRIP_TABLE", null, values)
-            db.close()
-        }
-
-        fun deleteAllTrip() {
-            val db = this.writableDatabase
-            db.delete("trips", null, null)
-            db.close()
-        }
-
-        companion object {
-            private const val DB_NAME = "travelerDB"
-            private const val DB_VERSION = 13
-        }
+        db.execSQL(createTripTable)
+        db.execSQL(createUserTable)
+        db.execSQL(createWalletTable)
+        db.execSQL(createTransactionTable)
+        db.execSQL(createReviewTable)
     }
+
+    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        db.execSQL("DROP TABLE IF EXISTS TRIP_TABLE")
+        db.execSQL("DROP TABLE IF EXISTS users")
+        db.execSQL("DROP TABLE IF EXISTS wallets")
+        db.execSQL("DROP TABLE IF EXISTS trips")
+        db.execSQL("DROP TABLE IF EXISTS transactions")
+        db.execSQL("DROP TABLE IF EXISTS reviews")
+        onCreate(db)
+    }
+
+    fun addNewUser(
+        username: String,
+        email: String,
+        password: String,
+        is_user: Int,
+    ) {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put("username", username)
+            put("email", email)
+            put("password", password)
+            put("is_user", is_user)
+        }
+        db.insert("users", null, values)
+        db.close()
+    }
+
+    @SuppressLint("Range")
+    fun getUserByEmailNPw(username: String, password: String): User? {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT * FROM users WHERE email=? AND password=?",
+            arrayOf(username, password)
+        )
+        var user: User? = null
+
+        if (cursor != null) {
+            val idColIdx = cursor.getColumnIndex("id")
+            if (idColIdx != -1 && cursor.moveToFirst()) {
+                user = User(
+                    userId = cursor.getLong(cursor.getColumnIndex("id")),
+                    userName = cursor.getString(cursor.getColumnIndex("username")),
+                    userEmail = cursor.getString(cursor.getColumnIndex("email")),
+                    userPw = cursor.getString(cursor.getColumnIndex("password")),
+                    userWalletPin = 0
+                )
+                AUTH_USER = cursor.getLong(cursor.getColumnIndex("id"))
+            }
+        }
+        cursor.close()
+        db.close()
+        return user
+    }
+
+    fun deleteAllUser() {
+        val db = this.writableDatabase
+        db.delete("users", null, null)
+        db.close()
+    }
+
+    fun getAllTrips(): List<Trip> {
+        val tripList: ArrayList<Trip> = ArrayList()
+        val db = this.readableDatabase
+        val cursorTrips: Cursor = db.rawQuery("SELECT * FROM TRIP_TABLE", null)
+        if (cursorTrips.moveToFirst()) {
+            do {
+                tripList.add(
+                    Trip(
+                        tripName = cursorTrips.getString(1),
+                        tripLength = cursorTrips.getString(2),
+                        tripFees = cursorTrips.getDouble(3),
+                        tripDeposit = cursorTrips.getDouble(4),
+                        tripDesc = cursorTrips.getString(5),
+                        depDate = cursorTrips.getString(6),
+                        retDate = cursorTrips.getString(7)
+                    )
+                )
+            } while (cursorTrips.moveToNext())
+
+        }
+        cursorTrips.close()
+        db.close()
+        return tripList
+    }
+
+    fun addNewTrip(
+        tripName: String,
+        tripLength: String,
+        tripFees: Double,
+        tripDeposit: Double,
+        tripDesc: String,
+        depDate: String,
+        retDate: String,
+        imageUri: String?,
+        tripOptions: List<String>
+    ) {
+        val optionsString = tripOptions.joinToString(", ")
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put("trip_name", tripName)
+            put("trip_length", tripLength)
+            put("trip_fees", tripFees)
+            put("trip_deposit", tripDeposit)
+            put("trip_desc", tripDesc)
+            put("trip_dep_date", depDate)
+            put("trip_ret_date", retDate)
+            put("trip_image_uri", imageUri)
+            put("trip_options", optionsString)
+        }
+        db.insert("TRIP_TABLE", null, values)
+        db.close()
+    }
+
+    fun deleteAllTrip() {
+        val db = this.writableDatabase
+        db.delete("trips", null, null)
+        db.close()
+    }
+
+    fun getAllReview(): List<Review> {
+        val reviewList: ArrayList<Review> = ArrayList()
+        val db = this.readableDatabase
+        val userId = AUTH_USER
+        val cursorReviews: Cursor = db.rawQuery("SELECT * FROM reviews WHERE user_id = ?", arrayOf(userId?.toString() ?: ""))
+        if (cursorReviews.moveToFirst()) {
+            do {
+                reviewList.add(
+                    Review(
+                        id = cursorReviews.getInt(1),
+                        title = cursorReviews.getString(2),
+                        rating = cursorReviews.getDouble(3),
+                        comment = cursorReviews.getString(4),
+                        is_public = cursorReviews.getInt(5),
+                        imageUrl = cursorReviews.getString(6),
+                        created_at = cursorReviews.getLong(7),
+                    )
+                )
+            } while (cursorReviews.moveToNext())
+        }
+        cursorReviews.close()
+        db.close()
+        return reviewList
+    }
+
+    fun getReviewById(id: Int): Review? {
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM reviews WHERE id = $id", null)
+
+        val review: Review? = if (cursor.moveToFirst()) {
+            val idIndex = cursor.getColumnIndex("id")
+            val titleIndex = cursor.getColumnIndex("title")
+            val ratingIndex = cursor.getColumnIndex("rating")
+            val commentIndex = cursor.getColumnIndex("comment")
+            val isPublicIndex = cursor.getColumnIndex("is_public")
+            val imageUrlIndex = cursor.getColumnIndex("imageUrl")
+            val createdAtIndex = cursor.getColumnIndex("created_at")
+
+            Review(
+                id = cursor.getInt(idIndex),
+                title = cursor.getString(titleIndex),
+                rating = cursor.getDouble(ratingIndex),
+                comment = cursor.getString(commentIndex),
+                is_public = cursor.getInt(isPublicIndex),
+                imageUrl = cursor.getString(imageUrlIndex),
+                created_at = cursor.getLong(createdAtIndex)
+            )
+        } else {
+            null // If no review found with the given ID, return null
+        }
+
+        cursor.close()
+        db.close()
+        return review
+    }
+
+    fun setWalletPIN(pin: Int) {
+        val db = this.readableDatabase
+        db.rawQuery("UPDATE users SET walletPIN = :pin WHERE user_id = :AUTH_USER", null)
+        db.close()
+    }
+
+    companion object {
+        private const val DB_NAME = "travelerDB"
+        private const val DB_VERSION = 13
+        private var AUTH_USER: Long? = null
+    }
+}

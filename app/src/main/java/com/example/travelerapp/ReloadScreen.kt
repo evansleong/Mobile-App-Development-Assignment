@@ -1,6 +1,8 @@
 package com.example.travelerapp
 
 import ReuseComponents
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -27,6 +30,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,13 +53,15 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
 
 
 @Composable
 fun ReloadScreen(
-    navController: NavController
+    navController: NavController,
+    context: Context
 ) {
     Column(
         modifier = Modifier
@@ -76,9 +82,9 @@ fun ReloadScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom,
                 modifier = Modifier.padding(bottom = 16.dp)
-            ){
+            ) {
                 Spacer(modifier = Modifier.padding(top = 240.dp))
-                Column{
+                Column {
                     Text(
                         text = "Your Balance",
                         style = MaterialTheme.typography.titleMedium,
@@ -192,7 +198,7 @@ fun ReloadScreen(
                         containerColor = Color(0xFFEDE9E9)
                     ),
                     shape = RoundedCornerShape(32.dp),
-                    contentPadding = PaddingValues(vertical = 20.dp, horizontal = 88.dp),
+                    contentPadding = PaddingValues(vertical = 20.dp, horizontal = 60.dp),
                     modifier = Modifier
                         .padding(horizontal = 32.dp, vertical = 16.dp)
                 ) {
@@ -204,14 +210,33 @@ fun ReloadScreen(
                             .padding(horizontal = 16.dp, vertical = 10.dp)
                     )
                 }
+                var wrongAttempts = 0
                 if (showDialog.value) {
                     PinInputDialog(
-                        onContinue = {
-                            //check the it value with the PIN here
+                        onContinue = { pin ->
+                            if (pin.length < 6) {
+                                Toast.makeText(context, "Invalid PIN. PIN must be 6 digits.", Toast.LENGTH_SHORT).show()
+                            } else if (pin != "123456") { // Replace "123456" with your valid PIN
+                                wrongAttempts++
+                                val remainingAttempts = 3 - wrongAttempts
+                                if (remainingAttempts > 0) {
+                                    Toast.makeText(context, "Invalid PIN. $remainingAttempts attempts remaining.", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, "You have exceeded the maximum number of attempts.", Toast.LENGTH_SHORT).show()
+                                    showDialog.value = false
+                                }
+                            } else {
+                                // PIN is correct
+                                showDialog.value = false
+                                wrongAttempts = 0 // Reset the wrong attempts counter
+                            }
+                        },
+                        onDismiss = {
+                            // Reset wrong attempts counter when PinInputDialog is dismissed
+                            wrongAttempts = 0
                             showDialog.value = false
-                        }) {
-                        showDialog.value = false
-                    }
+                        }
+                    )
                 }
             }
         }
@@ -220,8 +245,8 @@ fun ReloadScreen(
 }
 
 @Composable
-fun PinInputDialog(onContinue: (String) -> Unit, onCancel: () -> Unit) {
-    Dialog(onDismissRequest = { onCancel() }) {
+fun PinInputDialog(onContinue: (String) -> Unit, onDismiss: () -> Unit) {
+    Dialog(onDismissRequest = {  }) {
         var pinValue by remember { mutableStateOf("") }
 
         Box(
@@ -240,8 +265,8 @@ fun PinInputDialog(onContinue: (String) -> Unit, onCancel: () -> Unit) {
                     Icon(
                         painter = painterResource(id = R.drawable.back_button),
                         contentDescription = "back_button",
-                        modifier = Modifier.clickable {
-                            onCancel()
+                        modifier = Modifier.size(20.dp).clickable {
+                            onDismiss()
                         }
                     )
                 }
@@ -290,6 +315,7 @@ fun PinInputDialog(onContinue: (String) -> Unit, onCancel: () -> Unit) {
                                 },
                                 shape = RoundedCornerShape(16.dp),
                                 colors = ButtonDefaults.buttonColors(Color(0xFFB3B56C)),
+                                contentPadding = PaddingValues(vertical = 16.dp, horizontal = 6.dp),
                                 modifier = Modifier
                                     .weight(1f)
                                     .padding(8.dp)
@@ -298,7 +324,8 @@ fun PinInputDialog(onContinue: (String) -> Unit, onCancel: () -> Unit) {
                                     painter = painterResource(id = R.drawable.backspace),
                                     contentDescription = "backspace_button",
                                     tint = Color.Black,
-                                    modifier = Modifier.padding(vertical = 16.dp),
+                                    modifier = Modifier
+                                        .size(32.dp),
                                 )
                             }
                             Button(
@@ -319,13 +346,14 @@ fun PinInputDialog(onContinue: (String) -> Unit, onCancel: () -> Unit) {
                                 onClick = { onContinue(pinValue) },
                                 shape = RoundedCornerShape(16.dp),
                                 colors = ButtonDefaults.buttonColors(Color(0xFF36D100)),
+                                contentPadding = PaddingValues(vertical = 6.dp, horizontal = 4.dp),
                                 modifier = Modifier
                                     .weight(1f)
                                     .padding(8.dp)
                             ) {
                                 Text(
                                     text = "Enter",
-                                    fontSize = 10.sp,
+                                    fontSize = 16.sp,
                                     fontWeight = FontWeight.Bold,
                                     modifier = Modifier.padding(vertical = 16.dp),
                                 )
@@ -368,7 +396,8 @@ fun NumberButtonRow(start: Int, end: Int, modifier: Modifier = Modifier, onClick
 fun AmountButton(text: String, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color(0xFF5DB075))
+        colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color(0xFF5DB075)),
+        contentPadding = PaddingValues(vertical = 4.dp, horizontal = 18.dp),
     ) {
         Text(text)
     }
@@ -386,6 +415,12 @@ fun EditNumberField(
         modifier = modifier,
         label = { Text(text = "Enter your Reload Amount", color = Color.Black.copy(alpha = 0.32f), fontWeight = FontWeight.Light) },
         singleLine = true,
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color(0xFFE1E1E1),
+            unfocusedContainerColor = Color(0xFFE1E1E1),
+            focusedTextColor = Color.Black,
+            unfocusedTextColor = Color.Black,
+        ),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
     )
 }
@@ -393,6 +428,7 @@ fun EditNumberField(
 @Preview
 fun ReloadScreenPreview(){
     ReloadScreen(
-        navController = rememberNavController()
+        navController = rememberNavController(),
+        context = LocalContext.current
     )
 }
