@@ -15,8 +15,13 @@ fun SetUpNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Login.route
+        startDestination = Screen.UserOrAdmin.route
     ) {
+        composable(
+            route = Screen.UserOrAdmin.route
+        ){
+            PickUserTypeScreen(navController)
+        }
         composable(
             route = Screen.Home.route
         ){
@@ -56,6 +61,21 @@ fun SetUpNavGraph(
             route = Screen.Settings.route
         ) {
             SettingsScreen(navController)
+        }
+        composable(
+            route = Screen.AgencyLogin.route
+        ){
+            AgencyLoginScreen(navController, context = LocalContext.current)
+        }
+        composable(
+            route = Screen.AgencySignup.route
+        ){
+            AgencySignUpScreen(navController, context = LocalContext.current)
+        }
+        composable(
+            route = Screen.Login.route
+        ){
+            LoginScreen(navController,dbHandler)
         }
         composable(
             route = Screen.AgencyHome.route

@@ -70,7 +70,7 @@ object ReuseComponents {
         label: @Composable (String) -> Unit,
         shape: Shape = RoundedCornerShape(8.dp), // Default rounded corner shape
     ) {
-        OutlinedTextField(
+        TextField(
             value = value,
             onValueChange = onValueChange,
             shape = shape,
