@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -37,7 +38,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -69,146 +74,266 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.example.travelerapp.data.Review
 import com.example.travelerapp.data.Trip
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 
 @OptIn(ExperimentalCoilApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun EditReviewScreen(
     navController: NavController,
-    id: String,
+    id: String?= null,
     context: Context
 ) {
+    var review: Review? = null
+    var tripList: List<String>?
+
+    val db = Firebase.firestore
     var dbHandler: DBHandler = DBHandler(context)
-    val review = dbHandler.getReviewById(id.toInt())
+
+    if (id != "null") {
+        review = id?.let { dbHandler.getReviewById(it) }
+        tripList = null
+    } else {
+        tripList = dbHandler.getPurchasedTrip()
+    }
 
     val maxWords = 30
     val maxImages = 9
     val title = review?.title
     var reviewTitle by remember { mutableStateOf(title) }
-    var rating by remember { mutableStateOf(0) }
-    var comment by remember { mutableStateOf("") }
-    var isChecked by remember { mutableStateOf(false) }
+    var rating by remember { mutableStateOf(review?.rating ?: 0) }
+    var comment by remember { mutableStateOf(review?.comment ?: "") }
+    var isChecked by remember { mutableStateOf(id != null && review?.is_public == 1) }
     var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
+
+    var expanded by remember { mutableStateOf(false) }
+    var selectedOption by remember { mutableStateOf("") }
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
         ReuseComponents.TopBar(title = title.toString(), navController, showBackButton = true)
-
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
-        ){
-            TextField(
-                value = reviewTitle?: "",
-                onValueChange = {
-                    // Limit the input to maxWords words
-                    if (it.count { c -> c == ' ' } < maxWords) {
-                        reviewTitle = it
+        ) {
+            item {
+                if (tripList != null) {
+                    Text(text = "Trip: ")
+                    ExposedDropdownMenuBox(
+                        expanded = expanded,
+                        onExpandedChange = { expanded = it },
+                        modifier = Modifier
+                            .padding(top = 4.dp)
+                    ) {
+                        TextField(
+                            value = selectedOption,
+                            onValueChange = {},
+                            readOnly = true,
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth(),
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                        if (expanded) {
+                            DropdownMenu(
+                                expanded = true,
+                                onDismissRequest = {
+                                    expanded = false
+                                },
+                                modifier = Modifier
+                                    .fillParentMaxWidth()
+                            ) {
+                                tripList?.let {
+                                    it.forEach { trip ->
+                                        DropdownMenuItem(
+                                            text = { Text(text = trip) },
+                                            onClick = {
+                                                selectedOption = trip
+                                                expanded = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
-                },
-                maxLines = 1,
-                colors = TextFieldDefaults.colors(
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedContainerColor = Color.Transparent,
-                    focusedPlaceholderColor = Color.Gray,
-                    unfocusedPlaceholderColor = Color.Gray,
-                ),
-                placeholder = { Text(text = "Enter Some Attractive Title Here") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Text(
-                text = "Max $maxWords words",
-                color = Color.Gray,
-                style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier.padding(start = 8.dp)
-            )
+                } else {
+                    Text(text = "Trip: ")
+                    TextField(
+                        value = review?.trip_name.toString(),
+                        onValueChange = {},
+                        readOnly = true,
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = TextFieldDefaults.colors(
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedContainerColor = Color.Transparent,
+                            focusedPlaceholderColor = Color.Gray,
+                            unfocusedPlaceholderColor = Color.Gray,
+                        ),
+                    )
 
-            Spacer(modifier = Modifier.padding(vertical = 8.dp))
-            Text(text = "Rating: ")
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                StarRatingInput(onRatingChanged = { newRating ->
-                    rating = newRating
-                })
+                }
             }
 
-            Spacer(modifier = Modifier.padding(vertical = 8.dp))
-            Text(
-                text = "Share more about your experience: ",
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
-            TextField(
-                value = comment,
-                onValueChange = { comment = it },
-                colors = TextFieldDefaults.colors(
-                    focusedPlaceholderColor = Color.Gray,
-                    unfocusedPlaceholderColor = Color.Gray,
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                ),
-                placeholder = { Text(text = "Share details of your own experience at this place") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(unbounded = true)
-                    .heightIn(max = 200.dp, min = 60.dp)
-                    .padding(vertical = 4.dp)
-                    .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
-            )
-
-            Spacer(modifier = Modifier.padding(vertical = 8.dp))
-            ImageInputButton(context = LocalContext.current, maxImages) { uri ->
-                selectedImages = selectedImages + uri
-                //selectedImages store all Images Inputted
-            }
-            Text(
-                text = "Max $maxImages images",
-                color = Color.Gray,
-                style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier.padding(start = 8.dp)
-            )
-
-            Spacer(modifier = Modifier.padding(vertical = 4.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(
-                    checked = isChecked,
-                    onCheckedChange = { isChecked = it },
-                    modifier = Modifier.padding(end = 4.dp)
+            item {
+                TextField(
+                    value = reviewTitle ?: "",
+                    onValueChange = {
+                        // Limit the input to maxWords words
+                        if (it.count { c -> c == ' ' } < maxWords) {
+                            reviewTitle = it
+                        }
+                    },
+                    maxLines = 1,
+                    colors = TextFieldDefaults.colors(
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent,
+                        focusedPlaceholderColor = Color.Gray,
+                        unfocusedPlaceholderColor = Color.Gray,
+                    ),
+                    placeholder = { Text(text = "Enter Some Attractive Title Here") },
+                    modifier = Modifier.fillMaxWidth()
                 )
                 Text(
-                    text = "Make it public",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.clickable(onClick = { isChecked = !isChecked })
+                    text = "Max $maxWords words",
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(start = 8.dp)
                 )
+                Spacer(modifier = Modifier.padding(vertical = 8.dp))
             }
 
-            Spacer(modifier = Modifier.weight(1f))
-            Surface(
-                color = Color.Transparent,
-                modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)
-            ) {
-                Row(horizontalArrangement = Arrangement.Center) {
-                    Button(
-                        onClick = { },
-                        colors = ButtonDefaults.buttonColors(
-                            contentColor = Color.Black,
-                            containerColor = Color(0xFF1B6DF3)
-                        ),
-                        shape = RoundedCornerShape(32.dp),
-                        contentPadding = PaddingValues(vertical = 4.dp, horizontal = 100.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "Post",
-                            textAlign = TextAlign.Center,
-                            fontSize = 16.sp,
-                            color = Color.White
-                        )
+            item {
+                Text(text = "Rating: ")
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    StarRatingInput(onRatingChanged = { newRating ->
+                        rating = newRating
+                    })
+                }
+                Spacer(modifier = Modifier.padding(vertical = 8.dp))
+            }
+
+            item {
+                Text(
+                    text = "Share more about your experience: ",
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
+                TextField(
+                    value = comment,
+                    onValueChange = { comment = it },
+                    colors = TextFieldDefaults.colors(
+                        focusedPlaceholderColor = Color.Gray,
+                        unfocusedPlaceholderColor = Color.Gray,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                    ),
+                    placeholder = { Text(text = "Share details of your own experience at this place") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(unbounded = true)
+                        .heightIn(max = 200.dp, min = 60.dp)
+                        .padding(vertical = 4.dp)
+                        .border(1.dp, Color.Black, RoundedCornerShape(8.dp))
+                )
+                Spacer(modifier = Modifier.padding(vertical = 8.dp))
+            }
+
+            item {
+                ImageInputButton(context = LocalContext.current, maxImages) { uri ->
+                    selectedImages = selectedImages + uri
+                    //selectedImages store all Images Inputted
+                }
+                Text(
+                    text = "Max $maxImages images",
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.padding(vertical = 4.dp))
+            }
+
+            item {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = isChecked,
+                        onCheckedChange = { isChecked = it },
+                        modifier = Modifier.padding(end = 4.dp)
+                    )
+                    Text(
+                        text = "Make it public",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.clickable(onClick = { isChecked = !isChecked })
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
+            }
+
+            item {
+                Surface(
+                    color = Color.Transparent,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp)
+                ) {
+                    Row(horizontalArrangement = Arrangement.Center) {
+                        Button(
+                            onClick = {
+                                val isCheckedInt = if (isChecked) 1 else 0
+                                if (id != null) {
+                                    //edit
+                                    saveReview(
+                                        db,
+                                        context,
+                                        selectedOption,
+                                        reviewTitle ?: "",
+                                        rating.toInt(),
+                                        comment,
+                                        selectedImages,
+                                        isCheckedInt,
+                                        id
+                                    )
+                                } else {
+                                    //add
+                                    saveReview(
+                                        db,
+                                        context,
+                                        selectedOption,
+                                        reviewTitle ?: "",
+                                        rating.toInt(),
+                                        comment,
+                                        selectedImages,
+                                        isCheckedInt
+                                    )
+                                }
+                                navController.popBackStack()
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                contentColor = Color.Black,
+                                containerColor = Color(0xFF1B6DF3)
+                            ),
+                            shape = RoundedCornerShape(32.dp),
+                            contentPadding = PaddingValues(vertical = 4.dp, horizontal = 100.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            Text(
+                                text = if (id != null) "Update" else "Post",
+                                textAlign = TextAlign.Center,
+                                fontSize = 16.sp,
+                                color = Color.White
+                            )
+                        }
                     }
                 }
             }
@@ -288,8 +413,8 @@ fun ImageInputButton(
 fun StarRatingInput(onRatingChanged: (Int) -> Unit) {
     var selectedRating by remember { mutableStateOf(0) }
 
-    Row(verticalAlignment = Alignment.CenterVertically){
-        for(i in 1..5){
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        for (i in 1..5) {
             StarButton(
                 isSelected = i <= selectedRating,
                 onClick = { selectedRating = i },
@@ -309,8 +434,8 @@ fun StarButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val starIcon = if(isSelected) Icons.Filled.Star else Icons.Outlined.Star
-    val starColor = if(isSelected) Color(0xFFF9BB04) else Color.Gray
+    val starIcon = if (isSelected) Icons.Filled.Star else Icons.Outlined.Star
+    val starColor = if (isSelected) Color(0xFFF9BB04) else Color.Gray
 
     IconButton(
         onClick = onClick,

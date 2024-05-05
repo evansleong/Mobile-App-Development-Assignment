@@ -1,6 +1,7 @@
 package com.example.travelerapp
 
 import ReuseComponents
+import android.content.Context
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,6 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -35,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,17 +48,24 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WalletScreen(
-    navController: NavController
+    navController: NavController,
+    context: Context
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(color = Color(0xFF5DB075)),
     ) {
+        val dbHandler: DBHandler = DBHandler(context)
+        val wallet = dbHandler.getUserWallet()
+        val transactions = dbHandler.getAllTransactions()
         val title = "Wallet"
         ReuseComponents.TopBar(title = title, navController)
         val balance = "100.00"
@@ -78,16 +89,17 @@ fun WalletScreen(
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
                     )
-                    Text(
-                        text = "MYR$balance",
-                        color = Color.White,
-                        fontSize = 36.sp,
-                        fontWeight = FontWeight.ExtraBold,
-//                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .padding(top = 2.dp)
-                    )
+                    if (wallet != null) {
+                        Text(
+                            text = "MYR${wallet.available}",
+                            color = Color.White,
+                            fontSize = 36.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                                .padding(top = 2.dp)
+                        )
+                    }
                 }
                 Column(
                     horizontalAlignment = Alignment.End,
@@ -141,7 +153,10 @@ fun WalletScreen(
                             .background(Color.White),
                     )
                 }
-                items(10) { index ->
+                items(transactions) { transaction ->
+                    val date = Date(transaction.created_at * 1000)
+                    val sdf = SimpleDateFormat("HH:mm dd MMMM yyyy", Locale.getDefault())
+                    val formattedDate = sdf.format(date)
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -164,15 +179,15 @@ fun WalletScreen(
                             ){
                                 Column {
                                     Text(
-                                        text = "18March 2024"
+                                        text = formattedDate
                                     )
                                     Text(
-                                        text = "Pulau Pangkor 3D2N",
+                                        text = transaction.remarks,
                                         fontSize = 20.sp,
                                         fontWeight = FontWeight.Bold,
                                     )
                                     Text(
-                                        text = "Description",
+                                        text = transaction.description,
                                     )
                                 }
                                 Column(
@@ -182,13 +197,12 @@ fun WalletScreen(
 
                                 ){
                                     Text(
-                                        text = "-RM200.00",
+                                        text = transaction.amount.toString(),
                                         fontSize = 20.sp,
                                         fontWeight = FontWeight.Bold,
                                     )
                                 }
                             }
-                            // Add more Text composables for displaying purchase details
                         }
                     }
                 }
@@ -205,6 +219,7 @@ fun WalletScreen(
 @Preview
 fun WalletScreenPreview(){
     WalletScreen(
-        navController = rememberNavController()
+        navController = rememberNavController(),
+        context = LocalContext.current
     )
 }

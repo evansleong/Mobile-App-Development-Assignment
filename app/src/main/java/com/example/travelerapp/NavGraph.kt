@@ -2,6 +2,7 @@ package com.example.travelerapp
 
 import AddPINScreen
 import SignUpScreen
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -62,7 +63,7 @@ fun SetUpNavGraph(
         composable(
             route = Screen.Wallet.route
         ){
-            WalletScreen(navController)
+            WalletScreen(navController, context = LocalContext.current)
         }
         composable(
             route = Screen.Profile.route

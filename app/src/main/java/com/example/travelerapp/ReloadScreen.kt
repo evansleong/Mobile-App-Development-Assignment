@@ -56,6 +56,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 
 
 @Composable
@@ -71,6 +73,8 @@ fun ReloadScreen(
         ReuseComponents.TopBar(title = title, navController)
         val balance = "100.00"
         val focusRequester = remember { FocusRequester() }
+        var is_valid by remember { mutableStateOf(false) }
+        val db = Firebase.firestore
 
         Column(
             modifier = Modifier
@@ -216,25 +220,30 @@ fun ReloadScreen(
                         onContinue = { pin ->
                             if (pin.length < 6) {
                                 Toast.makeText(context, "Invalid PIN. PIN must be 6 digits.", Toast.LENGTH_SHORT).show()
-                            } else if (pin != "123456") { // Replace "123456" with your valid PIN
-                                wrongAttempts++
-                                val remainingAttempts = 3 - wrongAttempts
-                                if (remainingAttempts > 0) {
-                                    Toast.makeText(context, "Invalid PIN. $remainingAttempts attempts remaining.", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    Toast.makeText(context, "You have exceeded the maximum number of attempts.", Toast.LENGTH_SHORT).show()
-                                    showDialog.value = false
-                                }
                             } else {
-                                // PIN is correct
-                                showDialog.value = false
-                                wrongAttempts = 0 // Reset the wrong attempts counter
+                                is_valid = reloadBalance(db, context, amountInput, pin)
+                                if (is_valid) {
+                                    Toast.makeText(context, "Successfully Reload $amountInput into wallet", Toast.LENGTH_SHORT).show()
+                                    showDialog.value = false
+                                    navController.popBackStack()
+                                } else {
+                                    wrongAttempts++
+                                    val remainingAttempts = 5 - wrongAttempts
+                                    if(remainingAttempts > 0){
+                                        Toast.makeText(context, "Invalid PIN. $remainingAttempts attempts remaining", Toast.LENGTH_SHORT).show()
+                                    }else{
+                                        Toast.makeText(context, "You have exceeded the maximum number of attempts.", Toast.LENGTH_SHORT).show()
+                                        showDialog.value = false
+                                        navController.popBackStack()
+                                    }
+                                }
                             }
                         },
                         onDismiss = {
                             // Reset wrong attempts counter when PinInputDialog is dismissed
                             wrongAttempts = 0
                             showDialog.value = false
+                            navController.popBackStack()
                         }
                     )
                 }

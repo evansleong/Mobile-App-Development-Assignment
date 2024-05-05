@@ -28,15 +28,18 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.travelerapp.DBHandler
 import com.example.travelerapp.Screen
+import com.example.travelerapp.updateWalletPIN
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 
 @Composable
 fun AddPINScreen(
     navController: NavController,
     context: Context
 ) {
+    val db = Firebase.firestore
     var pin1 by remember { mutableStateOf("") }
     var pin2 by remember { mutableStateOf("") }
 
@@ -113,12 +116,13 @@ fun AddPINScreen(
                 onClick = {
                     if (pin1.isNotEmpty() && pin2.isNotEmpty()) {
                         if (pin1 == pin2) {
+                            updateWalletPIN(db, context, pin2)
                             Toast.makeText(context, "Welcome to Traveller Apps", Toast.LENGTH_SHORT)
                                 .show()
 //                            dbHandler.setWalletPIN(pin2.toInt())
                             navController.navigate(Screen.Home.route) {
                                 popUpTo(Screen.Home.route) {
-                                    inclusive = true
+                                    inclusive = false
                                 }
                             }
                         } else {
