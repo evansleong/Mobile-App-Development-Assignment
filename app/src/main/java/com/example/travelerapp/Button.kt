@@ -134,10 +134,19 @@ object ReuseComponents {
     }
 
     @Composable
-    fun TopBar(title: String, navController: NavController, showBackButton: Boolean = false) {
+    fun TopBar(title: String,
+               navController: NavController,
+               showBackButton: Boolean = false,
+               showLogoutButton: Boolean = false,
+               onLogout: (() -> Unit)? = null) {
         var expanded by remember { mutableStateOf(false) }
 
-        val items = listOf("Profile", "Settings")
+        val items = mutableListOf("Profile", "Settings")
+
+        if (showLogoutButton) {
+            items.add("Logout")
+        }
+
 
         Surface(
             color = Color.White,
@@ -204,6 +213,11 @@ object ReuseComponents {
                                     "Settings" -> {
                                         navController.navigate(route = Screen.Settings.route)
                                     }
+
+                                    "Logout" -> {
+                                        onLogout?.invoke()
+                                    }
+
                                 }
                             },
                                 text = { Text(it) }

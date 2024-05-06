@@ -24,19 +24,54 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
+import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberImagePainter
+import com.example.travelerapp.data.Trip
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 
 @Composable
 fun AgencyHomeScreen(
     navController: NavController,
-    loggedInUserName: String,
-    soldPackagesCount: Int,
+    viewModel: AgencyViewModel
 ) {
+    val db = Firebase.firestore
+
+    val isLoggedIn = remember { mutableStateOf(true) }
+    val loggedInAgency = viewModel.loggedInAgency
+
+    val tripListState = remember { mutableStateOf<List<Trip>>(emptyList()) }
+
+    LaunchedEffect(key1 = true) {
+        readDataFromFirestore(db) { trips ->
+            val filteredTrips = trips.filter { trip ->
+                trip.agencyUsername == loggedInAgency?.agencyUsername
+            }
+            // Update the tripListState with the fetched trips
+            tripListState.value = filteredTrips
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        val title = "Welcome, $loggedInUserName"
-        ReuseComponents.TopBar(title = title, navController)
+        val title = "Welcome, ${loggedInAgency?.agencyUsername}"
+        ReuseComponents.TopBar(
+            title = title,
+            navController,
+            showLogoutButton = true,
+            onLogout = {
+            navController.navigate(route = Screen.UserOrAdmin.route) {
+                popUpTo(Screen.UserOrAdmin.route) {
+                    inclusive = true
+                }
+            }
+        })
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -58,7 +93,7 @@ fun AgencyHomeScreen(
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            text = "$soldPackagesCount Pkgs booked",
+            text = " Pkgs booked",
             modifier = Modifier
                 .padding(bottom = 16.dp, start = 200.dp),
             color = Color.Red,
@@ -73,7 +108,7 @@ fun AgencyHomeScreen(
 
         Text(
             text = "Your travel package list",
-            modifier = Modifier.padding(bottom = 10.dp, start = 15.dp),
+            modifier = Modifier.padding(start = 15.dp),
             fontSize = 18.sp // Smaller font size for "Today" text
         )
 
@@ -88,73 +123,89 @@ fun AgencyHomeScreen(
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(horizontal = 8.dp)
             ) {
-//                items(userTravelPackages.take(2)) { packageItem ->
-//                    PackageItemCard(packageItem = packageItem, onClick = { /* Handle package item click */ })
-//                }
+                items(tripListState.value.take(2)) { trip ->
+                    HomeTripItem(trip = trip)
+                }
             }
+
             Button(
                 onClick = {
-                    navController.navigate(route = Screen.AgencyPackageList.route)
+                    navController.navigate(route = Screen.AgencyPackageList.route) {
+                        popUpTo(Screen.Home.route) {
+                            inclusive = true
+                        }
+                    }
                 },
-                modifier = Modifier.align(Alignment.BottomEnd)
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
                     .height(90.dp)
                     .width(120.dp)
                     .padding(20.dp)
-                    .align(Alignment.BottomEnd)
-                    .offset(y = (-200).dp)
+                    .offset(y = (-300).dp)
             ) {
                 Text(
                     text = ">",
                     fontSize = 25.sp
                 )
             }
+
+            Button(
+                onClick = {
+                        navController.navigate(route = Screen.AgencyAddPackage.route) {
+
+                        }
+                    },
+                    modifier = Modifier.align(Alignment.BottomEnd)
+                ) {
+                    Text(
+                        text = "Add package",
+                        fontSize = 25.sp
+                    )
+                }
         }
         ReuseComponents.NavBar(text = title, navController = navController)
     }
 }
 
-//@Composable
-//fun PackageItemCard(packageItem: TravelPackage, onClick: () -> Unit) {
-//    Box(
-//        modifier = Modifier
-//            .padding(end = 8.dp)
-//            .background(Color.LightGray, RoundedCornerShape(8.dp))
-//            .padding(8.dp)
-//    ) {
-//        Column(
-//            horizontalAlignment = Alignment.CenterHorizontally,
-//        ) {
-//            Image(
-//                painter = painterResource(id = packageItem.imageResId),
-//                contentDescription = null, // Provide content description if needed
-//                modifier = Modifier
-//                    .clickable(onClick = onClick) // Make the image clickable
-//                    .size(100.dp)
-//            )
-//            Text(
-//                text = packageItem.name,
-//                modifier = Modifier.padding(top = 4.dp),
-//                fontWeight = FontWeight.Bold
-//            )
-//        }
-//    }
-//}
+@OptIn(ExperimentalCoilApi::class)
+@Composable
+fun HomeTripItem(trip: Trip) {
+    val painter: Painter = rememberImagePainter(trip.tripUri)
+
+    Column(
+        modifier = Modifier
+            .padding(8.dp)
+            .width(200.dp)
+    ) {
+        Image(
+            painter = painter,
+            contentDescription = trip.tripName,
+            modifier = Modifier
+                .height(100.dp)
+                .fillMaxWidth(),
+            contentScale = ContentScale.Crop
+        )
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = trip.tripName,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = trip.tripLength
+            )
+        }
+    }
+}
 
 
 @Preview
 @Composable
 fun PreviewAgencyHomeScreen() {
-    val loggedInUserName = "John Doe"
-    val soldPackagesCount = 10
-//    val userTravelPackages = listOf(
-//        TravelPackage(name = "Package 1", imageResId = R.drawable.invoker),
-//        TravelPackage(name = "Package 2", imageResId = R.drawable.invoker),
-//        TravelPackage(name = "Package 3", imageResId = R.drawable.invoker)
-//    )
+    val email = "John Doe"
     AgencyHomeScreen(
         navController = rememberNavController(),
-        loggedInUserName = loggedInUserName,
-        soldPackagesCount = soldPackagesCount,
-//        userTravelPackages = userTravelPackages,
+        viewModel = AgencyViewModel()
     )
 }

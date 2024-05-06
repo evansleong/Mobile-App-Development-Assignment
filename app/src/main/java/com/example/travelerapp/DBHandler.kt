@@ -475,7 +475,7 @@ class DBHandler(context: Context) :
 
     companion object {
         private const val DB_NAME = "travelerDB"
-        private const val DB_VERSION = 13
+        private const val DB_VERSION = 15
         private var AUTH_USER: String = ""
     }
 }

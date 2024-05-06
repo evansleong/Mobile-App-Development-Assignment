@@ -1,11 +1,9 @@
     package com.example.travelerapp
 
-
     import android.content.Context
     import android.util.Log
     import android.widget.Toast
     import com.example.travelerapp.data.AgencyUser
-    import com.example.travelerapp.data.Trip
     import com.google.firebase.firestore.FirebaseFirestore
 
     fun addDataToFirestore(
@@ -52,6 +50,21 @@
             .addOnFailureListener { e ->
                 Log.e("Firestore", "Error getting documents: ${e.message}", e)
             }
+    }
+
+    fun checkLoginCredentials(email: String, password: String, agencyUsers: List<AgencyUser>): AgencyUser? {
+        // Check if there is any user with the provided email and password
+        return agencyUsers.find { it.agencyEmail == email && it.agencyPassword == password }
+    }
+
+    // Function to check if the username is available
+    fun isUsernameAvailable(username: String, agencyUsers: List<AgencyUser>): Boolean {
+        return agencyUsers.none { it.agencyUsername == username }
+    }
+
+    // Function to check if the email is available
+    fun isEmailAvailable(email: String, agencyUsers: List<AgencyUser>): Boolean {
+        return agencyUsers.none { it.agencyEmail == email }
     }
 
 

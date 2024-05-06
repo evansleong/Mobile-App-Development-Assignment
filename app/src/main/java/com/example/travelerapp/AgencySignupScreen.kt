@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.travelerapp.data.AgencyUser
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 
@@ -55,6 +56,13 @@ fun AgencySignUpScreen(
     val checked = remember {
         mutableStateOf(false)
     }
+
+    val agencyUsers = remember { mutableStateOf(emptyList<AgencyUser>()) }
+
+    readAgencyDataFromFirestore(db) { agencyUserList ->
+        agencyUsers.value = agencyUserList
+    }
+
 
     Column(
         modifier = Modifier
@@ -161,15 +169,25 @@ fun AgencySignUpScreen(
                     text = "Sign Up",
                     onClick = {
                         if (agreedToTerms.value) {
-                            addDataToFirestore(
-                                context = context,
-                                db = db,
-                                agencyUsername = agencyUsername.value.text,
-                                agencyEmail = agencyEmail.value.text,
-                                agencyPassword = agencyPassword.value.text
-                            )
-                            showToast.value = true // Set the state to show toast after successful signup
-                            agreedToTerms.value = false // Reset the checkbox state
+                            if (isUsernameAvailable(agencyUsername.value.text, agencyUsers.value) &&
+                                isEmailAvailable(agencyEmail.value.text, agencyUsers.value)
+                            ) {
+                                addDataToFirestore(
+                                    context = context,
+                                    db = db,
+                                    agencyUsername = agencyUsername.value.text,
+                                    agencyEmail = agencyEmail.value.text,
+                                    agencyPassword = agencyPassword.value.text
+                                )
+                                showToast.value = true
+                                agreedToTerms.value = false
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "Username or Email already exists, please choose another",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         } else {
                             Toast.makeText(context, "Please agree to the Terms and Privacy", Toast.LENGTH_SHORT).show()
                         }
@@ -179,8 +197,8 @@ fun AgencySignUpScreen(
                 // Show toast message after successful signup
                 if (showToast.value) {
                     Toast.makeText(context, "Sign Up Successful", Toast.LENGTH_SHORT).show()
-                    navController.navigate(Screen.Login.route) {
-                        popUpTo(Screen.Login.route) {
+                    navController.navigate(Screen.AgencyLogin.route) {
+                        popUpTo(Screen.AgencyLogin.route) {
                             inclusive = true
                         }
                     }

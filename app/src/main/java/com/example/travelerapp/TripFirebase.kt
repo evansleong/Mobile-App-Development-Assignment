@@ -18,6 +18,7 @@ fun addDataToFirestore(
     tripPackageRetDate: String,
     uploadedImageUri: String?,
     selectedOption: List<String>,
+    agencyUsername: String
 //    isChecked: Boolean
 ) {
 
@@ -29,8 +30,9 @@ fun addDataToFirestore(
         "tripDesc" to tripPackageDesc,
         "depDate" to tripPackageDeptDate,
         "retDate" to tripPackageRetDate,
-        "imageUri" to uploadedImageUri,
+        "tripUri" to uploadedImageUri,
         "options" to selectedOption,
+        "agencyUsername" to agencyUsername
 //        "isActive" to isChecked
     )
 

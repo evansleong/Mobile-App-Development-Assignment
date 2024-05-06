@@ -5,15 +5,20 @@ import SignUpScreen
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 
 @Composable
 fun SetUpNavGraph(
     navController: NavHostController,
     dbHandler: DBHandler
 ) {
+    val agencyViewModel: AgencyViewModel = viewModel()
+
     NavHost(
         navController = navController,
         startDestination = Screen.UserOrAdmin.route
@@ -78,7 +83,7 @@ fun SetUpNavGraph(
         composable(
             route = Screen.AgencyLogin.route
         ){
-            AgencyLoginScreen(navController, context = LocalContext.current)
+            AgencyLoginScreen(navController, context = LocalContext.current, viewModel = agencyViewModel)
         }
         composable(
             route = Screen.AgencySignup.route
@@ -92,21 +97,18 @@ fun SetUpNavGraph(
         }
         composable(
             route = Screen.AgencyHome.route
-        ){ backStackEntry ->
-            // Extracting arguments from NavBackStackEntry
-            val loggedInUserName = backStackEntry.arguments?.getString("loggedInUserName")
-            // Passing the argument to AgencyHomeScreen
-            AgencyHomeScreen(navController, loggedInUserName ?: "", soldPackagesCount = 0)
+        ){
+            AgencyHomeScreen(navController, viewModel = agencyViewModel)
         }
         composable(
             route = Screen.AgencyAddPackage.route
         ) {
-            AgencyAddPackageScreen(navController = navController, context = LocalContext.current)
+            AgencyAddPackageScreen(navController = navController, context = LocalContext.current, viewModel = agencyViewModel)
         }
         composable(
             route = Screen.AgencyPackageList.route
         ) {
-            AgencyPackageList(navController, context = LocalContext.current)
+            AgencyPackageList(navController, context = LocalContext.current, viewModel = agencyViewModel)
         }
         composable(
             route = Screen.Reload.route

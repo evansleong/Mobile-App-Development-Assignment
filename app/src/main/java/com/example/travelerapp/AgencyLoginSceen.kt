@@ -35,7 +35,8 @@ import com.google.firebase.firestore.firestore
 @Composable
 fun AgencyLoginScreen(
     navController: NavController,
-    context: Context
+    context: Context,
+    viewModel: AgencyViewModel
 ) {
     val db = Firebase.firestore
 
@@ -162,13 +163,16 @@ fun AgencyLoginScreen(
                         val password = agencyLoginPassword.value.text
                         val loginSuccessful = checkLoginCredentials(email, password, agencyUsers.value)
 
-                        if (loginSuccessful) {
-                            Log.d("Login", "Login successful")
+                        if (loginSuccessful != null) {
+                            viewModel.loggedInAgency = loginSuccessful
+
                             Toast.makeText(context, "Login Up Successful", Toast.LENGTH_SHORT).show()
-                            navController.navigate(route = Screen.AgencyHome.route)
+                            navController.navigate(Screen.AgencyHome.route) {
+                                popUpTo(Screen.Home.route) {
+                                    inclusive = true
+                                }
+                            }
                         } else {
-                            // Login failed
-                            Log.d("Login", "Login failed. Please check your credentials.")
                             Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
                         }
                     }
@@ -182,7 +186,6 @@ fun AgencyLoginScreen(
                     modifier = Modifier
                         .padding(top = 16.dp)
                         .clickable {
-                            // Navigate to the signup screen
                             navController.navigate(Screen.AgencySignup.route) {
                                 popUpTo(Screen.Signup.route) {
                                     inclusive = true
@@ -195,20 +198,8 @@ fun AgencyLoginScreen(
     }
 }
 
-fun checkLoginCredentials(email: String, password: String, agencyUsers: List<AgencyUser>): Boolean {
-
-    // Print each email and password from the agencyUsers list
-    agencyUsers.forEachIndexed { index, user ->
-        println("User $index - Email: ${user.agencyEmail}, Password: ${user.agencyPassword}")
-        println("User $index - Email: ${email}, Password: ${password}")
-    }
-
-    // Check if there is any user with the provided email and password
-    return agencyUsers.any { it.agencyEmail == email && it.agencyPassword == password }
-}
-
 @Preview
 @Composable
 fun AgencyLoginScreenPreview() {
-    AgencyLoginScreen(navController = rememberNavController(), context = LocalContext.current)
+    AgencyLoginScreen(navController = rememberNavController(), context = LocalContext.current, viewModel = AgencyViewModel())
 }
