@@ -9,9 +9,11 @@ import android.util.Log
 import android.widget.DatePicker
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,6 +33,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDatePickerState
@@ -57,9 +60,11 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalCoilApi::class)
 @Composable
@@ -78,13 +83,6 @@ fun AgencyAddPackageScreen(
         mutableStateOf<Uri?>(null)
     }
 
-    val imagePicker =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.GetContent()
-        ) { uri: Uri? ->
-            uploadedImageUri = uri
-        }
-
     var expanded by remember { mutableStateOf(false) }
 
     var isDialogOpen by remember { mutableStateOf(false) }
@@ -100,6 +98,8 @@ fun AgencyAddPackageScreen(
     val tripLength = remember {
         mutableStateOf(tripLengthOptions[0])
     }
+
+    val tripId = UUID.randomUUID().toString().substring(0, 6)
 
     val tripPackageName = remember {
         mutableStateOf(TextFieldValue())
@@ -141,13 +141,31 @@ fun AgencyAddPackageScreen(
 
     var selectedOption by remember { mutableStateOf(emptyList<String>()) }
 
-    // Function to launch image picker
-    fun pickImage() {
+    fun pickImage(imagePicker: ActivityResultLauncher<String>) {
         imagePicker.launch("image/*")
     }
 
     fun handleOthersOptionClick() {
         isOthersSelected = true
+    }
+
+    fun handleImageUpload(context: Context, imageUri: Uri?) {
+        uploadImageToFirebaseStorage(
+            context = context,
+            imageUri = imageUri,
+            onSuccess = { downloadUrl ->
+                uploadedImageUri = Uri.parse(downloadUrl)
+            },
+            onFailure = { exception ->
+                Log.e("ImageUpload", "Error uploading image: ${exception.message}")
+            }
+        )
+    }
+
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        handleImageUpload(context, uri)
     }
 
     // Check if an image has been uploaded
@@ -157,6 +175,14 @@ fun AgencyAddPackageScreen(
         tripLength.value = customTripLength.value.text
         isDialogOpen = false
     }
+
+    var tripPackageNameError by remember { mutableStateOf(false) }
+
+    var tripPackageFeesError by remember { mutableStateOf(false) }
+
+    var tripPackageDepositError by remember { mutableStateOf(false) }
+
+    var tripPackageDescError by remember { mutableStateOf(false) }
 
     // Validation functions
     fun validateInputs(): Boolean {
@@ -168,12 +194,6 @@ fun AgencyAddPackageScreen(
             Toast.makeText(context, "Please upload trip image", Toast.LENGTH_SHORT).show()
         }
 
-        // Trip Uri validation
-        if (tripLength.value.isEmpty() || (tripLength.value == "OTHERS" && customTripLength.value.text.isEmpty())) {
-            isValid = false
-            Toast.makeText(context, "Please enter valid trip length", Toast.LENGTH_SHORT).show()
-        }
-
         // Trip Length validation
         if (tripLength.value.isEmpty() || (tripLength.value == "OTHERS" && customTripLength.value.text.isEmpty())) {
             isValid = false
@@ -183,25 +203,37 @@ fun AgencyAddPackageScreen(
         // Trip Name validation
         if (tripPackageName.value.text.isEmpty()) {
             isValid = false
+            tripPackageNameError = true
             Toast.makeText(context, "Please enter trip name", Toast.LENGTH_SHORT).show()
+        } else {
+            tripPackageNameError = false
         }
 
         // Trip Fees validation
         if (tripPackageFees.value.text.isEmpty() || tripPackageFees.value.text.toDoubleOrNull() == null) {
             isValid = false
+            tripPackageFeesError = true
             Toast.makeText(context, "Please enter valid trip fees", Toast.LENGTH_SHORT).show()
+        } else {
+            tripPackageFeesError = false
         }
 
         // Trip Deposit validation
         if (tripPackageDeposit.value.text.isEmpty() || tripPackageDeposit.value.text.toDoubleOrNull() == null) {
             isValid = false
+            tripPackageDepositError = true
             Toast.makeText(context, "Please enter valid trip deposit", Toast.LENGTH_SHORT).show()
+        } else {
+            tripPackageDepositError = false
         }
 
         // Description validation
         if (tripPackageDesc.value.text.isEmpty()) {
             isValid = false
+            tripPackageDescError = true
             Toast.makeText(context, "Please enter trip description", Toast.LENGTH_SHORT).show()
+        } else {
+            tripPackageDescError = false
         }
 
         // Departure Date validation
@@ -214,6 +246,11 @@ fun AgencyAddPackageScreen(
         if (retDateMillisToLocalDate == null) {
             isValid = false
             Toast.makeText(context, "Please select valid return date", Toast.LENGTH_SHORT).show()
+        } else if (deptDateMillisToLocalDate != null && retDateMillisToLocalDate != null) {
+            if (retDateMillisToLocalDate < deptDateMillisToLocalDate) {
+                isValid = false
+                Toast.makeText(context, "Return date cannot be earlier than departure date", Toast.LENGTH_SHORT).show()
+            }
         }
 
         // Options validation
@@ -224,6 +261,7 @@ fun AgencyAddPackageScreen(
 
         return isValid
     }
+
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -242,13 +280,12 @@ fun AgencyAddPackageScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { pickImage() }
-                .background(Color.Gray) // Grey background when no image is uploaded
+                .clickable { pickImage(imagePicker) }
+                .background(Color.Gray)
         ) {
-            // Display the uploaded image or a placeholder
             if (isImageUploaded) {
                 Image(
-                    painter = rememberImagePainter(uploadedImageUri),
+                    painter = rememberAsyncImagePainter(uploadedImageUri),
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -265,9 +302,11 @@ fun AgencyAddPackageScreen(
                     Icon(Icons.Default.Clear, contentDescription = "Cancel")
                 }
             } else {
-                Text(
-                    text = "Upload Photo",
+                Image(
+                    painter = painterResource(R.drawable.upload_image),
+                    contentDescription = "Upload Photo Placeholder",
                     modifier = Modifier
+                        .fillMaxWidth()
                         .aspectRatio(16f / 9f)
                 )
             }
@@ -351,10 +390,19 @@ fun AgencyAddPackageScreen(
                         value = tripPackageName.value,
                         onValueChange = { tripPackageName.value = it },
                         placeholder = { Text(text = "Enter the trip location") },
+                        isError = tripPackageNameError,
                         modifier = Modifier
                             .fillMaxWidth(),
                         shape = RoundedCornerShape(20.dp)
                     )
+                    if (tripPackageNameError) {
+                        Text(
+                            text = "DO NOT LEAVE BLANK",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
                 }
 
                 item {
@@ -363,13 +411,23 @@ fun AgencyAddPackageScreen(
                     TextField(
                         value = tripPackageFees.value,
                         onValueChange = { tripPackageFees.value = it },
-                        placeholder = { Text(text = "Enter the trip fees:") },
-                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text(text = "MYR") },
+                        isError = tripPackageFeesError,
+                        modifier = Modifier
+                            .fillMaxWidth(),
                         shape = RoundedCornerShape(20.dp),
                         keyboardOptions = KeyboardOptions.Default.copy(
                             keyboardType = KeyboardType.Number
                         )
                     )
+                    if (tripPackageFeesError) {
+                        Text(
+                            text = "DO NOT LEAVE BLANK",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
                 }
 
                 item {
@@ -378,13 +436,23 @@ fun AgencyAddPackageScreen(
                     TextField(
                         value = tripPackageDeposit.value,
                         onValueChange = { tripPackageDeposit.value = it },
-                        placeholder = { Text(text = "Enter the trip deposit:") },
-                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text(text = "MYR") },
+                        isError = tripPackageDepositError,
+                        modifier = Modifier
+                            .fillMaxWidth(),
                         shape = RoundedCornerShape(20.dp),
                         keyboardOptions = KeyboardOptions.Default.copy(
                             keyboardType = KeyboardType.Number
                         )
                     )
+                    if (tripPackageDepositError) {
+                        Text(
+                            text = "DO NOT LEAVE BLANK",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
                 }
 
                 item {
@@ -405,7 +473,7 @@ fun AgencyAddPackageScreen(
                     Box {
                         TextField(
                             value = deptDateToString,
-                            onValueChange = { /* No operation, as this is non-editable */ },
+                            onValueChange = {},
                             readOnly = true,
                             keyboardOptions = KeyboardOptions.Default.copy(
                                 imeAction = ImeAction.Done
@@ -450,14 +518,13 @@ fun AgencyAddPackageScreen(
                     }
                 }
 
-// Inside your Composable function
                 item {
                     Spacer(modifier = Modifier.height(20.dp))
                     Text(text = "Return Date", fontWeight = FontWeight.Bold)
                     Box {
                         TextField(
                             value = retDateToString,
-                            onValueChange = { /* No operation, as this is non-editable */ },
+                            onValueChange = {},
                             readOnly = true,
                             keyboardOptions = KeyboardOptions.Default.copy(
                                 imeAction = ImeAction.Done
@@ -645,6 +712,7 @@ fun AgencyAddPackageScreen(
                             addDataToFirestore(
                                 context = context,
                                 db = db,
+                                tripId = tripId,
                                 tripPackageName = tripPackageName.value.text,
                                 tripLength = tripLength.value,
                                 tripPackageFees = tripPackageFees.value.text.toDouble(),

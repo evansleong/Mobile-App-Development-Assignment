@@ -10,5 +10,6 @@ data class Trip(
     val depDate: String = "",
     val retDate: String = "",
     val tripUri: String = "",
+    val options: List<String> = emptyList(),
     val agencyUsername: String = "", //FK
 )

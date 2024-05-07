@@ -18,6 +18,7 @@ fun SetUpNavGraph(
     dbHandler: DBHandler
 ) {
     val agencyViewModel: AgencyViewModel = viewModel()
+    val tripViewModel: TripViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -108,17 +109,17 @@ fun SetUpNavGraph(
         composable(
             route = Screen.AgencyPackageList.route
         ) {
-            AgencyPackageList(navController, context = LocalContext.current, viewModel = agencyViewModel)
+            AgencyPackageList(navController, context = LocalContext.current, viewModel = agencyViewModel, tripViewModel = tripViewModel)
+        }
+        composable(
+            route = Screen.AgencyPackageDetail.route
+        ) {
+            AgencyPackageDetail(navController, context = LocalContext.current, tripViewModel = tripViewModel)
         }
         composable(
             route = Screen.Reload.route
         ) {
             ReloadScreen(navController, context = LocalContext.current)
         }
-//        composable(
-//            route = Screen.Testing.route
-//        ) {
-//            Testing(Modifier)
-//        }
     }
 }

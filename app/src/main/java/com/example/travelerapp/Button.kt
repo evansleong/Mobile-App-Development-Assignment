@@ -228,4 +228,41 @@ object ReuseComponents {
             }
         }
     }
+
+    @Composable
+    fun AgencyNavBar(text: String, navController: NavController) {
+        Surface(
+            color = Color.White,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 56.dp, vertical = 16.dp)
+            ) {
+                val agencyHomeColor = if (text == "AgencyHome") Color.Blue else Color.Black
+                val agencyPackageColor = if (text == "AgencyPackage") Color.Blue else Color.Black
+
+                Icon(
+                    painter = painterResource(R.drawable.home),
+                    contentDescription = "Home",
+                    tint = agencyHomeColor,
+                    modifier = Modifier.size(20.dp).clickable {
+                        navController.navigate(route = Screen.AgencyHome.route)
+                    }
+                )
+                Icon(
+                    painter = painterResource(R.drawable.map),
+                    contentDescription = "Package",
+                    tint = agencyPackageColor,
+                    modifier = Modifier.size(20.dp).clickable {
+                        navController.navigate(route = Screen.AgencyPackageList.route)
+                    }
+                )
+            }
+        }
+    }
+
 }
