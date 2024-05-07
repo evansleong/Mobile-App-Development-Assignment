@@ -42,7 +42,7 @@ fun SetUpNavGraph(
         composable(
             route = Screen.Signup.route
         ){
-            SignUpScreen(navController)
+            SignUpScreen(navController, context = LocalContext.current)
         }
         composable(
             route = Screen.AddPIN.route

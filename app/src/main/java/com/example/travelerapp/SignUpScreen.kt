@@ -1,3 +1,5 @@
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -6,6 +8,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,26 +17,32 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.travelerapp.Screen
+import com.example.travelerapp.addUDatatoFirestore
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 @Composable
 fun SignUpScreen(
-    navController: NavController
+    navController: NavController,
+    context: Context
 ) {
-    val auth: FirebaseAuth = Firebase.auth
-    var username by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    val db = Firebase.firestore
+    var username = remember { mutableStateOf(TextFieldValue()) }
+    var email = remember { mutableStateOf(TextFieldValue()) }
+    var password = remember { mutableStateOf(TextFieldValue()) }
     val checked = remember { mutableStateOf(false) }
+    val showToast = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -77,9 +86,9 @@ fun SignUpScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                ReuseComponents.RoundedOutlinedTextField(
-                    value = username,
-                    onValueChange = { username = it }, // Added missing onValueChange lambda
+                TextField(
+                    value = username.value,
+                    onValueChange = { username.value = it }, // Added missing onValueChange lambda
                     shape = RoundedCornerShape(16.dp),
                     label = { BasicText(text = "Username") },
                     modifier = Modifier.fillMaxWidth()
@@ -94,9 +103,9 @@ fun SignUpScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                ReuseComponents.RoundedOutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
+                TextField(
+                    value = email.value,
+                    onValueChange = { email.value = it },
                     shape = RoundedCornerShape(16.dp),
                     label = { BasicText(text = "Email") },
                     modifier = Modifier.fillMaxWidth()
@@ -111,9 +120,9 @@ fun SignUpScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                ReuseComponents.RoundedOutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
+                TextField(
+                    value = password.value,
+                    onValueChange = { password.value = it },
                     shape = RoundedCornerShape(16.dp),
                     label = { BasicText(text = "Password") },
                     modifier = Modifier.fillMaxWidth()
@@ -139,21 +148,45 @@ fun SignUpScreen(
                 ReuseComponents.CustomButton(
                     text = "Sign Up",
                     onClick = {
-                        if (email.isNotEmpty() && password.isNotEmpty() && checked.value) {
-                            auth.createUserWithEmailAndPassword(email, password)
-                                .addOnCompleteListener { task ->
-                                    if (task.isSuccessful) {
-                                        // User created successfully
-                                        navController.navigate(Screen.AddPIN.route) {
-                                            popUpTo(Screen.AddPIN.route) {
-                                                inclusive = true
-                                            }
-                                        }
-                                    }
-                                }
+                        if(checked.value) {
+                            if (email.value != null && password.value != null && checked.value) {
+                                addUDatatoFirestore(
+                                    context = context,
+                                    db = db,
+                                    userName = username.value.text,
+                                    userEmail = email.value.text,
+                                    userPw = password.value.text
+                                )
+                                showToast.value = true
+                                checked.value = false
+//                                auth.createUserWithEmailAndPassword(email, password)
+//                                    .addOnCompleteListener { task ->
+//                                        if (task.isSuccessful) {
+//                                            // User created successfully
+//                                            navController.navigate(Screen.AddPIN.route) {
+//                                                popUpTo(Screen.AddPIN.route) {
+//                                                    inclusive = true
+//                                                }
+//                                            }
+//                                        }
+//                                    }
+                            }else{
+                                Toast.makeText(context,"Please fill up your Email and Password",Toast.LENGTH_SHORT).show()
+                            }
+                        }else{
+                            Toast.makeText(context, "Please agree to the Terms and Privacy", Toast.LENGTH_SHORT).show()
                         }
                     }
                 )
+
+                if(showToast.value){
+                    Toast.makeText(context,"Sign Up Successful",Toast.LENGTH_SHORT).show()
+                    navController.navigate(Screen.Login.route){
+                        popUpTo(Screen.Login.route){
+                            inclusive = true
+                        }
+                    }
+                }
 
                 Text(
                     text = "Already have an account? Login now",
@@ -180,6 +213,7 @@ fun SignUpScreen(
 @Preview
 fun SignUpScreenPreview(){
     SignUpScreen(
-        navController = rememberNavController()
+        navController = rememberNavController(),
+        context = LocalContext.current
     )
 }

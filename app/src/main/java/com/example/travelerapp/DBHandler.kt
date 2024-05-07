@@ -34,7 +34,7 @@ class DBHandler(context: Context) :
 
         val createUserTable = """
             CREATE TABLE users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id INTEGER PRIMARY KEY,
                 username TEXT NOT NULL,
                 email TEXT NOT NULL,
                 password TEXT NOT NULL,
@@ -475,7 +475,7 @@ class DBHandler(context: Context) :
 
     companion object {
         private const val DB_NAME = "travelerDB"
-        private const val DB_VERSION = 15
+        private const val DB_VERSION = 14
         private var AUTH_USER: String = ""
     }
 }
