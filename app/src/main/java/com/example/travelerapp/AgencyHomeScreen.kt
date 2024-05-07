@@ -29,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import com.example.travelerapp.data.Trip
 import com.google.firebase.Firebase
@@ -123,7 +124,7 @@ fun AgencyHomeScreen(
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(horizontal = 8.dp)
             ) {
-                items(tripListState.value.take(2)) { trip ->
+                items(tripListState.value.take(3)) { trip ->
                     HomeTripItem(trip = trip)
                 }
             }
@@ -163,14 +164,14 @@ fun AgencyHomeScreen(
                     )
                 }
         }
-        ReuseComponents.NavBar(text = title, navController = navController)
+        ReuseComponents.AgencyNavBar(text = title, navController = navController)
     }
 }
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
 fun HomeTripItem(trip: Trip) {
-    val painter: Painter = rememberImagePainter(trip.tripUri)
+    val painter: Painter = rememberAsyncImagePainter(trip.tripUri)
 
     Column(
         modifier = Modifier

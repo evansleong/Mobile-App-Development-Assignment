@@ -2,7 +2,9 @@ package com.example.travelerapp
 
 import android.app.Activity
 import android.content.Context
+import android.net.Uri
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,7 +15,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,34 +38,31 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import com.example.travelerapp.data.Trip
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 
-//import com.example.travelerapp.Screen.AgencyAddPackage
-
 @Composable
 fun AgencyPackageList(
     navController: NavController,
     context: Context,
-    viewModel: AgencyViewModel
+    viewModel: AgencyViewModel,
+    tripViewModel: TripViewModel
 ) {
     val db = Firebase.firestore
     val activity = context as Activity
 
     val loggedInAgency = viewModel.loggedInAgency
 
-    // State to hold the list of trips
     val tripListState = remember { mutableStateOf<List<Trip>>(emptyList()) }
 
-    // Call readDataFromFirestore when this composable is composed
     LaunchedEffect(key1 = true) {
         readDataFromFirestore(db) { trips ->
             val filteredTrips = trips.filter { trip ->
                 trip.agencyUsername == loggedInAgency?.agencyUsername
             }
-            // Update the tripListState with the fetched trips
             tripListState.value = filteredTrips
         }
     }
@@ -76,59 +80,102 @@ fun AgencyPackageList(
             modifier = Modifier.fillMaxSize()
         ) {
             items(tripListState.value) { trip ->
-                TripItem(trip = trip)
+                TripItem(trip = trip, navController = navController, tripViewModel) {
+                    deleteTripFromFirestore(
+                        db,
+                        trip.tripId,
+                        onSuccess = {},
+                        onFailure = {}
+                    )
+                }
             }
         }
     }
 }
 
-
-
-@OptIn(ExperimentalCoilApi::class)
 @Composable
-fun TripItem(trip: Trip) {
-    // Load the image using Coil
-    val painter: Painter = rememberImagePainter(trip.tripUri)
+fun TripItem(
+    trip: Trip,
+    navController: NavController,
+    tripViewModel: TripViewModel,
+    onDeleteTrip: () -> Unit
+) {
+    val painter: Painter = rememberAsyncImagePainter(model = Uri.parse(trip.tripUri))
+
+    val showDialog = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
+            .clickable {
+                tripViewModel.selectedTripId = trip.tripId
+                navController.navigate(route = Screen.AgencyPackageDetail.route)
+            }
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically // Align items vertically
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Display the image with specified content scale
+
             Image(
                 painter = painter,
                 contentDescription = trip.tripName,
                 modifier = Modifier
-                    .height(100.dp) // Adjust the height of the image
-                    .width(100.dp) // Adjust the width of the image
-                    .padding(end = 8.dp), // Add padding to the right of the image
+                    .height(100.dp)
+                    .width(100.dp)
+                    .padding(end = 8.dp),
                 contentScale = ContentScale.Crop
             )
-            // Display trip name and length in a column
+
             Column(
-                modifier = Modifier.weight(1f) // Expand to fill remaining space
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = trip.tripName,
-                    fontWeight = FontWeight.Bold // Optionally, make the name bold
+                    fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = trip.tripLength
                 )
             }
+            IconButton(
+                onClick = { showDialog.value = true },
+                content = {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = "Delete Trip"
+                    )
+                }
+            )
         }
     }
-}
 
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text("Confirm Deletion") },
+            text = { Text("Are you sure you want to delete this trip?") },
+            confirmButton = {
+                Button(onClick = {
+                    showDialog.value = false
+                    onDeleteTrip()
+                }) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDialog.value = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+}
 
 
 @Preview
 @Composable
 fun PreviewAgencyPackageList() {
-    AgencyPackageList(navController = rememberNavController(), context = LocalContext.current, viewModel = AgencyViewModel())
+    AgencyPackageList(navController = rememberNavController(), context = LocalContext.current, viewModel = AgencyViewModel(), tripViewModel = TripViewModel())
 }
