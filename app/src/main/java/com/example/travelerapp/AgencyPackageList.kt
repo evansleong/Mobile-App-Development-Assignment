@@ -32,15 +32,14 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
 import com.example.travelerapp.data.Trip
+import com.example.travelerapp.viewModel.AgencyViewModel
+import com.example.travelerapp.viewModel.TripViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 
@@ -59,7 +58,7 @@ fun AgencyPackageList(
     val tripListState = remember { mutableStateOf<List<Trip>>(emptyList()) }
 
     LaunchedEffect(key1 = true) {
-        readDataFromFirestore(db) { trips ->
+        tripViewModel.readTrip(db) { trips ->
             val filteredTrips = trips.filter { trip ->
                 trip.agencyUsername == loggedInAgency?.agencyUsername
             }
@@ -81,7 +80,7 @@ fun AgencyPackageList(
         ) {
             items(tripListState.value) { trip ->
                 TripItem(trip = trip, navController = navController, tripViewModel) {
-                    deleteTripFromFirestore(
+                    tripViewModel.deleteTrip(
                         db,
                         trip.tripId,
                         onSuccess = {},

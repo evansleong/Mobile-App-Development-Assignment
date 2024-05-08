@@ -18,17 +18,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,8 +41,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
 import com.example.travelerapp.data.Trip
+import com.example.travelerapp.viewModel.TripViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 
@@ -58,12 +59,22 @@ fun AgencyPackageDetail(
     val selectedPackage = tripViewModel.selectedTripId
 
     LaunchedEffect(selectedPackage) {
-        readSingleTripFromFirestore(db, selectedPackage.toString()) { trip ->
+//        readSingleTripFromFirestore(db, selectedPackage.toString()) { trip ->
+//            tripState.value = trip
+//        }
+        tripViewModel.readSingleTrip(db, selectedPackage.toString()) { trip ->
             tripState.value = trip
         }
     }
 
     tripState.value?.let { trip ->
+        var isEditing by remember { mutableStateOf(false) }
+
+        var editedTripName by remember { mutableStateOf(trip.tripName) }
+        var editedTripLength by remember { mutableStateOf(trip.tripLength) }
+        var editedTripFees by remember { mutableStateOf(trip.tripFees) }
+        var editedTripDesc by remember { mutableStateOf(trip.tripDesc) }
+
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Top,
@@ -98,6 +109,7 @@ fun AgencyPackageDetail(
                 )
             }
 
+
             Card(
                 modifier = Modifier
                     .width(400.dp)
@@ -117,6 +129,26 @@ fun AgencyPackageDetail(
                             fontSize = 20.sp,
                             fontWeight = FontWeight.ExtraBold
                         )
+
+                        EditableFieldWithButton(
+                            text = editedTripName,
+                            onTextChanged = { editedTripName = it },
+                            label = "Trip Name",
+                            buttonText = "Edit",
+                            onButtonClicked = {
+                                tripViewModel.editTrip(
+                                    context = context,
+                                    db = db,
+                                    tripId = selectedPackage.toString(),
+                                    newTripName = editedTripName,
+                                    newTripLength = trip.tripLength,
+                                    newTripFees = trip.tripFees,
+                                    newTripDesc = trip.tripDesc,
+                                    newOptions = trip.options // Assuming options are not edited in this scenario
+                            )
+                            }
+                        )
+
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
                             text = trip.tripDesc,
@@ -152,6 +184,32 @@ fun AgencyPackageDetail(
                 }
             }
 
+        }
+    }
+}
+
+@Composable
+fun EditableFieldWithButton(
+    text: String,
+    onTextChanged: (String) -> Unit,
+    label: String,
+    buttonText: String,
+    onButtonClicked: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(label)
+        Spacer(modifier = Modifier.width(8.dp))
+        TextField(
+            value = text,
+            onValueChange = { onTextChanged(it) },
+            modifier = Modifier.weight(1f)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Button(onClick = { onButtonClicked() }) {
+            Text(buttonText)
         }
     }
 }

@@ -28,13 +28,15 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.travelerapp.data.AgencyUser
+import com.example.travelerapp.viewModel.AgencyViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 
 @Composable
 fun AgencySignUpScreen(
     navController: NavController,
-    context: Context
+    context: Context,
+    viewModel: AgencyViewModel
 ) {
     val db = Firebase.firestore
 
@@ -59,7 +61,7 @@ fun AgencySignUpScreen(
 
     val agencyUsers = remember { mutableStateOf(emptyList<AgencyUser>()) }
 
-    readAgencyDataFromFirestore(db) { agencyUserList ->
+    viewModel.readAgencyData(db) { agencyUserList ->
         agencyUsers.value = agencyUserList
     }
 
@@ -169,10 +171,10 @@ fun AgencySignUpScreen(
                     text = "Sign Up",
                     onClick = {
                         if (agreedToTerms.value) {
-                            if (isUsernameAvailable(agencyUsername.value.text, agencyUsers.value) &&
-                                isEmailAvailable(agencyEmail.value.text, agencyUsers.value)
+                            if (viewModel.isUsernameAvailable(agencyUsername.value.text, agencyUsers.value) &&
+                                viewModel.isEmailAvailable(agencyEmail.value.text, agencyUsers.value)
                             ) {
-                                addDataToFirestore(
+                                viewModel.addAgency(
                                     context = context,
                                     db = db,
                                     agencyUsername = agencyUsername.value.text,
@@ -230,6 +232,7 @@ fun AgencySignUpScreen(
 fun AgencySignUpScreenPreview(){
     AgencySignUpScreen(
         navController = rememberNavController(),
-        context = LocalContext.current
+        context = LocalContext.current,
+        viewModel = AgencyViewModel()
     )
 }

@@ -1,6 +1,5 @@
 package com.example.travelerapp
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -17,28 +16,27 @@ import androidx.navigation.compose.rememberNavController
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
 import com.example.travelerapp.data.Trip
+import com.example.travelerapp.viewModel.AgencyViewModel
+import com.example.travelerapp.viewModel.TripViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 
 @Composable
 fun AgencyHomeScreen(
     navController: NavController,
-    viewModel: AgencyViewModel
+    viewModel: AgencyViewModel,
+    tripViewModel: TripViewModel
 ) {
     val db = Firebase.firestore
 
@@ -48,7 +46,14 @@ fun AgencyHomeScreen(
     val tripListState = remember { mutableStateOf<List<Trip>>(emptyList()) }
 
     LaunchedEffect(key1 = true) {
-        readDataFromFirestore(db) { trips ->
+//        readDataFromFirestore(db) { trips ->
+//            val filteredTrips = trips.filter { trip ->
+//                trip.agencyUsername == loggedInAgency?.agencyUsername
+//            }
+//            // Update the tripListState with the fetched trips
+//            tripListState.value = filteredTrips
+//        }
+        tripViewModel.readTrip(db) { trips ->
             val filteredTrips = trips.filter { trip ->
                 trip.agencyUsername == loggedInAgency?.agencyUsername
             }
@@ -207,6 +212,7 @@ fun PreviewAgencyHomeScreen() {
     val email = "John Doe"
     AgencyHomeScreen(
         navController = rememberNavController(),
-        viewModel = AgencyViewModel()
+        viewModel = AgencyViewModel(),
+        tripViewModel = TripViewModel()
     )
 }

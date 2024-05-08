@@ -1,7 +1,6 @@
 package com.example.travelerapp
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,10 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.example.travelerapp.Screen
 import com.example.travelerapp.data.AgencyUser
+import com.example.travelerapp.viewModel.AgencyViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 
@@ -55,7 +52,7 @@ fun AgencyLoginScreen(
 
     val agencyUsers = remember { mutableStateOf(emptyList<AgencyUser>()) }
 
-    readAgencyDataFromFirestore(db) { agencyUserList ->
+    viewModel.readAgencyData(db) { agencyUserList ->
         agencyUsers.value = agencyUserList
     }
 
@@ -161,7 +158,7 @@ fun AgencyLoginScreen(
                     onClick = {
                         val email = agencyLoginEmail.value.text
                         val password = agencyLoginPassword.value.text
-                        val loginSuccessful = checkLoginCredentials(email, password, agencyUsers.value)
+                        val loginSuccessful = viewModel.checkLoginCredentials(email, password, agencyUsers.value)
 
                         if (loginSuccessful != null) {
                             viewModel.loggedInAgency = loginSuccessful

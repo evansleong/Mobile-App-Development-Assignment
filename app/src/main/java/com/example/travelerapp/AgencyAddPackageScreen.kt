@@ -2,18 +2,15 @@ package com.example.travelerapp
 
 import ReuseComponents
 import android.app.Activity
-import android.app.DatePickerDialog
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import android.widget.DatePicker
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,10 +24,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.Divider
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -61,9 +55,11 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
+import com.example.travelerapp.viewModel.AgencyViewModel
+import com.example.travelerapp.viewModel.TripViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalCoilApi::class)
@@ -71,7 +67,8 @@ import java.util.UUID
 fun AgencyAddPackageScreen(
     navController: NavController,
     context: Context,
-    viewModel: AgencyViewModel
+    viewModel: AgencyViewModel,
+    tripViewModel: TripViewModel
 ) {
     val loggedInAgency = viewModel.loggedInAgency
 
@@ -95,9 +92,9 @@ fun AgencyAddPackageScreen(
 
     val tripLengthOptions = listOf("1 DAY TRIP", "2 DAYS 1 NIGHT", "3 DAYS 2 NIGHTS", "OTHERS")
 
-    val tripLength = remember {
-        mutableStateOf(tripLengthOptions[0])
-    }
+//    val tripLength = remember {
+//        mutableStateOf(tripLengthOptions[0])
+//    }
 
     val tripId = UUID.randomUUID().toString().substring(0, 6)
 
@@ -150,7 +147,7 @@ fun AgencyAddPackageScreen(
     }
 
     fun handleImageUpload(context: Context, imageUri: Uri?) {
-        uploadImageToFirebaseStorage(
+        tripViewModel.uploadImage(
             context = context,
             imageUri = imageUri,
             onSuccess = { downloadUrl ->
@@ -162,6 +159,18 @@ fun AgencyAddPackageScreen(
         )
     }
 
+    // Function to calculate trip length
+    fun calculateTripLength(departureMillis: Long?, returnMillis: Long?): String {
+        if (departureMillis != null && returnMillis != null) {
+            val departureDate = DateUtils().convertMillisToLocalDate(departureMillis)
+            val returnDate = DateUtils().convertMillisToLocalDate(returnMillis)
+            val days = ChronoUnit.DAYS.between(departureDate, returnDate) + 1
+            val nights = if (days > 1) days - 1 else 0
+            return "$days DAYS $nights NIGHTS"
+        }
+        return tripLengthOptions[0] // Default to 1 DAY TRIP if dates are not selected
+    }
+
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -170,6 +179,11 @@ fun AgencyAddPackageScreen(
 
     // Check if an image has been uploaded
     val isImageUploaded = uploadedImageUri != null
+
+    // Calculate trip length based on departure and return dates
+    val tripLength = remember {
+        mutableStateOf(calculateTripLength(tripPackageDeptDate.selectedDateMillis, tripPackageRetDate.selectedDateMillis))
+    }
 
     fun saveCustomTripLength() {
         tripLength.value = customTripLength.value.text
@@ -321,67 +335,62 @@ fun AgencyAddPackageScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-                item {
-                    Spacer(modifier = Modifier.height(20.dp))
-                    Text(text = "Trip Length", fontWeight = FontWeight.Bold)
-                }
-
-                item {
-                    ExposedDropdownMenuBox(
-                        expanded = expanded,
-                        onExpandedChange = { expanded = it },
-                    ) {
-                        TextField(
-                            value = tripLength.value,
-                            onValueChange = {
-                                if (it == "OTHERS") {
-                                    handleOthersOptionClick()
-                                } else {
-                                    tripLength.value = it
-                                }
-                            },
-                            readOnly = true,
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                            modifier = Modifier
-                                .menuAnchor()
-                                .width(350.dp),
-                            shape = RoundedCornerShape(20.dp),
-                        )
-
-                        if (expanded) {
-                            ExposedDropdownMenu(
-                                expanded = true,
-                                onDismissRequest = { expanded = false }
-                            ) {
-                                tripLengthOptions.forEach { tripLengthOption ->
-                                    DropdownMenuItem(
-                                        text = { Text(text = tripLengthOption) },
-                                        onClick = {
-                                            if (tripLengthOption == "OTHERS") {
-                                                handleOthersOptionClick()
-                                            } else {
-                                                tripLength.value = tripLengthOption
-                                                expanded = false
-                                            }
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                item {
-                    if (isOthersSelected) {
-                        OthersOptionInputDialog(
-                            onContinue = { customOption ->
-                                tripLength.value = customOption
-                                isOthersSelected = false
-                            },
-                            onDismiss = { isOthersSelected = false }
-                        )
-                    }
-                }
+//                item {
+//                    ExposedDropdownMenuBox(
+//                        expanded = expanded,
+//                        onExpandedChange = { expanded = it },
+//                    ) {
+//                        TextField(
+//                            value = tripLength.value,
+//                            onValueChange = {
+//                                if (it == "OTHERS") {
+//                                    handleOthersOptionClick()
+//                                } else {
+//                                    tripLength.value = it
+//                                }
+//                            },
+//                            readOnly = true,
+//                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+//                            modifier = Modifier
+//                                .menuAnchor()
+//                                .width(350.dp),
+//                            shape = RoundedCornerShape(20.dp),
+//                        )
+//
+//                        if (expanded) {
+//                            ExposedDropdownMenu(
+//                                expanded = true,
+//                                onDismissRequest = { expanded = false }
+//                            ) {
+//                                tripLengthOptions.forEach { tripLengthOption ->
+//                                    DropdownMenuItem(
+//                                        text = { Text(text = tripLengthOption) },
+//                                        onClick = {
+//                                            if (tripLengthOption == "OTHERS") {
+//                                                handleOthersOptionClick()
+//                                            } else {
+//                                                tripLength.value = tripLengthOption
+//                                                expanded = false
+//                                            }
+//                                        }
+//                                    )
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//
+//                item {
+//                    if (isOthersSelected) {
+//                        OthersOptionInputDialog(
+//                            onContinue = { customOption ->
+//                                tripLength.value = customOption
+//                                isOthersSelected = false
+//                            },
+//                            onDismiss = { isOthersSelected = false }
+//                        )
+//                    }
+//                }
 
                 item {
                     Spacer(modifier = Modifier.height(20.dp))
@@ -498,7 +507,13 @@ fun AgencyAddPackageScreen(
                             onDismissRequest = { showDeptDateDialog = false },
                             confirmButton = {
                                 Button(
-                                    onClick = { showDeptDateDialog = false }
+                                    onClick = {
+                                        showDeptDateDialog = false
+                                        tripLength.value = calculateTripLength(
+                                            tripPackageDeptDate.selectedDateMillis,
+                                            tripPackageRetDate.selectedDateMillis
+                                        )
+                                    }
                                 ) {
                                     Text(text = "ok")
                                 }
@@ -549,7 +564,12 @@ fun AgencyAddPackageScreen(
                             onDismissRequest = { showRetDateDialog = false },
                             confirmButton = {
                                 Button(
-                                    onClick = { showRetDateDialog = false }
+                                    onClick = {
+                                        showRetDateDialog = false
+                                        tripLength.value = calculateTripLength(
+                                            tripPackageDeptDate.selectedDateMillis,
+                                            tripPackageRetDate.selectedDateMillis
+                                        )}
                                 ) {
                                     Text(text = "ok")
                                 }
@@ -566,6 +586,22 @@ fun AgencyAddPackageScreen(
                                 state = tripPackageRetDate
                             )
                         }
+                    }
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Text(text = "Trip Length", fontWeight = FontWeight.Bold)
+                    Box {
+                        TextField(
+                            value = calculateTripLength(
+                                tripPackageDeptDate.selectedDateMillis,
+                                tripPackageRetDate.selectedDateMillis
+                            ),
+                            onValueChange = {},
+                            readOnly = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
 
@@ -709,21 +745,21 @@ fun AgencyAddPackageScreen(
                                 uploadedImageUri?.toString(),
                                 selectedOption
                             )
-                            addDataToFirestore(
-                                context = context,
-                                db = db,
-                                tripId = tripId,
-                                tripPackageName = tripPackageName.value.text,
-                                tripLength = tripLength.value,
-                                tripPackageFees = tripPackageFees.value.text.toDouble(),
-                                tripPackageDeposit = tripPackageDeposit.value.text.toDouble(),
-                                tripPackageDesc = tripPackageDesc.value.text,
-                                tripPackageDeptDate = deptDateToString,
-                                tripPackageRetDate = retDateToString,
-                                uploadedImageUri = uploadedImageUri?.toString(),
-                                selectedOption = selectedOption,
-                                agencyUsername = loggedInAgency?.agencyUsername ?: "user"
-                            )
+                                tripViewModel.addTrip(
+                                    context = context,
+                                    db = db,
+                                    tripId = tripId,
+                                    tripPackageName = tripPackageName.value.text,
+                                    tripLength = tripLength.value,
+                                    tripPackageFees = tripPackageFees.value.text.toDouble(),
+                                    tripPackageDeposit = tripPackageDeposit.value.text.toDouble(),
+                                    tripPackageDesc = tripPackageDesc.value.text,
+                                    tripPackageDeptDate = deptDateToString,
+                                    tripPackageRetDate = retDateToString,
+                                    uploadedImageUri = uploadedImageUri?.toString(),
+                                    selectedOption = selectedOption,
+                                    agencyUsername = loggedInAgency?.agencyUsername ?: "user"
+                                )
                             Toast.makeText(context, "Trip Added to Database", Toast.LENGTH_SHORT)
                                 .show()
                         }
@@ -792,5 +828,5 @@ fun OthersOptionInputDialog(onContinue: (String) -> Unit, onDismiss: () -> Unit)
 @Preview
 @Composable
 fun PreviewAgencyAddPackageScreen() {
-    AgencyAddPackageScreen(navController = rememberNavController(), context = LocalContext.current, viewModel = AgencyViewModel())
+    AgencyAddPackageScreen(navController = rememberNavController(), context = LocalContext.current, viewModel = AgencyViewModel(), tripViewModel = TripViewModel())
 }

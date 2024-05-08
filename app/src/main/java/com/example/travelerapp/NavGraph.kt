@@ -2,15 +2,14 @@ package com.example.travelerapp
 
 import AddPINScreen
 import SignUpScreen
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
+import com.example.travelerapp.viewModel.AgencyViewModel
+import com.example.travelerapp.viewModel.TripViewModel
 
 @Composable
 fun SetUpNavGraph(
@@ -89,7 +88,7 @@ fun SetUpNavGraph(
         composable(
             route = Screen.AgencySignup.route
         ){
-            AgencySignUpScreen(navController, context = LocalContext.current)
+            AgencySignUpScreen(navController, context = LocalContext.current, viewModel = agencyViewModel)
         }
         composable(
             route = Screen.Login.route
@@ -99,12 +98,12 @@ fun SetUpNavGraph(
         composable(
             route = Screen.AgencyHome.route
         ){
-            AgencyHomeScreen(navController, viewModel = agencyViewModel)
+            AgencyHomeScreen(navController, viewModel = agencyViewModel, tripViewModel = tripViewModel)
         }
         composable(
             route = Screen.AgencyAddPackage.route
         ) {
-            AgencyAddPackageScreen(navController = navController, context = LocalContext.current, viewModel = agencyViewModel)
+            AgencyAddPackageScreen(navController = navController, context = LocalContext.current, viewModel = agencyViewModel, tripViewModel = tripViewModel)
         }
         composable(
             route = Screen.AgencyPackageList.route
