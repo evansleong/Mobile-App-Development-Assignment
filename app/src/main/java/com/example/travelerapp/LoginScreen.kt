@@ -172,26 +172,32 @@ fun LoginScreen(
                 ReuseComponents.CustomButton(
                     text = "Login",
                     onClick = {
-                        if(checked.value){
-                            if(logInEmail.value != "" && logInPw.value != ""){
-                        val emailTemp = logInEmail.getValueAsString()
-                        val pwTemp = logInPw.getValueAsString()
-                        val userExst = viewModel.checkULC(emailTemp,pwTemp,users.value)
-//                        val userExst = dbHandler.getUserByEmailNPw(emailTemp, pwTemp)
-
-                        if(userExst!=null) {
-                            navController.navigate(route = Screen.Home.route) {
-                                popUpTo(Screen.Home.route) {
+                        navController.navigate(route = Screen.Home.route) {
+                            popUpTo(Screen.Home.route) {
                                     inclusive = true
                                 }
                             }
-//                        navController.navigate(route = Screen.AddPIN.route) {
-//                            popUpTo(Screen.AddPIN.route) {
-//                                inclusive = true
+
+//                        if(checked.value){
+//                            if(logInEmail.value != "" && logInPw.value != ""){
+//                        val emailTemp = logInEmail.getValueAsString()
+//                        val pwTemp = logInPw.getValueAsString()
+//                        val userExst = viewModel.checkULC(emailTemp,pwTemp,users.value)
+////                        val userExst = dbHandler.getUserByEmailNPw(emailTemp, pwTemp)
+//
+//                        if(userExst!=null) {
+//                            navController.navigate(route = Screen.Home.route) {
+//                                popUpTo(Screen.Home.route) {
+//                                    inclusive = true
+//                                }
 //                            }
-                        }
-                        }
-                      }
+////                        navController.navigate(route = Screen.AddPIN.route) {
+////                            popUpTo(Screen.AddPIN.route) {
+////                                inclusive = true
+////                            }
+//                        }
+//                        }
+//                      }
                     }
                 )
 

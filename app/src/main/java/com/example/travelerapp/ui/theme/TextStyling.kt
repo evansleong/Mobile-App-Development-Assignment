@@ -20,7 +20,7 @@ fun Modifier.textHeadingStyle() =
 fun HeadingTxt(text: String) {
     Text(
         modifier = Modifier.textHeadingStyle(),
-        style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold),
+        style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold),
         text = text
     )
 }

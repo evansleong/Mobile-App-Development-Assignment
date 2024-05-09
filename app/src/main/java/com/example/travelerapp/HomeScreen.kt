@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -54,7 +55,10 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             HeadingTxt(text = "Recent Activities")
-            Text(text = "calendar")
+//            Text(text = "calendar")
+            Box(modifier = Modifier.padding(16.dp)) {
+                ReuseComponents.DatePicker()
+            }
             HeadingTxt("Explore Travel Package")
 
             Text(

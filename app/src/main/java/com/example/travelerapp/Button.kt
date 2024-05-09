@@ -1,6 +1,8 @@
+import android.graphics.Paint.Style
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -34,12 +36,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Green
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.DpOffset
 import androidx.navigation.NavController
 import com.example.travelerapp.R
 import com.example.travelerapp.Screen
-
+import java.util.Calendar
 
 
 object ReuseComponents {
@@ -261,6 +264,69 @@ object ReuseComponents {
                         navController.navigate(route = Screen.AgencyPackageList.route)
                     }
                 )
+            }
+        }
+    }
+
+    @Composable
+    fun DatePicker() {
+        val datesList = listOf<String>("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+        var dayCounter: Int = 1
+        var week: Int = 1
+        val currentDay = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
+        Column(Modifier.fillMaxWidth()) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(5.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                datesList.forEach {
+                    Box(
+                        Modifier
+                            .weight(1f)
+                            .padding(5.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = it.substring(0, 3),
+                            style = TextStyle(Color(0xFF43b3fb)))
+                    }
+                }
+            }
+            var initWeekday = 3 // wednesday
+            while (dayCounter <= 31) {
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp),
+                ) {
+                    if (initWeekday > 0) {
+                        repeat(initWeekday) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
+                    for (i in week..(7 - initWeekday)) {
+                        if (dayCounter <= 31) {
+                            val isToday = dayCounter == currentDay
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .background(if(isToday)Color(0xFF43b3fb) else Color.White, CircleShape)
+                                    .padding(10.dp)
+                            ) {
+                                Text(
+                                    text = dayCounter++.toString(),
+                                    style = TextStyle(Color.Gray)
+                                    )
+                            }
+                        } else {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
+                    initWeekday = 0
+                }
             }
         }
     }
