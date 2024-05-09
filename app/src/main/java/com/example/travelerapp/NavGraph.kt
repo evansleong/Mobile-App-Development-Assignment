@@ -19,6 +19,7 @@ fun SetUpNavGraph(
 ) {
     val agencyViewModel: AgencyViewModel = viewModel()
     val tripViewModel: TripViewModel = viewModel()
+    val userViewModel: UserViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -38,12 +39,12 @@ fun SetUpNavGraph(
         composable(
             route = Screen.Login.route
         ){
-            LoginScreen(navController,dbHandler)
+            LoginScreen(navController, context = LocalContext.current,userViewModel)
         }
         composable(
             route = Screen.Signup.route
         ){
-            SignUpScreen(navController, context = LocalContext.current)
+            SignUpScreen(navController, context = LocalContext.current, dbHandler, viewModel = UserViewModel())
         }
         composable(
             route = Screen.AddPIN.route
@@ -91,11 +92,11 @@ fun SetUpNavGraph(
         ){
             AgencySignUpScreen(navController, context = LocalContext.current, viewModel = agencyViewModel)
         }
-        composable(
-            route = Screen.Login.route
-        ){
-            LoginScreen(navController,dbHandler)
-        }
+//        composable(
+//            route = Screen.Login.route
+//        ){
+//            LoginScreen(navController,dbHandler, viewModel = userViewModel)
+//        }
         composable(
             route = Screen.AgencyHome.route
         ){

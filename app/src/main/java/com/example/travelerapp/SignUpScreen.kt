@@ -25,8 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.travelerapp.DBHandler
 import com.example.travelerapp.Screen
-import com.example.travelerapp.addUDatatoFirestore
+import com.example.travelerapp.UserViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
@@ -35,7 +36,9 @@ import com.google.firebase.ktx.Firebase
 @Composable
 fun SignUpScreen(
     navController: NavController,
-    context: Context
+    context: Context,
+    dbHandler: DBHandler,
+    viewModel: UserViewModel
 ) {
     val db = Firebase.firestore
     var username = remember { mutableStateOf(TextFieldValue()) }
@@ -150,7 +153,7 @@ fun SignUpScreen(
                     onClick = {
                         if(checked.value) {
                             if (email.value != null && password.value != null && checked.value) {
-                                addUDatatoFirestore(
+                                viewModel.addUser(
                                     context = context,
                                     db = db,
                                     userName = username.value.text,
@@ -181,6 +184,11 @@ fun SignUpScreen(
 
                 if(showToast.value){
                     Toast.makeText(context,"Sign Up Successful",Toast.LENGTH_SHORT).show()
+                    dbHandler.addNewUser(
+                        username = username.value.text,
+                        email = email.value.text,
+                        password = password.value.text
+                        )
                     navController.navigate(Screen.Login.route){
                         popUpTo(Screen.Login.route){
                             inclusive = true
@@ -212,8 +220,12 @@ fun SignUpScreen(
 @Composable
 @Preview
 fun SignUpScreenPreview(){
+    val context = LocalContext.current
+    val db = DBHandler(context)
     SignUpScreen(
         navController = rememberNavController(),
-        context = LocalContext.current
+        context = LocalContext.current,
+        dbHandler = db,
+        viewModel = UserViewModel()
     )
 }

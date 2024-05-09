@@ -2,6 +2,7 @@ package com.example.travelerapp
 
 import ReuseComponents.getValueAsString
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +20,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,16 +34,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.travelerapp.data.User
+import com.google.firebase.firestore.firestore
+import com.google.firebase.Firebase
 
 
-
-@SuppressLint("SuspiciousIndentation")
+//@SuppressLint("SuspiciousIndentation")
 @Composable
 fun LoginScreen(
     navController: NavController,
-    dbHandler: DBHandler
+    context: Context,
+    viewModel: UserViewModel
 ) {
 //    val lsContext: Context = this
+    val db = Firebase.firestore
     val checked = remember { mutableStateOf(false) }
     val logInEmail = remember {
         mutableStateOf("")
@@ -51,6 +57,14 @@ fun LoginScreen(
         mutableStateOf("")
     }
 
+    val users = remember {
+        mutableStateOf((emptyList<User>()))
+    }
+
+    viewModel.readUData(db){
+        userList ->
+        users.value = userList
+    }
 
     Column(
         modifier = Modifier
@@ -96,8 +110,8 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                ReuseComponents.RoundedOutlinedTextField(
-                    value = "",
+                TextField(
+                    value = logInEmail.value,
                     onValueChange = {
                                     logInEmail.value = it
                     },
@@ -115,14 +129,13 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                ReuseComponents.RoundedOutlinedTextField(
-                    value = "",
+                TextField(
+                    value = logInPw.value,
                     onValueChange = {
                                     logInPw.value = it
                     },
                     shape = RoundedCornerShape(16.dp),
                     label = { BasicText(text = "Password") },
-
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -159,18 +172,26 @@ fun LoginScreen(
                 ReuseComponents.CustomButton(
                     text = "Login",
                     onClick = {
+                        if(checked.value){
+                            if(logInEmail.value != "" && logInPw.value != ""){
                         val emailTemp = logInEmail.getValueAsString()
                         val pwTemp = logInPw.getValueAsString()
+                        val userExst = viewModel.checkULC(emailTemp,pwTemp,users.value)
+//                        val userExst = dbHandler.getUserByEmailNPw(emailTemp, pwTemp)
 
-                        val userExst = dbHandler.getUserByEmailNPw(emailTemp, pwTemp)
-
-//                        if(userExst!=null){
-                        navController.navigate(route = Screen.AddPIN.route) {
-                            popUpTo(Screen.AddPIN.route) {
-                                inclusive = true
+                        if(userExst!=null) {
+                            navController.navigate(route = Screen.Home.route) {
+                                popUpTo(Screen.Home.route) {
+                                    inclusive = true
+                                }
                             }
-                            }
-//                        }
+//                        navController.navigate(route = Screen.AddPIN.route) {
+//                            popUpTo(Screen.AddPIN.route) {
+//                                inclusive = true
+//                            }
+                        }
+                        }
+                      }
                     }
                 )
 
@@ -203,6 +224,7 @@ fun LoginScreenPreview(){
     val DBH = DBHandler(context)
     LoginScreen(
         navController = rememberNavController(),
-        dbHandler = DBH
+        context = LocalContext.current,
+        viewModel = UserViewModel()
     )
 }

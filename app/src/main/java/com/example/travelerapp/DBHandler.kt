@@ -102,14 +102,12 @@ class DBHandler(context: Context) :
         username: String,
         email: String,
         password: String,
-        is_user: Int,
     ) {
         val db = this.writableDatabase
         val values = ContentValues().apply {
             put("username", username)
             put("email", email)
             put("password", password)
-            put("is_user", is_user)
         }
         db.insert("users", null, values)
         db.close()
