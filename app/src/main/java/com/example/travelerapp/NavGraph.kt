@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.travelerapp.data.Trip
 import com.example.travelerapp.viewModel.AgencyViewModel
 import com.example.travelerapp.viewModel.TripViewModel
 
@@ -114,6 +115,11 @@ fun SetUpNavGraph(
             route = Screen.AgencyPackageDetail.route
         ) {
             AgencyPackageDetail(navController, context = LocalContext.current, tripViewModel = tripViewModel)
+        }
+        composable(
+            route = Screen.AgencyEditPackage.route
+        ) {
+            AgencyEditPackageScreen(navController, trip = Trip(), context = LocalContext.current, tripViewModel = tripViewModel)
         }
         composable(
             route = Screen.Reload.route

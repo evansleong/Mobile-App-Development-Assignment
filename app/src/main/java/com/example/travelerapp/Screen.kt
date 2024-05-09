@@ -19,6 +19,7 @@ sealed class Screen(val route: String) {
     object AgencyAddPackage: Screen(route = "agency_add_package_screen")
     object AgencyPackageList: Screen(route = "agency_package_list_screen")
     object AgencyPackageDetail: Screen(route = "agency_package_detail_screen")
+    object AgencyEditPackage: Screen(route = "agency_edit_package_screen")
     object Reload: Screen(route = "reload_screen")
 
 }

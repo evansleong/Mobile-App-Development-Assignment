@@ -59,9 +59,6 @@ fun AgencyPackageDetail(
     val selectedPackage = tripViewModel.selectedTripId
 
     LaunchedEffect(selectedPackage) {
-//        readSingleTripFromFirestore(db, selectedPackage.toString()) { trip ->
-//            tripState.value = trip
-//        }
         tripViewModel.readSingleTrip(db, selectedPackage.toString()) { trip ->
             tripState.value = trip
         }
@@ -130,24 +127,24 @@ fun AgencyPackageDetail(
                             fontWeight = FontWeight.ExtraBold
                         )
 
-                        EditableFieldWithButton(
-                            text = editedTripName,
-                            onTextChanged = { editedTripName = it },
-                            label = "Trip Name",
-                            buttonText = "Edit",
-                            onButtonClicked = {
-                                tripViewModel.editTrip(
-                                    context = context,
-                                    db = db,
-                                    tripId = selectedPackage.toString(),
-                                    newTripName = editedTripName,
-                                    newTripLength = trip.tripLength,
-                                    newTripFees = trip.tripFees,
-                                    newTripDesc = trip.tripDesc,
-                                    newOptions = trip.options // Assuming options are not edited in this scenario
-                            )
-                            }
-                        )
+//                        EditableFieldWithButton(
+//                            text = editedTripName,
+//                            onTextChanged = { editedTripName = it },
+//                            label = "Trip Name",
+//                            buttonText = "Edit",
+//                            onButtonClicked = {
+//                                tripViewModel.editTrip(
+//                                    context = context,
+//                                    db = db,
+//                                    tripId = selectedPackage.toString(),
+//                                    newTripName = editedTripName,
+//                                    newTripLength = trip.tripLength,
+//                                    newTripFees = trip.tripFees,
+//                                    newTripDesc = trip.tripDesc,
+//                                    newOptions = trip.options // Assuming options are not edited in this scenario
+//                            )
+//                            }
+//                        )
 
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
@@ -183,36 +180,42 @@ fun AgencyPackageDetail(
                     }
                 }
             }
-
+            Button(
+                onClick = {
+                    navController.navigate(route = Screen.AgencyEditPackage.route)
+                }
+            ) {
+                Text("Edit Package")
+            }
         }
     }
 }
 
-@Composable
-fun EditableFieldWithButton(
-    text: String,
-    onTextChanged: (String) -> Unit,
-    label: String,
-    buttonText: String,
-    onButtonClicked: () -> Unit
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(label)
-        Spacer(modifier = Modifier.width(8.dp))
-        TextField(
-            value = text,
-            onValueChange = { onTextChanged(it) },
-            modifier = Modifier.weight(1f)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Button(onClick = { onButtonClicked() }) {
-            Text(buttonText)
-        }
-    }
-}
+//@Composable
+//fun EditableFieldWithButton(
+//    text: String,
+//    onTextChanged: (String) -> Unit,
+//    label: String,
+//    buttonText: String,
+//    onButtonClicked: () -> Unit
+//) {
+//    Row(
+//        verticalAlignment = Alignment.CenterVertically,
+//        modifier = Modifier.fillMaxWidth()
+//    ) {
+//        Text(label)
+//        Spacer(modifier = Modifier.width(8.dp))
+//        TextField(
+//            value = text,
+//            onValueChange = { onTextChanged(it) },
+//            modifier = Modifier.weight(1f)
+//        )
+//        Spacer(modifier = Modifier.width(8.dp))
+//        Button(onClick = { onButtonClicked() }) {
+//            Text(buttonText)
+//        }
+//    }
+//}
 
 
 

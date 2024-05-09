@@ -16,7 +16,7 @@ class AgencyViewModel : ViewModel() {
             db = db,
             agencyUsername = agencyUsername,
             agencyEmail = agencyEmail,
-            agencyPassword
+            agencyPassword = agencyPassword
         )
     }
 

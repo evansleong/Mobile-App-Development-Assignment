@@ -38,15 +38,18 @@ class TripViewModel : ViewModel() {
         )
     }
 
-    fun editTrip(context: Context, db: FirebaseFirestore, tripId: String, newTripName: String, newTripLength: String, newTripFees: Double, newTripDesc: String, newOptions: List<String>){
+    fun editTrip(context: Context, db: FirebaseFirestore, tripId: String, newTripUri: String,  newTripName: String, newTripLength: String, newTripFees: Double, newTripDesc: String, newDeptDate: String, newRetDate: String, newOptions: List<String>){
         database.editTripInFirestore(
             context = context,
             db = db,
             tripId = tripId,
+            newImageUri = newTripUri,
             newTripName = newTripName,
             newTripLength = newTripLength,
             newTripFees = newTripFees,
             newTripDesc = newTripDesc,
+            newDeptDate = newDeptDate,
+            newRetDate = newRetDate,
             newOptions = newOptions
         )
     }

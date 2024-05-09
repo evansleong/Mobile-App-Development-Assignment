@@ -60,19 +60,25 @@ class TripFirebase {
         context: Context,
         db: FirebaseFirestore,
         tripId: String,
+        newImageUri: String,
         newTripName: String,
         newTripLength: String,
         newTripFees: Double,
         newTripDesc: String,
+        newDeptDate: String,
+        newRetDate: String,
         newOptions: List<String>
     ) {
         val tripRef = db.collection("trips").document(tripId)
 
         val newData = hashMapOf(
+            "tripUri" to newImageUri,
             "tripName" to newTripName,
             "tripLength" to newTripLength,
             "tripFees" to newTripFees,
             "tripDesc" to newTripDesc,
+            "depDate" to newDeptDate,
+            "retDate" to newRetDate,
             "options" to newOptions
         )
 

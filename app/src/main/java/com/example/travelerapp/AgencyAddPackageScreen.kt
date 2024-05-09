@@ -92,10 +92,6 @@ fun AgencyAddPackageScreen(
 
     val tripLengthOptions = listOf("1 DAY TRIP", "2 DAYS 1 NIGHT", "3 DAYS 2 NIGHTS", "OTHERS")
 
-//    val tripLength = remember {
-//        mutableStateOf(tripLengthOptions[0])
-//    }
-
     val tripId = UUID.randomUUID().toString().substring(0, 6)
 
     val tripPackageName = remember {
@@ -166,7 +162,7 @@ fun AgencyAddPackageScreen(
             val returnDate = DateUtils().convertMillisToLocalDate(returnMillis)
             val days = ChronoUnit.DAYS.between(departureDate, returnDate) + 1
             val nights = if (days > 1) days - 1 else 0
-            return "$days DAYS $nights NIGHTS"
+            return if (days < 2) "1 DAY TRIP" else "$days DAYS $nights NIGHTS"
         }
         return tripLengthOptions[0] // Default to 1 DAY TRIP if dates are not selected
     }
@@ -335,63 +331,6 @@ fun AgencyAddPackageScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-//                item {
-//                    ExposedDropdownMenuBox(
-//                        expanded = expanded,
-//                        onExpandedChange = { expanded = it },
-//                    ) {
-//                        TextField(
-//                            value = tripLength.value,
-//                            onValueChange = {
-//                                if (it == "OTHERS") {
-//                                    handleOthersOptionClick()
-//                                } else {
-//                                    tripLength.value = it
-//                                }
-//                            },
-//                            readOnly = true,
-//                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-//                            modifier = Modifier
-//                                .menuAnchor()
-//                                .width(350.dp),
-//                            shape = RoundedCornerShape(20.dp),
-//                        )
-//
-//                        if (expanded) {
-//                            ExposedDropdownMenu(
-//                                expanded = true,
-//                                onDismissRequest = { expanded = false }
-//                            ) {
-//                                tripLengthOptions.forEach { tripLengthOption ->
-//                                    DropdownMenuItem(
-//                                        text = { Text(text = tripLengthOption) },
-//                                        onClick = {
-//                                            if (tripLengthOption == "OTHERS") {
-//                                                handleOthersOptionClick()
-//                                            } else {
-//                                                tripLength.value = tripLengthOption
-//                                                expanded = false
-//                                            }
-//                                        }
-//                                    )
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//
-//                item {
-//                    if (isOthersSelected) {
-//                        OthersOptionInputDialog(
-//                            onContinue = { customOption ->
-//                                tripLength.value = customOption
-//                                isOthersSelected = false
-//                            },
-//                            onDismiss = { isOthersSelected = false }
-//                        )
-//                    }
-//                }
-
                 item {
                     Spacer(modifier = Modifier.height(20.dp))
                     Text(text = "Trip Name", fontWeight = FontWeight.Bold)
@@ -764,59 +703,6 @@ fun AgencyAddPackageScreen(
                                 .show()
                         }
                         })
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun OthersOptionInputDialog(onContinue: (String) -> Unit, onDismiss: () -> Unit) {
-    Dialog(onDismissRequest = { onDismiss() }) {
-        var customOption by remember { mutableStateOf("") }
-
-        Box(
-            modifier = Modifier
-                .background(Color.White)
-                .padding(12.dp)
-                .clip(RoundedCornerShape(24.dp))
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Enter Trip Length",
-                        textAlign = TextAlign.Center,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.weight(1f)
-                    )
-                    IconButton(
-                        onClick = { onDismiss() },
-                        modifier = Modifier.padding(8.dp)
-                    ) {
-                        Icon(Icons.Default.Clear, contentDescription = "Close")
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                TextField(
-                    value = customOption,
-                    onValueChange = { customOption = it },
-                    placeholder = { Text("Custom Option") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = { onContinue(customOption) },
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Text("Save")
                 }
             }
         }

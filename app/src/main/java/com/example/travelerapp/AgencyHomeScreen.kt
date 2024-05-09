@@ -46,13 +46,6 @@ fun AgencyHomeScreen(
     val tripListState = remember { mutableStateOf<List<Trip>>(emptyList()) }
 
     LaunchedEffect(key1 = true) {
-//        readDataFromFirestore(db) { trips ->
-//            val filteredTrips = trips.filter { trip ->
-//                trip.agencyUsername == loggedInAgency?.agencyUsername
-//            }
-//            // Update the tripListState with the fetched trips
-//            tripListState.value = filteredTrips
-//        }
         tripViewModel.readTrip(db) { trips ->
             val filteredTrips = trips.filter { trip ->
                 trip.agencyUsername == loggedInAgency?.agencyUsername
