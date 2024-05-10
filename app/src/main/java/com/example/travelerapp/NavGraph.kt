@@ -66,7 +66,7 @@ fun SetUpNavGraph(
         composable(
              route = Screen.EditReview.route
         ){ backStackEntry ->
-            EditReviewScreen(navController, context = LocalContext.current, reviewViewModel, tripViewModel)
+            EditReviewScreen(navController, context = LocalContext.current, reviewViewModel, tripViewModel, userViewModel)
         }
         composable(
             route = Screen.UserDisplayPackageList.route

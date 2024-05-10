@@ -25,9 +25,13 @@ class ReviewViewModel : ViewModel() {
         comment: String,
         imageUris: List<Uri>,
         is_public: Int,
-        trip_id: String? = null,
+        trip_id: String? = "null",
+        user_id: String? = "null",
+        id: String = "null",
+        created_at: Long = 0L,
+        action: String,
     ) {
-        database.saveReview(db,context,trip_name, title, rating, comment, imageUris, is_public, trip_id)
+        database.saveReview(db,context,trip_name, title, rating, comment, imageUris, is_public, trip_id, user_id, id, created_at, action)
     }
 
     fun readReviews(db: FirebaseFirestore, callback: (List<Review>) -> Unit) {
@@ -36,5 +40,27 @@ class ReviewViewModel : ViewModel() {
 
     fun readReview(db: FirebaseFirestore, id: String, callback: (Review?) -> Unit) {
         database.readSingleReviewFromFirestore(db, id, callback)
+    }
+
+    fun uploadImage(context: Context, imageUris: List<Uri?>, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
+        for (imageUri in imageUris) {
+            if (imageUri != null) {
+                val storageRef = Firebase.storage.reference
+                val imageRef = storageRef.child("images/${UUID.randomUUID()}")
+                val uploadTask = imageRef.putFile(imageUri)
+
+                uploadTask.addOnSuccessListener { taskSnapshot ->
+                    // Image uploaded successfully
+                    imageRef.downloadUrl.addOnSuccessListener { uri ->
+                        // Get the download URL
+                        onSuccess(uri.toString())
+                    }.addOnFailureListener { exception ->
+                        onFailure(exception)
+                    }
+                }.addOnFailureListener { exception ->
+                    onFailure(exception)
+                }
+            }
+        }
     }
 }
