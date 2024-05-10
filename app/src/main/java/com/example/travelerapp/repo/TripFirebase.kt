@@ -20,7 +20,8 @@ class TripFirebase {
         tripPackageRetDate: String,
         uploadedImageUri: String?,
         selectedOption: List<String>,
-        agencyUsername: String
+        isAvailable: Int,
+        agencyUsername: String,
 //    isChecked: Boolean
     ) {
 
@@ -35,7 +36,8 @@ class TripFirebase {
             "retDate" to tripPackageRetDate,
             "tripUri" to uploadedImageUri,
             "options" to selectedOption,
-            "agencyUsername" to agencyUsername
+            "isAvailable" to isAvailable,
+            "agencyUsername" to agencyUsername,
 //        "isActive" to isChecked
         )
 

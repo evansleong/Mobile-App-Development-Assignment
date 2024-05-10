@@ -9,7 +9,7 @@ sealed class Screen(val route: String) {
     object AddPIN: Screen(route = "addPIN_screen")
     object Review: Screen(route = "review_screen")
     object EditReview: Screen(route = "edit_review_screen")
-    object Package: Screen(route = "package_screen")
+    object UserDisplayPackageList: Screen(route = "user_display_package_list_screen")
     object Wallet: Screen(route = "wallet_screen")
     object Transaction: Screen(route = "transaction_screen")
     object Reload: Screen(route = "reload_screen")

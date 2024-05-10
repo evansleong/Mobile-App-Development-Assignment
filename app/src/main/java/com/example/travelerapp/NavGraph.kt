@@ -41,7 +41,7 @@ fun SetUpNavGraph(
         composable(
             route = Screen.Home.route
         ){
-            HomeScreen(navController)
+            HomeScreen(navController, tripViewModel = tripViewModel)
         }
         composable(
             route = Screen.Login.route
@@ -69,9 +69,9 @@ fun SetUpNavGraph(
             EditReviewScreen(navController, context = LocalContext.current, reviewViewModel, tripViewModel)
         }
         composable(
-            route = Screen.Package.route
+            route = Screen.UserDisplayPackageList.route
         ){
-            PackageScreen(navController)
+            UserPackageListScreen(navController, context = LocalContext.current , tripViewModel)
         }
         composable(
             route = Screen.Wallet.route

@@ -13,7 +13,7 @@ import java.util.UUID
 class TripViewModel : ViewModel() {
     var selectedTripId: String? = null
     private val database = TripFirebase()
-    fun addTrip(context: Context, db: FirebaseFirestore, tripId: String, tripPackageName: String, tripLength: String, tripPackageFees: Double, tripPackageDeposit: Double, tripPackageDesc: String, tripPackageDeptDate: String, tripPackageRetDate: String, uploadedImageUri: String?, selectedOption: List<String>, agencyUsername: String){
+    fun addTrip(context: Context, db: FirebaseFirestore, tripId: String, tripPackageName: String, tripLength: String, tripPackageFees: Double, tripPackageDeposit: Double, tripPackageDesc: String, tripPackageDeptDate: String, tripPackageRetDate: String, uploadedImageUri: String?, selectedOption: List<String>, isAvailable: Int, agencyUsername: String){
         database.addDataToFirestore(
             context = context,
             db = db,
@@ -27,6 +27,7 @@ class TripViewModel : ViewModel() {
             tripPackageRetDate = tripPackageRetDate,
             uploadedImageUri = uploadedImageUri,
             selectedOption = selectedOption,
+            isAvailable = isAvailable,
             agencyUsername = agencyUsername
         )
     }

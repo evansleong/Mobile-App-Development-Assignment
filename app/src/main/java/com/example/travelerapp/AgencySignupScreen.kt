@@ -59,12 +59,17 @@ fun AgencySignUpScreen(
         mutableStateOf(false)
     }
 
+    // Call validation functions from ViewModel
+    val isValidEmail = viewModel.isValidEmail(agencyEmail.value.text)
+    val isValidPassword = viewModel.isValidPassword(agencyPassword.value.text)
+
     val agencyUsers = remember { mutableStateOf(emptyList<AgencyUser>()) }
 
     viewModel.readAgencyData(db) { agencyUserList ->
         agencyUsers.value = agencyUserList
     }
 
+    val isSignUpEnabled = isValidEmail && isValidPassword && agreedToTerms.value
 
     Column(
         modifier = Modifier
@@ -130,7 +135,8 @@ fun AgencySignUpScreen(
                     onValueChange = { agencyEmail.value = it },
                     modifier = Modifier
                         .fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp)
+                    shape = RoundedCornerShape(20.dp),
+                    isError = !isValidEmail
                 )
 
                 Spacer(modifier = Modifier.height(15.dp))
@@ -147,7 +153,8 @@ fun AgencySignUpScreen(
                     onValueChange = { agencyPassword.value = it },
                     modifier = Modifier
                         .fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp)
+                    shape = RoundedCornerShape(20.dp),
+                    isError = !isValidPassword
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -170,7 +177,7 @@ fun AgencySignUpScreen(
                 ReuseComponents.CustomButton(
                     text = "Sign Up",
                     onClick = {
-                        if (agreedToTerms.value) {
+                        if (isSignUpEnabled) {
                             if (viewModel.isUsernameAvailable(agencyUsername.value.text, agencyUsers.value) &&
                                 viewModel.isEmailAvailable(agencyEmail.value.text, agencyUsers.value)
                             ) {
@@ -191,7 +198,7 @@ fun AgencySignUpScreen(
                                 ).show()
                             }
                         } else {
-                            Toast.makeText(context, "Please agree to the Terms and Privacy", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Please fill all fields correctly and agree to the Terms and Privacy", Toast.LENGTH_SHORT).show()
                         }
                     }
                 )
@@ -236,3 +243,4 @@ fun AgencySignUpScreenPreview(){
         viewModel = AgencyViewModel()
     )
 }
+

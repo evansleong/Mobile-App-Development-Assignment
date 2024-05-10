@@ -113,7 +113,7 @@ object ReuseComponents {
                     contentDescription = "Package",
                     tint = packageColor,
                     modifier = Modifier.size(20.dp).clickable {
-                        navController.navigate(route = Screen.Package.route)
+                        navController.navigate(route = Screen.UserDisplayPackageList.route)
                     }
                 )
                 Icon(
@@ -177,7 +177,7 @@ object ReuseComponents {
                 Text(
                     text = title,
                     color = Color.Black,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
                 IconButton(
                     onClick = {}

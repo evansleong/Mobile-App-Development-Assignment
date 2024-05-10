@@ -45,4 +45,17 @@ class AgencyViewModel : ViewModel() {
     fun isEmailAvailable(email: String, agencyUsers: List<AgencyUser>): Boolean {
         return agencyUsers.none { it.agencyEmail == email }
     }
+
+    // Function to validate email format
+    fun isValidEmail(email: String): Boolean {
+        val emailRegex = "^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})"
+        return email.matches(emailRegex.toRegex())
+    }
+
+    // Function to validate password format
+    fun isValidPassword(password: String): Boolean {
+        // Password must contain at least 1 uppercase, 1 lowercase, and be at least 8 characters long
+        val passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}\$"
+        return password.matches(passwordRegex.toRegex())
+    }
 }

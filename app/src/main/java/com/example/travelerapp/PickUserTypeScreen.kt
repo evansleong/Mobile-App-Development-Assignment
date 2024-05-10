@@ -45,7 +45,7 @@ fun PickUserTypeScreen(
         contentAlignment = Alignment.CenterEnd
     ) {
         Image(
-            painter = painterResource(R.drawable.beach),
+            painter = painterResource(R.drawable.background),
             contentDescription = null,
             modifier = Modifier
                 .fillMaxSize(),
@@ -64,7 +64,7 @@ fun PickUserTypeScreen(
 
             Text(
                 text = "Choose User Type",
-                style = TextStyle(color = Color.Black,fontSize = 30.sp, fontWeight = FontWeight.ExtraBold)
+                style = TextStyle(color = Color.White, fontSize = 30.sp, fontWeight = FontWeight.ExtraBold)
             )
 
             Spacer(modifier = Modifier.height(96.dp))

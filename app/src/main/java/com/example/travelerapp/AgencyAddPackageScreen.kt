@@ -114,6 +114,10 @@ fun AgencyAddPackageScreen(
 
     val tripPackageRetDate = rememberDatePickerState()
 
+    val tripAvailable = remember {
+        mutableStateOf(TextFieldValue())
+    }
+
     val deptDateMillisToLocalDate = tripPackageDeptDate.selectedDateMillis?.let {
         DateUtils().convertMillisToLocalDate(it)
     }
@@ -417,6 +421,31 @@ fun AgencyAddPackageScreen(
 
                 item {
                     Spacer(modifier = Modifier.height(20.dp))
+                    Text(text = "Number Of Pax Available", fontWeight = FontWeight.Bold)
+                    TextField(
+                        value = tripAvailable.value,
+                        onValueChange = { tripAvailable.value = it },
+                        placeholder = { Text(text = "No. of PAX") },
+                        isError = tripPackageFeesError,
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            keyboardType = KeyboardType.Number
+                        )
+                    )
+                    if (tripPackageFeesError) {
+                        Text(
+                            text = "DO NOT LEAVE BLANK",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
                     Text(text = "Departure Date", fontWeight = FontWeight.Bold)
                     Box {
                         TextField(
@@ -697,6 +726,7 @@ fun AgencyAddPackageScreen(
                                     tripPackageRetDate = retDateToString,
                                     uploadedImageUri = uploadedImageUri?.toString(),
                                     selectedOption = selectedOption,
+                                    isAvailable = tripAvailable.value.text.toInt(),
                                     agencyUsername = loggedInAgency?.agencyUsername ?: "user"
                                 )
                             Toast.makeText(context, "Trip Added to Database", Toast.LENGTH_SHORT)

@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -72,81 +73,51 @@ fun AgencyPackageDetail(
         var editedTripFees by remember { mutableStateOf(trip.tripFees) }
         var editedTripDesc by remember { mutableStateOf(trip.tripDesc) }
 
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            val title = trip.tripName
-            ReuseComponents.TopBar(title = title, navController, showBackButton = true)
-
+        Scaffold(
+            topBar = {
+                ReuseComponents.TopBar(title = trip.tripName, navController, showBackButton = true)
+            }
+        ) { contentPadding ->
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.LightGray)
+                    .fillMaxSize()
+                    .padding(contentPadding)
             ) {
-                Image(
-                    painter = rememberAsyncImagePainter(trip.tripUri),
-                    contentDescription = trip.tripUri,
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(16f / 9f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = trip.tripName,
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-
-            Card(
-                modifier = Modifier
-                    .width(400.dp)
-                    .height(350.dp)
-                    .padding(16.dp),
-                shape = RoundedCornerShape(12.dp),
-            ) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Column(
+                        .background(Color.LightGray),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        painter = rememberAsyncImagePainter(trip.tripUri),
+                        contentDescription = trip.tripUri,
                         modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxSize(),
-                        verticalArrangement = Arrangement.Top
+                            .fillMaxWidth()
+                            .aspectRatio(16f / 9f)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Text(
+                            text = trip.tripName,
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Spacer(modifier = Modifier.height(30.dp))
+
                         Text(
                             text = "${trip.tripLength} - RM${trip.tripFees}/pax",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.ExtraBold
                         )
 
-//                        EditableFieldWithButton(
-//                            text = editedTripName,
-//                            onTextChanged = { editedTripName = it },
-//                            label = "Trip Name",
-//                            buttonText = "Edit",
-//                            onButtonClicked = {
-//                                tripViewModel.editTrip(
-//                                    context = context,
-//                                    db = db,
-//                                    tripId = selectedPackage.toString(),
-//                                    newTripName = editedTripName,
-//                                    newTripLength = trip.tripLength,
-//                                    newTripFees = trip.tripFees,
-//                                    newTripDesc = trip.tripDesc,
-//                                    newOptions = trip.options // Assuming options are not edited in this scenario
-//                            )
-//                            }
-//                        )
-
                         Spacer(modifier = Modifier.height(10.dp))
+
                         Text(
                             text = trip.tripDesc,
                             fontSize = 14.sp,
@@ -160,7 +131,9 @@ fun AgencyPackageDetail(
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold
                         )
+
                         Spacer(modifier = Modifier.height(5.dp))
+
                         trip.options.forEach { option ->
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
@@ -170,7 +143,9 @@ fun AgencyPackageDetail(
                                         .size(30.dp)
                                         .padding(end = 11.dp)
                                 )
+
                                 Spacer(modifier = Modifier.height(30.dp))
+
                                 Text(
                                     text = option,
                                     fontSize = 18.sp
@@ -178,47 +153,21 @@ fun AgencyPackageDetail(
                             }
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Button(
+                        onClick = {
+                            navController.navigate(route = Screen.AgencyEditPackage.route)
+                        }
+                    ) {
+                        Text("Edit Package")
+                    }
                 }
-            }
-            Button(
-                onClick = {
-                    navController.navigate(route = Screen.AgencyEditPackage.route)
-                }
-            ) {
-                Text("Edit Package")
             }
         }
     }
 }
-
-//@Composable
-//fun EditableFieldWithButton(
-//    text: String,
-//    onTextChanged: (String) -> Unit,
-//    label: String,
-//    buttonText: String,
-//    onButtonClicked: () -> Unit
-//) {
-//    Row(
-//        verticalAlignment = Alignment.CenterVertically,
-//        modifier = Modifier.fillMaxWidth()
-//    ) {
-//        Text(label)
-//        Spacer(modifier = Modifier.width(8.dp))
-//        TextField(
-//            value = text,
-//            onValueChange = { onTextChanged(it) },
-//            modifier = Modifier.weight(1f)
-//        )
-//        Spacer(modifier = Modifier.width(8.dp))
-//        Button(onClick = { onButtonClicked() }) {
-//            Text(buttonText)
-//        }
-//    }
-//}
-
-
-
 
 @Preview
 @Composable

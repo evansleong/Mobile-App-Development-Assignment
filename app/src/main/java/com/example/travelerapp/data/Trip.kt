@@ -11,5 +11,6 @@ data class Trip(
     val retDate: String = "",
     val tripUri: String = "",
     val options: List<String> = emptyList(),
+    val isAvailable: Int = 0,
     val agencyUsername: String = "", //FK
 )
