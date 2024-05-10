@@ -16,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
@@ -94,7 +95,7 @@ fun AgencyHomeScreen(
         Text(
             text = " Pkgs booked",
             modifier = Modifier
-                .padding(bottom = 16.dp, start = 200.dp),
+                .align(Alignment.End),
             color = Color.Red,
             fontWeight = FontWeight.Bold,
             fontSize = 25.sp
@@ -123,7 +124,7 @@ fun AgencyHomeScreen(
                 contentPadding = PaddingValues(horizontal = 8.dp)
             ) {
                 items(tripListState.value.take(3)) { trip ->
-                    HomeTripItem(trip = trip)
+                    HomeTripItem(trip = trip, navController = navController, tripViewModel)
                 }
             }
 
@@ -168,13 +169,21 @@ fun AgencyHomeScreen(
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
-fun HomeTripItem(trip: Trip) {
+fun HomeTripItem(
+    trip: Trip,
+    navController: NavController,
+    tripViewModel: TripViewModel,
+    ) {
     val painter: Painter = rememberAsyncImagePainter(trip.tripUri)
 
     Column(
         modifier = Modifier
             .padding(8.dp)
             .width(200.dp)
+            .clickable {
+                tripViewModel.selectedTripId = trip.tripId
+                navController.navigate(route = Screen.AgencyPackageDetail.route)
+            }
     ) {
         Image(
             painter = painter,

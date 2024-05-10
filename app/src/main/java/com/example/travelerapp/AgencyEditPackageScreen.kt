@@ -27,14 +27,21 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +60,7 @@ import com.example.travelerapp.viewModel.TripViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AgencyEditPackageScreen(
     navController: NavController,
@@ -68,6 +76,26 @@ fun AgencyEditPackageScreen(
     var editedImageUri by remember {
         mutableStateOf<Uri?>(null)
     }
+
+    val tripPackageDeptDate = rememberDatePickerState()
+
+    val tripPackageRetDate = rememberDatePickerState()
+
+    val deptDateMillisToLocalDate = tripPackageDeptDate.selectedDateMillis?.let {
+        DateUtils().convertMillisToLocalDate(it)
+    }
+
+    val retDateMillisToLocalDate = tripPackageRetDate.selectedDateMillis?.let {
+        DateUtils().convertMillisToLocalDate(it)
+    }
+
+    val deptDateToString = deptDateMillisToLocalDate?.let {
+        DateUtils().dateToString(deptDateMillisToLocalDate)
+    } ?: ""
+
+    val retDateToString = retDateMillisToLocalDate?.let {
+        DateUtils().dateToString(retDateMillisToLocalDate)
+    } ?: ""
 
     var selectedOptions by remember { mutableStateOf(trip.options.toMutableSet()) }
 
@@ -199,6 +227,30 @@ fun AgencyEditPackageScreen(
 
                     item {
                         Spacer(modifier = Modifier.height(20.dp))
+                        Text(text = "Departure Date", fontWeight = FontWeight.Bold)
+                        EditableDateFieldWithButton(
+                            date = editedDepartureDate,
+                            onDateChanged = { editedDepartureDate = it },
+                            datePickerState = tripPackageDeptDate,
+                            dateToString = deptDateToString
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Text(text = "Return Date", fontWeight = FontWeight.Bold)
+                        EditableDateFieldWithButton(
+                            date = editedReturnDate,
+                            onDateChanged = { editedReturnDate = it },
+                            datePickerState = tripPackageRetDate,
+                            dateToString = retDateToString
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(20.dp))
                         Text("Options (Select at least 1):", fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.height(16.dp))
                         val allOptions = listOf("Included breakfast", "Free Parking", "Travel Insurance", "Tipping and Taxes", "Full Board Meals", "Airport Transport")
@@ -283,6 +335,78 @@ fun EditableDoubleFieldWithButton(
         Spacer(modifier = Modifier.width(8.dp))
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditableDateFieldWithButton(
+    date: String,
+    onDateChanged: (String) -> Unit,
+    datePickerState: DatePickerState,
+    dateToString: String
+) {
+    var selectedDate by remember { mutableStateOf(date) }
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    // Update selectedDate when dateToString changes
+    LaunchedEffect(dateToString) {
+        if (dateToString.isNotEmpty()) {
+            selectedDate = dateToString
+        }
+    }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Spacer(modifier = Modifier.width(8.dp))
+        TextField(
+            value = selectedDate,
+            onValueChange = { /* Do not handle value change here */ },
+            shape = RoundedCornerShape(20.dp),
+            readOnly = true,
+            modifier = Modifier.weight(1f)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        IconButton(
+            onClick = {
+                showDatePicker = true
+            }
+        ) {
+            Icon(Icons.Default.DateRange, contentDescription = "Select Date")
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+    }
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDatePicker = false
+                        onDateChanged(selectedDate) // Update the selected date
+                    }
+                ) {
+                    Text(text = "OK")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showDatePicker = false }
+                ) {
+                    Text(text = "Cancel")
+                }
+            }
+        ) {
+            DatePicker(
+                state = datePickerState
+            )
+        }
+    }
+}
+
+
+
 
 @Composable
 fun OptionsCheckbox(option: String, selectedOptions: MutableSet<String>, trip: Trip) {

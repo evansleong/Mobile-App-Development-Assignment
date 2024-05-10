@@ -1,5 +1,6 @@
 package com.example.travelerapp
 
+import ReuseComponents
 import android.app.Activity
 import android.content.Context
 import android.net.Uri
@@ -34,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
@@ -86,6 +88,14 @@ fun AgencyPackageList(
                         onSuccess = {},
                         onFailure = {}
                     )
+                }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(20.dp))
+                ReuseComponents.CustomButton(text = "Add new package") {
+                    navController.navigate(route = Screen.AgencyAddPackage.route) {
+                    }
                 }
             }
         }

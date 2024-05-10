@@ -280,7 +280,7 @@ fun AgencyAddPackageScreen(
     ) {
         var dbHandler: DBHandler = DBHandler(context)
 
-        val title = "Welcome, ${loggedInAgency?.agencyUsername}"
+        val title = "Add Package"
         ReuseComponents.TopBar(
             title = title,
             navController,
