@@ -17,17 +17,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -43,19 +36,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
+import com.example.travelerapp.viewModel.TransactionViewModel
+import com.example.travelerapp.viewModel.WalletViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 
@@ -63,7 +54,9 @@ import com.google.firebase.firestore.firestore
 @Composable
 fun ReloadScreen(
     navController: NavController,
-    context: Context
+    context: Context,
+    walletViewModel: WalletViewModel,
+    transactionViewModel: TransactionViewModel
 ) {
     Column(
         modifier = Modifier
@@ -71,9 +64,8 @@ fun ReloadScreen(
     ) {
         val title = "Wallet"
         ReuseComponents.TopBar(title = title, navController)
-        val balance = "100.00"
+        val wallet = walletViewModel.userWallet
         val focusRequester = remember { FocusRequester() }
-        var is_valid by remember { mutableStateOf(false) }
         val db = Firebase.firestore
 
         Column(
@@ -97,7 +89,7 @@ fun ReloadScreen(
                             .padding(horizontal = 16.dp)
                     )
                     Text(
-                        text = "MYR$balance",
+                        text = "MYR${wallet?.available}",
                         color = Color.White,
                         fontSize = 36.sp,
                         fontWeight = FontWeight.ExtraBold,
@@ -221,11 +213,14 @@ fun ReloadScreen(
                             if (pin.length < 6) {
                                 Toast.makeText(context, "Invalid PIN. PIN must be 6 digits.", Toast.LENGTH_SHORT).show()
                             } else {
-                                is_valid = reloadBalance(db, context, amountInput, pin)
-                                if (is_valid) {
-                                    Toast.makeText(context, "Successfully Reload $amountInput into wallet", Toast.LENGTH_SHORT).show()
-                                    showDialog.value = false
-                                    navController.popBackStack()
+                                if (walletViewModel.checkPin(pin)){
+                                    walletViewModel.reload(db, context, amountInput)
+                                    if(walletViewModel.checkReloadSuccess(amountInput) > 0){
+                                        Toast.makeText(context, "Successfully Reload $amountInput into wallet", Toast.LENGTH_SHORT).show()
+                                        showDialog.value = false
+                                        navController.popBackStack()
+                                        walletViewModel.userWallet?.let { transactionViewModel.createTx(db, context, "Reload", amountInput, user_id = it.user_id) }
+                                    }
                                 } else {
                                     wrongAttempts++
                                     val remainingAttempts = 5 - wrongAttempts
@@ -352,7 +347,10 @@ fun PinInputDialog(onContinue: (String) -> Unit, onDismiss: () -> Unit) {
                                 )
                             }
                             Button(
-                                onClick = { onContinue(pinValue) },
+                                onClick = {
+                                    onContinue(pinValue)
+                                    pinValue = ""
+                                },
                                 shape = RoundedCornerShape(16.dp),
                                 colors = ButtonDefaults.buttonColors(Color(0xFF36D100)),
                                 contentPadding = PaddingValues(vertical = 6.dp, horizontal = 4.dp),
@@ -436,8 +434,8 @@ fun EditNumberField(
 @Composable
 @Preview
 fun ReloadScreenPreview(){
-    ReloadScreen(
-        navController = rememberNavController(),
-        context = LocalContext.current
-    )
+//    ReloadScreen(
+//        navController = rememberNavController(),
+//        context = LocalContext.current
+//    )
 }

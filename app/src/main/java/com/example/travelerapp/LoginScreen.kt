@@ -1,8 +1,7 @@
 package com.example.travelerapp
 
-import ReuseComponents.getValueAsString
-import android.annotation.SuppressLint
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,16 +34,18 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.travelerapp.data.User
+import com.example.travelerapp.data.Wallet
+import com.example.travelerapp.viewModel.WalletViewModel
+import com.example.travelerapp.viewModel.UserViewModel
 import com.google.firebase.firestore.firestore
 import com.google.firebase.Firebase
 
-
-//@SuppressLint("SuspiciousIndentation")
 @Composable
 fun LoginScreen(
     navController: NavController,
     context: Context,
-    viewModel: UserViewModel
+    viewModel: UserViewModel,
+    walletViewModel: WalletViewModel
 ) {
 //    val lsContext: Context = this
     val db = Firebase.firestore
@@ -61,9 +62,14 @@ fun LoginScreen(
         mutableStateOf((emptyList<User>()))
     }
 
-    viewModel.readUData(db){
-        userList ->
+    viewModel.readUData(db) { userList ->
         users.value = userList
+    }
+
+    val walletList = remember { mutableStateOf(emptyList<Wallet>()) }
+
+    walletViewModel.readWallets(db) { wallet ->
+        walletList.value = wallet
     }
 
     Column(
@@ -113,7 +119,7 @@ fun LoginScreen(
                 TextField(
                     value = logInEmail.value,
                     onValueChange = {
-                                    logInEmail.value = it
+                        logInEmail.value = it
                     },
                     shape = RoundedCornerShape(16.dp),
                     label = { BasicText(text = "Email") },
@@ -132,7 +138,7 @@ fun LoginScreen(
                 TextField(
                     value = logInPw.value,
                     onValueChange = {
-                                    logInPw.value = it
+                        logInPw.value = it
                     },
                     shape = RoundedCornerShape(16.dp),
                     label = { BasicText(text = "Password") },
@@ -172,11 +178,40 @@ fun LoginScreen(
                 ReuseComponents.CustomButton(
                     text = "Login",
                     onClick = {
-                        navController.navigate(route = Screen.Home.route) {
-                            popUpTo(Screen.Home.route) {
-                                    inclusive = true
+                        val email = logInEmail.value
+                        val password = logInPw.value
+                        val loginSuccessful = viewModel.checkULoginCred(email, password, users.value)
+
+                        if (loginSuccessful != null) {
+                            viewModel.loggedInUser = loginSuccessful
+
+                            val wallet = walletViewModel.checkWallet(viewModel.loggedInUser!!.userId, walletList.value)
+
+                            if (wallet != null){
+                                walletViewModel.userWallet = wallet
+                                if(wallet.walletPin != "null"){
+                                    Toast.makeText(context, "Login Up Successful", Toast.LENGTH_SHORT).show()
+                                    navController.navigate(Screen.Home.route) {
+                                        popUpTo(Screen.Home.route) {
+                                            inclusive = true
+                                        }
+                                    }
+                                }else{
+                                    Toast.makeText(context, "Add Pin", Toast.LENGTH_SHORT).show()
+                                    navController.navigate(Screen.AddPIN.route) {
+                                        popUpTo(Screen.AddPIN.route) {
+                                            inclusive = true
+                                        }
+                                    }
                                 }
+                            } else{
+                                Toast.makeText(context, "wallet null", Toast.LENGTH_SHORT).show()
                             }
+
+                        } else {
+                            Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
+                        }
+                    }
 
 //                        if(checked.value){
 //                            if(logInEmail.value != "" && logInPw.value != ""){
@@ -198,7 +233,7 @@ fun LoginScreen(
 //                        }
 //                        }
 //                      }
-                    }
+
                 )
 
                 Text(
@@ -222,7 +257,6 @@ fun LoginScreen(
     }
 }
 
-
 @Composable
 @Preview
 fun LoginScreenPreview(){
@@ -231,6 +265,7 @@ fun LoginScreenPreview(){
     LoginScreen(
         navController = rememberNavController(),
         context = LocalContext.current,
-        viewModel = UserViewModel()
+        viewModel = UserViewModel(),
+        walletViewModel = WalletViewModel()
     )
 }

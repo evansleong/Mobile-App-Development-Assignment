@@ -2,6 +2,7 @@ package com.example.travelerapp
 
 import ReuseComponents
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -29,6 +30,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,6 +48,12 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.travelerapp.data.Review
 import com.example.travelerapp.data.Trip
+import com.example.travelerapp.viewModel.ReviewViewModel
+import com.example.travelerapp.viewModel.TransactionViewModel
+import com.example.travelerapp.viewModel.TripViewModel
+import com.example.travelerapp.viewModel.UserViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -51,10 +61,41 @@ import java.util.Locale
 @Composable
 fun ReviewScreen(
     navController: NavController,
-    context: Context
+    context: Context,
+    viewModel: UserViewModel,
+    reviewViewModel: ReviewViewModel,
+    transactionViewModel: TransactionViewModel
 ) {
+    val db = Firebase.firestore
+
+    val user = viewModel.loggedInUser
+
+    val reviews = remember { mutableStateOf<List<Review>>(emptyList()) }
+
+    LaunchedEffect(key1 = true) {
+        reviewViewModel.readReviews(db) { lists ->
+            val filteredReview = lists.filter { review ->
+                review.user_id == user?.userId
+            }
+            // Update the tripListState with the fetched trips
+            reviews.value = filteredReview
+        }
+    }
+    val tripIds = remember { mutableStateOf<List<String>>(emptyList()) }
+
+    LaunchedEffect(key1 = true) {
+        transactionViewModel.readTxs(db) { lists ->
+            val filteredId = lists.filter { tx ->
+                user?.userId == tx?.user_id && tx?.trip_id != "null"
+            }
+            // Update the tripListState with the fetched trips
+            tripIds.value = filteredId.map { it.trip_id }
+        }
+    }
+    reviewViewModel.tripPurchasedId = tripIds.value
+
     var dbHandler: DBHandler = DBHandler(context)
-    val reviews = dbHandler.getAllReview()
+//    val reviews = dbHandler.getAllReview()
 //    val reviews = listOf(
 //        Review(
 //            id = "1",
@@ -106,14 +147,34 @@ fun ReviewScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(reviews) { review ->
-                    ReviewItem(review = review, navController)
+                if (reviews.value.isEmpty()) {
+                    item {
+                        Text(
+                            text = "No Review",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Gray,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
+                } else {
+                    items(reviews.value) { review ->
+                        ReviewItem(review = review, navController)
+                    }
                 }
             }
         }
         FloatingActionButton(
             onClick = {
-                navController.navigate("${Screen.EditReview.route}/${null}")
+                if (tripIds.value.isEmpty()){
+                    Toast.makeText(context, "No Purchased Trip", Toast.LENGTH_SHORT).show()
+                } else {
+                    reviewViewModel.review = null
+                    navController.navigate(Screen.EditReview.route)
+
+                }
             },
             modifier = Modifier
                 .padding(16.dp)
@@ -185,8 +246,8 @@ fun ReviewItem(review: Review, navController: NavController) {
 @Composable
 @Preview(showSystemUi = true, showBackground = true)
 fun ReviewScreenPreview() {
-    ReviewScreen(
-        navController = rememberNavController(),
-        context = LocalContext.current
-    )
+//    ReviewScreen(
+//        navController = rememberNavController(),
+//        context = LocalContext.current
+//    )
 }

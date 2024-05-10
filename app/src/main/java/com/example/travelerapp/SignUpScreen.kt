@@ -27,7 +27,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.travelerapp.DBHandler
 import com.example.travelerapp.Screen
-import com.example.travelerapp.UserViewModel
+import com.example.travelerapp.viewModel.UserViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore

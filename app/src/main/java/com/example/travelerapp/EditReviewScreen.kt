@@ -74,6 +74,8 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.example.travelerapp.data.Review
 import com.example.travelerapp.data.Trip
+import com.example.travelerapp.viewModel.ReviewViewModel
+import com.example.travelerapp.viewModel.TripViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 
@@ -81,29 +83,40 @@ import com.google.firebase.firestore.firestore
 @Composable
 fun EditReviewScreen(
     navController: NavController,
-    id: String?= null,
-    context: Context
+    context: Context,
+    reviewViewModel: ReviewViewModel,
+    tripViewModel: TripViewModel
 ) {
-    var review: Review? = null
-    var tripList: List<String>?
+//    var review: Review? = null
+//    var tripList: List<String>?
 
     val db = Firebase.firestore
     var dbHandler: DBHandler = DBHandler(context)
 
-    if (id != "null") {
-        review = id?.let { dbHandler.getReviewById(it) }
-        tripList = null
+    val review = reviewViewModel.review
+    val tripIds = reviewViewModel.tripPurchasedId
+
+    val tripList = remember { mutableStateOf<List<Trip?>>(emptyList()) }
+    if (review != null) {
     } else {
-        tripList = dbHandler.getPurchasedTrip()
+        if(tripIds != null) {
+            tripViewModel.readMultipleTrips(db, tripIds) { trips ->
+                tripList.value = trips
+            }
+        } else{
+            tripList.value = emptyList()
+        }
+
     }
 
     val maxWords = 30
     val maxImages = 9
     val title = review?.title
+    val tripName = review?.trip_name.toString()
     var reviewTitle by remember { mutableStateOf(title) }
     var rating by remember { mutableStateOf(review?.rating ?: 0) }
     var comment by remember { mutableStateOf(review?.comment ?: "") }
-    var isChecked by remember { mutableStateOf(id != null && review?.is_public == 1) }
+    var isChecked by remember { mutableStateOf(review != null && review?.is_public == 1) }
     var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
     var expanded by remember { mutableStateOf(false) }
@@ -119,7 +132,7 @@ fun EditReviewScreen(
                 .padding(horizontal = 16.dp)
         ) {
             item {
-                if (tripList != null) {
+                if (review == null) {
                     Text(text = "Trip: ")
                     ExposedDropdownMenuBox(
                         expanded = expanded,
@@ -146,24 +159,34 @@ fun EditReviewScreen(
                                 modifier = Modifier
                                     .fillParentMaxWidth()
                             ) {
-                                tripList?.let {
+                                tripList.value?.let {
                                     it.forEach { trip ->
                                         DropdownMenuItem(
-                                            text = { Text(text = trip) },
+                                            text = { Text(text = trip?.tripName ?: "") },
                                             onClick = {
-                                                selectedOption = trip
+                                                selectedOption = trip?.tripName ?: ""
                                                 expanded = false
-                                            }
-                                        )
+                                            })
                                     }
                                 }
+//                                tripList?.let {
+//                                    it.forEach { trip ->
+//                                        DropdownMenuItem(
+//                                            text = { Text(text = trip) },
+//                                            onClick = {
+//                                                selectedOption = trip
+//                                                expanded = false
+//                                            }
+//                                        )
+//                                    }
+//                                }
                             }
                         }
                     }
                 } else {
                     Text(text = "Trip: ")
                     TextField(
-                        value = review?.trip_name.toString(),
+                        value = tripName,
                         onValueChange = {},
                         readOnly = true,
                         modifier = Modifier
@@ -290,31 +313,52 @@ fun EditReviewScreen(
                         Button(
                             onClick = {
                                 val isCheckedInt = if (isChecked) 1 else 0
-                                if (id != null) {
+                                if (review != null) {
+//                                    reviewViewModel.saveReview(
+//                                        db,
+//                                        context,
+//                                        tripName,
+//                                        title.toString(),
+//                                        rating.toInt(),
+//                                        comment,
+//                                        selectedImages,
+//                                        isCheckedInt,
+//                                        review.trip_id
+//                                    )
                                     //edit
-                                    saveReview(
-                                        db,
-                                        context,
-                                        selectedOption,
-                                        reviewTitle ?: "",
-                                        rating.toInt(),
-                                        comment,
-                                        selectedImages,
-                                        isCheckedInt,
-                                        id
-                                    )
+//                                    saveReview(
+//                                        db,
+//                                        context,
+//                                        selectedOption,
+//                                        reviewTitle ?: "",
+//                                        rating.toInt(),
+//                                        comment,
+//                                        selectedImages,
+//                                        isCheckedInt,
+//                                        review.id
+//                                    )
                                 } else {
+//                                    reviewViewModel.saveReview(
+//                                        db,
+//                                        context,
+//                                        tripName,
+//                                        title.toString(),
+//                                        rating.toInt(),
+//                                        comment,
+//                                        selectedImages,
+//                                        isCheckedInt,
+//                                    )
                                     //add
-                                    saveReview(
-                                        db,
-                                        context,
-                                        selectedOption,
-                                        reviewTitle ?: "",
-                                        rating.toInt(),
-                                        comment,
-                                        selectedImages,
-                                        isCheckedInt
-                                    )
+//                                    saveReview(
+//                                        db,
+//                                        context,
+//                                        selectedOption,
+//                                        reviewTitle ?: "",
+//                                        rating.toInt(),
+//                                        comment,
+//                                        selectedImages,
+//                                        isCheckedInt
+//                                    )
                                 }
                                 navController.popBackStack()
                             },
@@ -328,7 +372,7 @@ fun EditReviewScreen(
                                 .fillMaxWidth()
                         ) {
                             Text(
-                                text = if (id != null) "Update" else "Post",
+                                text = if (review != null) "Update" else "Post",
                                 textAlign = TextAlign.Center,
                                 fontSize = 16.sp,
                                 color = Color.White
@@ -453,9 +497,9 @@ fun StarButton(
 @Composable
 @Preview(showSystemUi = true, showBackground = true)
 fun EditReviewScreenPreview() {
-    EditReviewScreen(
-        navController = rememberNavController(),
-        id = "999",
-        context = LocalContext.current
-    )
+//    EditReviewScreen(
+//        navController = rememberNavController(),
+//        id = "999",
+//        context = LocalContext.current
+//    )
 }

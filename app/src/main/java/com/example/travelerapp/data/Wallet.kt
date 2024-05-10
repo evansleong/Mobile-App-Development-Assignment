@@ -1,8 +1,8 @@
 package com.example.travelerapp.data
 
 data class Wallet(
-    val user_id: String,
-    val available: Double = 0.0,
-    val frozen: Double = 0.0,
-    val walletPin: String = "",
+    val user_id: String = "",
+    var available: String = "0",
+    val frozen: String = "0",
+    var walletPin: String = "",
 )

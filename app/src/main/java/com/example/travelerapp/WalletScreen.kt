@@ -34,6 +34,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,7 +50,17 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.travelerapp.data.AgencyUser
+import com.example.travelerapp.data.Transaction
+import com.example.travelerapp.viewModel.TransactionViewModel
+import com.example.travelerapp.viewModel.WalletViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
@@ -56,7 +68,9 @@ import java.util.Locale
 @Composable
 fun WalletScreen(
     navController: NavController,
-    context: Context
+    context: Context,
+    walletViewModel: WalletViewModel,
+    transactionViewModel: TransactionViewModel
 ) {
     Column(
         modifier = Modifier
@@ -64,11 +78,20 @@ fun WalletScreen(
             .background(color = Color(0xFF5DB075)),
     ) {
         val dbHandler: DBHandler = DBHandler(context)
-        val wallet = dbHandler.getUserWallet()
-        val transactions = dbHandler.getAllTransactions()
+        val wallet = walletViewModel.userWallet
+        val db = Firebase.firestore
+
+        val transactionList = remember { mutableStateOf(emptyList<Transaction>()) }
+
+        transactionViewModel.readTxs(db){
+            val filteredTx = it.filter { tx ->
+                tx.user_id == wallet?.user_id
+            }
+            transactionList.value = filteredTx
+        }
+
         val title = "Wallet"
         ReuseComponents.TopBar(title = title, navController)
-        val balance = "100.00"
 
         Column(
             modifier = Modifier
@@ -153,64 +176,88 @@ fun WalletScreen(
                             .background(Color.White),
                     )
                 }
-                items(transactions) { transaction ->
-                    val date = Date(transaction.created_at * 1000)
-                    val sdf = SimpleDateFormat("HH:mm dd MMMM yyyy", Locale.getDefault())
-                    val formattedDate = sdf.format(date)
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                            .clip(RoundedCornerShape(8.dp)),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color.White,
-                        ),
-                    ) {
-                        Column(
+                if (transactionList.value.isEmpty()) {
+                    item {
+                        Text(
+                            text = "No transactions",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Gray,
                             modifier = Modifier
-                                .fillMaxSize()
-                                .padding(vertical = 8.dp)
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        )
+                    }
+                } else {
+                    items(transactionList.value) { transaction ->
+                        val utcDateTime = remember {
+                            val instant = Instant.ofEpochMilli(transaction.created_at)
+                            LocalDateTime.ofInstant(instant, ZoneOffset.UTC)
+                        }
+                        val formattedDate = remember {
+                            val formatter = DateTimeFormatter.ofPattern("HH:mm dd MMMM yyyy")
+                            utcDateTime.format(formatter)
+                        }
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color.White,
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable {
+                                    transactionViewModel.transaction = transaction
+                                    navController.navigate(Screen.Transaction.route){
+                                        popUpTo(Screen.Transaction.route){
+                                            inclusive = true
+                                        }
+                                    }
+                                },
                         ) {
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceBetween,
+                            Column(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp)
-                            ){
-                                Column {
-                                    Text(
-                                        text = formattedDate
-                                    )
-                                    Text(
-                                        text = transaction.remarks,
-                                        fontSize = 20.sp,
-                                        fontWeight = FontWeight.Bold,
-                                    )
-                                    Text(
-                                        text = transaction.description,
-                                    )
-                                }
-                                Column(
-                                    horizontalAlignment = Alignment.End,
+                                    .fillMaxSize()
+                                    .padding(vertical = 8.dp)
+                            ) {
+                                Row(
+                                    horizontalArrangement = Arrangement.SpaceBetween,
                                     modifier = Modifier
-                                        .padding(top = 16.dp)
-
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp)
                                 ){
-                                    Text(
-                                        text = transaction.amount.toString(),
-                                        fontSize = 20.sp,
-                                        fontWeight = FontWeight.Bold,
-                                    )
+                                    Column {
+                                        Text(
+                                            text = formattedDate
+                                        )
+                                        Text(
+                                            text = transaction.remarks,
+                                            fontSize = 20.sp,
+                                            fontWeight = FontWeight.Bold,
+                                        )
+                                        Text(
+                                            text = transaction.description,
+                                        )
+                                    }
+                                    Column(
+                                        horizontalAlignment = Alignment.End,
+                                        modifier = Modifier
+                                            .padding(top = 16.dp)
+
+                                    ){
+                                        Text(
+                                            text = transaction.amount.toString(),
+                                            fontSize = 20.sp,
+                                            fontWeight = FontWeight.Bold,
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                 }
-
             }
         }
-
-
         ReuseComponents.NavBar(text = title, navController = navController)
     }
 }
@@ -218,8 +265,9 @@ fun WalletScreen(
 @Composable
 @Preview
 fun WalletScreenPreview(){
-    WalletScreen(
-        navController = rememberNavController(),
-        context = LocalContext.current
-    )
+//    WalletScreen(
+//        navController = rememberNavController(),
+//        context = LocalContext.current,
+//
+//    )
 }

@@ -90,4 +90,8 @@ class TripViewModel : ViewModel() {
             callback = callback
         )
     }
+
+    fun readMultipleTrips(db: FirebaseFirestore, tripId: List<String>, callback: (List<Trip?>) -> Unit) {
+        database.readMultipleTripFromFirestore(db, tripId, callback)
+    }
 }

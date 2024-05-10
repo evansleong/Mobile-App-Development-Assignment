@@ -126,13 +126,11 @@ class DBHandler(context: Context) :
             val idColIdx = cursor.getColumnIndex("id")
             if (idColIdx != -1 && cursor.moveToFirst()) {
                 user = User(
-                    userId = cursor.getLong(cursor.getColumnIndex("id")),
+                    userId = cursor.getString(cursor.getColumnIndex("id")),
                     userName = cursor.getString(cursor.getColumnIndex("username")),
                     userEmail = cursor.getString(cursor.getColumnIndex("email")),
                     userPw = cursor.getString(cursor.getColumnIndex("password")),
-                    userWalletPin = 0
                 )
-                AUTH_USER = cursor.getString(cursor.getColumnIndex("id"))
             }
         }
         cursor.close()
@@ -199,7 +197,6 @@ class DBHandler(context: Context) :
         db.close()
     }
 
-
     fun saveReview(
         id: String,
         trip_name: String,
@@ -211,7 +208,7 @@ class DBHandler(context: Context) :
         created_at: Long,
         trip_id: String? = null,
     ) {
-        val db = this.readableDatabase
+        val db = this.writableDatabase
         val imageUrls = imageUris.joinToString(",")
         val review = getReviewById(id)
         val values = ContentValues().apply {
@@ -339,9 +336,9 @@ class DBHandler(context: Context) :
                     Transaction(
                         id = cursorTransactions.getString(idIndex),
                         trip_id = cursorTransactions.getString(tripIdIndex),
-                        wallet_id = cursorTransactions.getString(walletIdIndex),
+                        user_id = cursorTransactions.getString(walletIdIndex),
                         operation = cursorTransactions.getString(operationIndex),
-                        amount = cursorTransactions.getDouble(amountIndex),
+                        amount = cursorTransactions.getString(amountIndex),
                         status = cursorTransactions.getString(statusIndex),
                         remarks = cursorTransactions.getString(remarksIndex),
                         description = cursorTransactions.getString(descriptionIndex),
@@ -384,7 +381,7 @@ class DBHandler(context: Context) :
     }
 
     fun updateWalletPin(pin: ByteArray) {
-        val db = this.readableDatabase
+        val db = this.writableDatabase
         val values = ContentValues().apply {
             put("walletPin", pin)
         }
@@ -395,7 +392,7 @@ class DBHandler(context: Context) :
     }
 
     fun reloadBalance(amount: Double) {
-        val db = this.readableDatabase
+        val db = this.writableDatabase
         val values = ContentValues().apply {
             put("available", amount)
         }
@@ -418,8 +415,8 @@ class DBHandler(context: Context) :
 
             Wallet(
                 user_id = AUTH_USER,
-                available = cursor.getDouble(availableIndex),
-                frozen = cursor.getDouble(frozenIndex),
+                available = cursor.getString(availableIndex),
+                frozen = cursor.getString(frozenIndex),
                 walletPin = decrypt(cursor.getBlob(walletPINIndex)),
             )
         } else {
@@ -447,7 +444,7 @@ class DBHandler(context: Context) :
     fun getPurchasedTrip(): List<String> {
         val db = this.readableDatabase
         val query =
-            "SELECT tr.trip_name FROM users u " +
+            "SELECT tr.tripName FROM users u " +
                     "JOIN wallets w ON u.id = w.user_id " +
                     "JOIN transactions t ON w.id = t.wallet_id " +
                     "JOIN trips tr ON t.id = tr.trip_id WHERE u.id = ?"
@@ -471,6 +468,9 @@ class DBHandler(context: Context) :
         return AUTH_USER
     }
 
+    fun updateAuthUser(user_id: String) {
+        AUTH_USER = user_id
+    }
     companion object {
         private const val DB_NAME = "travelerDB"
         private const val DB_VERSION = 15
