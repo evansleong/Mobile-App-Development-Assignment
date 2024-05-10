@@ -11,6 +11,8 @@ sealed class Screen(val route: String) {
     object EditReview: Screen(route = "edit_review_screen")
     object Package: Screen(route = "package_screen")
     object Wallet: Screen(route = "wallet_screen")
+    object Transaction: Screen(route = "transaction_screen")
+    object Reload: Screen(route = "reload_screen")
     object Profile: Screen(route = "profile_screen")
     object Settings: Screen(route = "settings_screen")
     object AgencyLogin: Screen(route = "agency_login_screen")
@@ -20,6 +22,4 @@ sealed class Screen(val route: String) {
     object AgencyPackageList: Screen(route = "agency_package_list_screen")
     object AgencyPackageDetail: Screen(route = "agency_package_detail_screen")
     object AgencyEditPackage: Screen(route = "agency_edit_package_screen")
-    object Reload: Screen(route = "reload_screen")
-
 }

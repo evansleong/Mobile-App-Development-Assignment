@@ -1,9 +1,9 @@
-package com.example.travelerapp
+package com.example.travelerapp.viewModel
 
 import androidx.lifecycle.ViewModel
 import com.example.travelerapp.data.User
 import android.content.Context
-import com.google.firebase.Firebase
+import com.example.travelerapp.repo.NormalUserFirebase
 import com.google.firebase.firestore.FirebaseFirestore
 
 class UserViewModel: ViewModel() {
@@ -35,27 +35,20 @@ class UserViewModel: ViewModel() {
         )
     }
 
-    fun checkULC(
+    fun checkULoginCred(
         email: String,
         password: String,
         users: List<User>
     ): User? {
-        return users.find {
-            it.userEmail == email && it.userPw == password
-        }
+        return users.find { it.userEmail == email && it.userPw == password }
     }
 
-    fun unameAvailable(
-        username: String,
-        users: List<User>) : Boolean
-    {
-        return users.none{it.userName == username}
+    //check if username is used or not
+    fun isUNameAv(uname: String, users: List<User>): Boolean {
+        return users.none { it.userName == uname }
     }
 
-    fun isUEmailUsed(
-        email: String,
-        users: List<User>
-    ): Boolean{
-        return users.none{it.userEmail == email}
+    fun isEmailAv(email: String, users: List<User>): Boolean {
+        return users.none { it.userEmail == email }
     }
 }

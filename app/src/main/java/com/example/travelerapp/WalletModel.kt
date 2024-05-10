@@ -25,6 +25,8 @@ fun createWallet(db: FirebaseFirestore, context: Context, user_id: String) {
         "frozen" to 0,
         "walletPin" to null,
     )
+
+    dbHandler.updateAuthUser(user_id)
     db.collection("wallets")
         .add(newWallet)
         .addOnSuccessListener {documentReference ->
@@ -34,6 +36,33 @@ fun createWallet(db: FirebaseFirestore, context: Context, user_id: String) {
         .addOnFailureListener {
             Toast.makeText(context, "Error adding wallet to Firestore", Toast.LENGTH_SHORT).show()
         }
+}
+
+fun checkWalletPin(db: FirebaseFirestore, dbHandler: DBHandler):Boolean {
+    val user_id = dbHandler.getAuthUser()
+    var walletPin: ByteArray? = null
+
+    db.collection("wallets")
+        .whereEqualTo("user_id", user_id)
+        .get()
+        .addOnSuccessListener { documents ->
+            if (!documents.isEmpty) {
+                walletPin = documents.documents[0].get("walletPin") as? ByteArray
+            }
+        }
+        .addOnFailureListener { e ->
+            // Handle failure
+            Toast.makeText(
+                null,
+                "Error querying documents: $e",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    if (walletPin != null) {
+        return true
+    } else {
+        return false
+    }
 }
 
 fun updateWalletPIN(db: FirebaseFirestore, context: Context, pin: String) {
@@ -53,7 +82,7 @@ fun updateWalletPIN(db: FirebaseFirestore, context: Context, pin: String) {
 
                 collectionRef.document(documentId)
                     .update("walletPin", encryptedPin)
-                    .addOnSuccessListener { documentReference ->
+                    .addOnSuccessListener {
                         Toast.makeText(
                             context,
                             "WalletPin updated for document with ID: $documentId",
@@ -77,7 +106,6 @@ fun updateWalletPIN(db: FirebaseFirestore, context: Context, pin: String) {
                 "Error querying documents: $e",
                 Toast.LENGTH_SHORT
             ).show()
-            println()
         }
 }
 fun reloadBalance(

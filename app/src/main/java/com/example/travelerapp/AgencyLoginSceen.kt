@@ -25,7 +25,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.travelerapp.data.AgencyUser
+import com.example.travelerapp.data.Wallet
 import com.example.travelerapp.viewModel.AgencyViewModel
+import com.example.travelerapp.viewModel.WalletViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 
@@ -33,7 +35,7 @@ import com.google.firebase.firestore.firestore
 fun AgencyLoginScreen(
     navController: NavController,
     context: Context,
-    viewModel: AgencyViewModel
+    viewModel: AgencyViewModel,
 ) {
     val db = Firebase.firestore
 
@@ -165,7 +167,7 @@ fun AgencyLoginScreen(
 
                             Toast.makeText(context, "Login Up Successful", Toast.LENGTH_SHORT).show()
                             navController.navigate(Screen.AgencyHome.route) {
-                                popUpTo(Screen.Home.route) {
+                                popUpTo(Screen.AgencyHome.route) {
                                     inclusive = true
                                 }
                             }

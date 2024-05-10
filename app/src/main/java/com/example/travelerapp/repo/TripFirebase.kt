@@ -159,5 +159,46 @@ class TripFirebase {
                 callback(null)
             }
     }
+
+    fun readMultipleTripFromFirestore(
+        db: FirebaseFirestore,
+        tripIds: List<String>,
+        callback: (List<Trip?>) -> Unit
+    ) {
+        val trips = mutableListOf<Trip?>()
+        val totalTrips = tripIds.size
+        var tripsRetrieved = 0
+
+        for (tripId in tripIds) {
+            db.collection("trips")
+                .document(tripId)
+                .get()
+                .addOnSuccessListener { documentSnapshot ->
+                    if (documentSnapshot.exists()) {
+                        try {
+                            val trip: Trip? = documentSnapshot.toObject(Trip::class.java)
+                            trips.add(trip)
+                        } catch (e: Exception) {
+                            Log.e("Firestore", "Error converting document to Trip: ${e.message}")
+                            trips.add(null)
+                        }
+                    } else {
+                        Log.e("Firestore", "Document does not exist for tripId: $tripId")
+                        trips.add(null)
+                    }
+                    tripsRetrieved++
+                    if (tripsRetrieved == totalTrips) {
+                        callback(trips)
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("Firestore", "Error getting document: ${e.message}", e)
+                    tripsRetrieved++
+                    if (tripsRetrieved == totalTrips) {
+                        callback(trips)
+                    }
+                }
+        }
+    }
 }
 

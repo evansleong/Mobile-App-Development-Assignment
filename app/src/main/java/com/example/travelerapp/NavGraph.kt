@@ -10,7 +10,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.travelerapp.data.Trip
 import com.example.travelerapp.viewModel.AgencyViewModel
+import com.example.travelerapp.viewModel.ReviewViewModel
+import com.example.travelerapp.viewModel.TransactionViewModel
 import com.example.travelerapp.viewModel.TripViewModel
+import com.example.travelerapp.viewModel.WalletViewModel
+import com.example.travelerapp.viewModel.UserViewModel
 
 @Composable
 fun SetUpNavGraph(
@@ -20,11 +24,14 @@ fun SetUpNavGraph(
     val agencyViewModel: AgencyViewModel = viewModel()
     val tripViewModel: TripViewModel = viewModel()
     val userViewModel: UserViewModel = viewModel()
+    val walletViewModel: WalletViewModel = viewModel()
+    val reviewViewModel: ReviewViewModel = viewModel()
+    val transactionViewModel: TransactionViewModel = viewModel()
 
     NavHost(
         navController = navController,
         startDestination = Screen.UserOrAdmin.route
-//        startDestination = Screen.Review.route
+//        startDestination = Screen.Login.route
     ) {
         composable(
             route = Screen.UserOrAdmin.route
@@ -39,28 +46,27 @@ fun SetUpNavGraph(
         composable(
             route = Screen.Login.route
         ){
-            LoginScreen(navController, context = LocalContext.current,userViewModel)
+            LoginScreen(navController, context = LocalContext.current, userViewModel, walletViewModel)
         }
         composable(
             route = Screen.Signup.route
         ){
-            SignUpScreen(navController, context = LocalContext.current, dbHandler, viewModel = UserViewModel())
+            SignUpScreen(navController, context = LocalContext.current, dbHandler, userViewModel)
         }
         composable(
             route = Screen.AddPIN.route
         ){
-            AddPINScreen(navController, context = LocalContext.current)
+            AddPINScreen(navController, context = LocalContext.current, walletViewModel)
         }
         composable(
             route = Screen.Review.route
         ){
-            ReviewScreen(navController, context = LocalContext.current)
+            ReviewScreen(navController, context = LocalContext.current, userViewModel, reviewViewModel, transactionViewModel)
         }
         composable(
-             route = Screen.EditReview.route + "/{id}"
+             route = Screen.EditReview.route
         ){ backStackEntry ->
-            val id = backStackEntry.arguments?.getString("id")
-            EditReviewScreen(navController, id ?: "", context = LocalContext.current)
+            EditReviewScreen(navController, context = LocalContext.current, reviewViewModel, tripViewModel)
         }
         composable(
             route = Screen.Package.route
@@ -70,7 +76,17 @@ fun SetUpNavGraph(
         composable(
             route = Screen.Wallet.route
         ){
-            WalletScreen(navController, context = LocalContext.current)
+            WalletScreen(navController, context = LocalContext.current, walletViewModel, transactionViewModel)
+        }
+        composable(
+            route = Screen.Transaction.route
+        ) {
+            TransactionScreen(navController, context = LocalContext.current, transactionViewModel)
+        }
+        composable(
+            route = Screen.Reload.route
+        ) {
+            ReloadScreen(navController, context = LocalContext.current, walletViewModel, transactionViewModel)
         }
         composable(
             route = Screen.Profile.route
@@ -92,11 +108,6 @@ fun SetUpNavGraph(
         ){
             AgencySignUpScreen(navController, context = LocalContext.current, viewModel = agencyViewModel)
         }
-//        composable(
-//            route = Screen.Login.route
-//        ){
-//            LoginScreen(navController,dbHandler, viewModel = userViewModel)
-//        }
         composable(
             route = Screen.AgencyHome.route
         ){
@@ -125,7 +136,7 @@ fun SetUpNavGraph(
         composable(
             route = Screen.Reload.route
         ) {
-            ReloadScreen(navController, context = LocalContext.current)
+            ReloadScreen(navController, context = LocalContext.current, walletViewModel, transactionViewModel)
         }
     }
 }
