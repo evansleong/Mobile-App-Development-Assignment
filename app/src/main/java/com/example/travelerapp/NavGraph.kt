@@ -1,7 +1,5 @@
 package com.example.travelerapp
 
-import AddPINScreen
-import SignUpScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel

@@ -1,3 +1,5 @@
+package com.example.travelerapp
+
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background

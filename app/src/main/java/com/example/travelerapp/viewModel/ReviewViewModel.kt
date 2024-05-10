@@ -42,11 +42,11 @@ class ReviewViewModel : ViewModel() {
         database.readSingleReviewFromFirestore(db, id, callback)
     }
 
-    fun uploadImage(context: Context, imageUris: List<Uri?>, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
-        for (imageUri in imageUris) {
+    fun uploadImage(context: Context, imageUri: Uri?, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
+//        for (imageUri in imageUris) {
             if (imageUri != null) {
                 val storageRef = Firebase.storage.reference
-                val imageRef = storageRef.child("images/${UUID.randomUUID()}")
+                val imageRef = storageRef.child("reviewImage/${UUID.randomUUID()}")
                 val uploadTask = imageRef.putFile(imageUri)
 
                 uploadTask.addOnSuccessListener { taskSnapshot ->
@@ -61,6 +61,6 @@ class ReviewViewModel : ViewModel() {
                     onFailure(exception)
                 }
             }
-        }
+//        }
     }
 }

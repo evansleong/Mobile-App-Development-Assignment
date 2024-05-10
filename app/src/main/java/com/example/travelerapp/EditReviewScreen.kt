@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import com.example.travelerapp.data.Trip
 import com.example.travelerapp.viewModel.ReviewViewModel
@@ -94,6 +95,7 @@ fun EditReviewScreen(
 
     val tripList = remember { mutableStateOf<List<Trip?>>(emptyList()) }
     val uris = mutableListOf<Uri>()
+
     if (review != null) {
         val imageUrls = review.imageUrls.split(",")
         for (imageUrl in imageUrls) {
@@ -123,21 +125,22 @@ fun EditReviewScreen(
 
     var expanded by remember { mutableStateOf(false) }
     var selectedOption by remember { mutableStateOf("") }
+    var isImageUploadInProgress by remember { mutableStateOf(false) }
 
-    fun handleImageUpload(context: Context, imageUris: List<Uri?>) {
-        val lists = mutableListOf<Uri>()
+    fun handleImageUpload(context: Context, imageUri: Uri?) {
+        isImageUploadInProgress = true
         reviewViewModel.uploadImage(
             context = context,
-            imageUris = imageUris,
+            imageUri = imageUri,
             onSuccess = { downloadUrl ->
                 val uploadedImageUri = Uri.parse(downloadUrl)
-                lists.add(uploadedImageUri)
+                uris.add(uploadedImageUri)
+                isImageUploadInProgress = false
             },
             onFailure = { exception ->
                 Log.e("ImageUpload", "Error uploading image: ${exception.message}")
             }
         )
-        selectedImages = lists
     }
 
     Column(
@@ -282,10 +285,19 @@ fun EditReviewScreen(
             }
 
             item {
-                ImageInputButton(selectedImages, context = LocalContext.current, maxImages) { uri ->
-                    selectedImages = selectedImages + uri
-                    //selectedImages store all Images Inputted
-                }
+                ImageInputButton(
+                    selectedImages = selectedImages,
+                    context = context,
+                    maxImages = maxImages,
+                    onImageSelected = { uri ->
+                        handleImageUpload(context, uri)
+                        selectedImages = uris
+                    },
+                    onImageDeleted = { removeUri ->
+                        uris.remove(removeUri)
+                        selectedImages = uris
+                    }
+                )
                 Text(
                     text = "Max $maxImages images",
                     color = Color.Gray,
@@ -322,42 +334,46 @@ fun EditReviewScreen(
                     Row(horizontalArrangement = Arrangement.Center) {
                         Button(
                             onClick = {
-//                                handleImageUpload(context, selectedImages)
-                                val isCheckedInt = if (isChecked) 1 else 0
-                                if (review != null) {
-                                    //edit
-                                    reviewViewModel.saveReview(
-                                        db,
-                                        context,
-                                        tripName,
-                                        reviewTitle.toString(),
-                                        rating.toInt(),
-                                        comment,
-                                        selectedImages,
-                                        isCheckedInt,
-                                        review.trip_id,
-                                        logInUser?.userId,
-                                        review.id,
-                                        created_at = review.created_at,
-                                        action = "Edit"
-                                    )
+                                if(!isImageUploadInProgress){
+                                    selectedImages = uris
+                                    val isCheckedInt = if (isChecked) 1 else 0
+                                    if (review != null) {
+                                        //edit
+                                        reviewViewModel.saveReview(
+                                            db,
+                                            context,
+                                            tripName,
+                                            reviewTitle.toString(),
+                                            rating.toInt(),
+                                            comment,
+                                            selectedImages,
+                                            isCheckedInt,
+                                            review.trip_id,
+                                            logInUser?.userId,
+                                            review.id,
+                                            created_at = review.created_at,
+                                            action = "Edit"
+                                        )
+                                    } else {
+                                        //add
+                                        reviewViewModel.saveReview(
+                                            db,
+                                            context,
+                                            selectedOption,
+                                            reviewTitle.toString(),
+                                            rating.toInt(),
+                                            comment,
+                                            selectedImages,
+                                            isCheckedInt,
+                                            trip_id = trip_id,
+                                            user_id = logInUser?.userId,
+                                            action = "Add"
+                                        )
+                                    }
+                                    navController.popBackStack()
                                 } else {
-                                    //add
-                                    reviewViewModel.saveReview(
-                                        db,
-                                        context,
-                                        selectedOption,
-                                        reviewTitle.toString(),
-                                        rating.toInt(),
-                                        comment,
-                                        selectedImages,
-                                        isCheckedInt,
-                                        trip_id = trip_id,
-                                        user_id = logInUser?.userId,
-                                        action = "Add"
-                                    )
+                                    Toast.makeText(context, "Image upload in progress", Toast.LENGTH_SHORT).show()
                                 }
-                                navController.popBackStack()
                             },
                             colors = ButtonDefaults.buttonColors(
                                 contentColor = Color.Black,
@@ -390,7 +406,8 @@ fun ImageInputButton(
     selectedImages: List<Uri>,
     context: Context,
     maxImages: Int = 9,
-    onImageSelected: (Uri) -> Unit
+    onImageSelected: (Uri) -> Unit,
+    onImageDeleted: (Uri) -> Unit,
 ) {
     var imageUris by remember { mutableStateOf(selectedImages) }
 
@@ -417,12 +434,24 @@ fun ImageInputButton(
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
     ) {
         items(imageUris) { uri ->
+            var isImageSelectedForDeletion by remember { mutableStateOf(false) }
             Image(
-                painter = rememberImagePainter(uri),
+                painter = rememberAsyncImagePainter(uri),
                 contentDescription = null,
                 modifier = Modifier
                     .size(100.dp) // Set square size for each image
                     .padding(8.dp)
+                    .clickable {
+                        if (isImageSelectedForDeletion) {
+                            imageUris = imageUris.filterNot { it == uri }
+                            // Delete the image
+                            onImageDeleted(uri)
+                        } else {
+                            // Show toast to prompt for deletion
+                            Toast.makeText(context, "Click one more time to delete", Toast.LENGTH_SHORT).show()
+                            isImageSelectedForDeletion = true
+                        }
+                    }
             )
         }
 

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -46,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.travelerapp.data.Review
 import com.example.travelerapp.data.Trip
 import com.example.travelerapp.viewModel.ReviewViewModel
@@ -196,11 +198,11 @@ fun ReviewItem(review: Review, reviewViewModel: ReviewViewModel, navController: 
                 modifier = Modifier.fillMaxSize()
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.wallet),
+                    painter = rememberAsyncImagePainter(review.imageUrls.substringBefore(",")),
                     contentDescription = null,
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    contentScale = ContentScale.Crop
+                        .fillMaxWidth()
+                        .aspectRatio(16f/9f),
                 )
                 Text(
                     text = review.title,
