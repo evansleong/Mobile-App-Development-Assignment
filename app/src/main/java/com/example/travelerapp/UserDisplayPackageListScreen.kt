@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
@@ -92,7 +93,7 @@ fun PurchaseableTripItem(
             .fillMaxWidth()
             .clickable {
                 tripViewModel.selectedTripId = trip.tripId
-                navController.navigate(route = Screen.AgencyPackageDetail.route)
+                navController.navigate(route = Screen.UserViewTrip.route)
             },
         shape = RoundedCornerShape(20.dp), // Rounded corners
         elevation = CardDefaults.cardElevation(

@@ -160,6 +160,13 @@ fun UserViewTripScreen(
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                 }
+                Column (
+//                    modifier = Modifier.weight(0.2f)
+                ){
+                    Button(onClick = { /*TODO*/ }) {
+                        Text(text = "Purchase")
+                    }
+                }
             }
         }
     }
