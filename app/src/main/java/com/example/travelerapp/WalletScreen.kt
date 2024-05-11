@@ -246,7 +246,7 @@ fun WalletScreen(
 
                                     ){
                                         Text(
-                                            text = transaction.amount.toString(),
+                                            text = if (transaction.operation == "Reload") "+ ${transaction.amount}" else "- ${transaction.amount}",
                                             fontSize = 20.sp,
                                             fontWeight = FontWeight.Bold,
                                         )

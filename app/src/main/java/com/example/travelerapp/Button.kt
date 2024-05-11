@@ -220,7 +220,6 @@ object ReuseComponents {
                                     "Logout" -> {
                                         onLogout?.invoke()
                                     }
-
                                 }
                             },
                                 text = { Text(it) }

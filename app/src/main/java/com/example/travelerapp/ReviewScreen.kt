@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -46,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.travelerapp.data.Review
 import com.example.travelerapp.data.Trip
 import com.example.travelerapp.viewModel.ReviewViewModel
@@ -55,6 +57,10 @@ import com.example.travelerapp.viewModel.UserViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
@@ -77,7 +83,6 @@ fun ReviewScreen(
             val filteredReview = lists.filter { review ->
                 review.user_id == user?.userId
             }
-            // Update the tripListState with the fetched trips
             reviews.value = filteredReview
         }
     }
@@ -86,7 +91,7 @@ fun ReviewScreen(
     LaunchedEffect(key1 = true) {
         transactionViewModel.readTxs(db) { lists ->
             val filteredId = lists.filter { tx ->
-                user?.userId == tx?.user_id && tx?.trip_id != "null"
+                user?.userId == tx.user_id && tx.trip_id != "null"
             }
             // Update the tripListState with the fetched trips
             tripIds.value = filteredId.map { it.trip_id }
@@ -95,45 +100,7 @@ fun ReviewScreen(
     reviewViewModel.tripPurchasedId = tripIds.value
 
     var dbHandler: DBHandler = DBHandler(context)
-//    val reviews = dbHandler.getAllReview()
-//    val reviews = listOf(
-//        Review(
-//            id = "1",
-//            trip_id = "",
-//            user_id = "",
-//            trip_name = "Pangkor",
-//            title = "Great Experience",
-//            rating = 4.0,
-//            comment = "Had a wonderful experience with this service!",
-//            is_public = 1,
-//            imageUrls = "https://example.com/image1.jpg",
-//            created_at = 1620322112L // Assuming this is a timestamp
-//        ),
-//        Review(
-//            id = "2",
-//            trip_id = "",
-//            user_id = "",
-//            trip_name = "Pangkor",
-//            title = "Needs Improvement",
-//            rating = 3.0,
-//            comment = "Service was okay, but could be better.",
-//            is_public = 0,
-//            imageUrls = "https://example.com/image2.jpg",
-//            created_at = 1620410212L // Assuming this is a timestamp
-//        ),
-//        Review(
-//            id = "3",
-//            trip_id = "",
-//            user_id = "",
-//            trip_name = "Pangkor",
-//            title = "Excellent Service",
-//            rating = 5.0,
-//            comment = "Couldn't be happier with the service provided!",
-//            is_public = 1,
-//            imageUrls = "https://example.com/image3.jpg",
-//            created_at = 1620573012L // Assuming this is a timestamp
-//        )
-//    )
+
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -161,7 +128,7 @@ fun ReviewScreen(
                     }
                 } else {
                     items(reviews.value) { review ->
-                        ReviewItem(review = review, navController)
+                        ReviewItem(review = review, reviewViewModel, navController)
                     }
                 }
             }
@@ -173,7 +140,6 @@ fun ReviewScreen(
                 } else {
                     reviewViewModel.review = null
                     navController.navigate(Screen.EditReview.route)
-
                 }
             },
             modifier = Modifier
@@ -194,7 +160,7 @@ fun ReviewScreen(
 }
 
 @Composable
-fun ReviewItem(review: Review, navController: NavController) {
+fun ReviewItem(review: Review, reviewViewModel: ReviewViewModel, navController: NavController) {
     // Display the trip information in each item
 
     Card(
@@ -203,9 +169,17 @@ fun ReviewItem(review: Review, navController: NavController) {
             .padding(8.dp)
             .fillMaxWidth()
     ) {
-        val date = Date(review.created_at * 1000)
-        val sdf = SimpleDateFormat("MMMM dd, yyyy EEE", Locale.getDefault())
-        val formattedDate = sdf.format(date)
+        val utcDateTime = remember {
+            val instant = Instant.ofEpochMilli(review.created_at)
+            LocalDateTime.ofInstant(instant, ZoneOffset.UTC)
+        }
+        val formattedDate = remember {
+            val formatter = DateTimeFormatter.ofPattern("HH:mm dd MMMM yyyy")
+            utcDateTime.format(formatter)
+        }
+//        val date = Date(review.created_at * 1000)
+//        val sdf = SimpleDateFormat("MMMM dd, yyyy EEE", Locale.getDefault())
+//        val formattedDate = sdf.format(date)
         Text(
             text = formattedDate,
             fontSize = 12.sp,
@@ -216,18 +190,19 @@ fun ReviewItem(review: Review, navController: NavController) {
             modifier = Modifier
                 .padding(16.dp)
                 .clickable {
-                    navController.navigate("${Screen.EditReview.route}/${review.id.toString()}")
+                    reviewViewModel.review = review
+                    navController.navigate(Screen.EditReview.route)
                 },
         ) {
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.wallet),
+                    painter = rememberAsyncImagePainter(review.imageUrls.substringBefore(",")),
                     contentDescription = null,
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    contentScale = ContentScale.Crop
+                        .fillMaxWidth()
+                        .aspectRatio(16f/9f),
                 )
                 Text(
                     text = review.title,

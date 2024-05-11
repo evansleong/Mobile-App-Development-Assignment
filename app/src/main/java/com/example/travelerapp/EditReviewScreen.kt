@@ -3,6 +3,7 @@ package com.example.travelerapp
 import ReuseComponents
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -29,7 +30,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Star
@@ -50,7 +50,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -67,15 +66,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import androidx.room.util.appendPlaceholders
 import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
-import com.example.travelerapp.data.Review
 import com.example.travelerapp.data.Trip
 import com.example.travelerapp.viewModel.ReviewViewModel
 import com.example.travelerapp.viewModel.TripViewModel
+import com.example.travelerapp.viewModel.UserViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 
@@ -85,19 +82,27 @@ fun EditReviewScreen(
     navController: NavController,
     context: Context,
     reviewViewModel: ReviewViewModel,
-    tripViewModel: TripViewModel
+    tripViewModel: TripViewModel,
+    viewModel: UserViewModel,
 ) {
-//    var review: Review? = null
-//    var tripList: List<String>?
-
     val db = Firebase.firestore
     var dbHandler: DBHandler = DBHandler(context)
 
     val review = reviewViewModel.review
     val tripIds = reviewViewModel.tripPurchasedId
+    val logInUser = viewModel.loggedInUser
+    var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
 
     val tripList = remember { mutableStateOf<List<Trip?>>(emptyList()) }
+    val uris = mutableListOf<Uri>()
+
     if (review != null) {
+        val imageUrls = review.imageUrls.split(",")
+        for (imageUrl in imageUrls) {
+            val uri = Uri.parse(imageUrl)
+            uris.add(uri)
+        }
+        selectedImages = uris
     } else {
         if(tripIds != null) {
             tripViewModel.readMultipleTrips(db, tripIds) { trips ->
@@ -106,7 +111,6 @@ fun EditReviewScreen(
         } else{
             tripList.value = emptyList()
         }
-
     }
 
     val maxWords = 30
@@ -117,10 +121,28 @@ fun EditReviewScreen(
     var rating by remember { mutableStateOf(review?.rating ?: 0) }
     var comment by remember { mutableStateOf(review?.comment ?: "") }
     var isChecked by remember { mutableStateOf(review != null && review?.is_public == 1) }
-    var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
+    var trip_id: String = "null"
 
     var expanded by remember { mutableStateOf(false) }
     var selectedOption by remember { mutableStateOf("") }
+    var isImageUploadInProgress by remember { mutableStateOf(false) }
+
+    fun handleImageUpload(context: Context, imageUri: Uri?) {
+        isImageUploadInProgress = true
+        reviewViewModel.uploadImage(
+            context = context,
+            imageUri = imageUri,
+            onSuccess = { downloadUrl ->
+                val uploadedImageUri = Uri.parse(downloadUrl)
+                uris.add(uploadedImageUri)
+                isImageUploadInProgress = false
+            },
+            onFailure = { exception ->
+                Log.e("ImageUpload", "Error uploading image: ${exception.message}")
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -133,6 +155,7 @@ fun EditReviewScreen(
         ) {
             item {
                 if (review == null) {
+                    // add
                     Text(text = "Trip: ")
                     ExposedDropdownMenuBox(
                         expanded = expanded,
@@ -165,21 +188,11 @@ fun EditReviewScreen(
                                             text = { Text(text = trip?.tripName ?: "") },
                                             onClick = {
                                                 selectedOption = trip?.tripName ?: ""
+                                                trip_id = trip?.tripId ?: ""
                                                 expanded = false
                                             })
                                     }
                                 }
-//                                tripList?.let {
-//                                    it.forEach { trip ->
-//                                        DropdownMenuItem(
-//                                            text = { Text(text = trip) },
-//                                            onClick = {
-//                                                selectedOption = trip
-//                                                expanded = false
-//                                            }
-//                                        )
-//                                    }
-//                                }
                             }
                         }
                     }
@@ -237,7 +250,7 @@ fun EditReviewScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    StarRatingInput(onRatingChanged = { newRating ->
+                    StarRatingInput(rating, onRatingChanged = { newRating ->
                         rating = newRating
                     })
                 }
@@ -272,10 +285,19 @@ fun EditReviewScreen(
             }
 
             item {
-                ImageInputButton(context = LocalContext.current, maxImages) { uri ->
-                    selectedImages = selectedImages + uri
-                    //selectedImages store all Images Inputted
-                }
+                ImageInputButton(
+                    selectedImages = selectedImages,
+                    context = context,
+                    maxImages = maxImages,
+                    onImageSelected = { uri ->
+                        handleImageUpload(context, uri)
+                        selectedImages = uris
+                    },
+                    onImageDeleted = { removeUri ->
+                        uris.remove(removeUri)
+                        selectedImages = uris
+                    }
+                )
                 Text(
                     text = "Max $maxImages images",
                     color = Color.Gray,
@@ -312,55 +334,46 @@ fun EditReviewScreen(
                     Row(horizontalArrangement = Arrangement.Center) {
                         Button(
                             onClick = {
-                                val isCheckedInt = if (isChecked) 1 else 0
-                                if (review != null) {
-//                                    reviewViewModel.saveReview(
-//                                        db,
-//                                        context,
-//                                        tripName,
-//                                        title.toString(),
-//                                        rating.toInt(),
-//                                        comment,
-//                                        selectedImages,
-//                                        isCheckedInt,
-//                                        review.trip_id
-//                                    )
-                                    //edit
-//                                    saveReview(
-//                                        db,
-//                                        context,
-//                                        selectedOption,
-//                                        reviewTitle ?: "",
-//                                        rating.toInt(),
-//                                        comment,
-//                                        selectedImages,
-//                                        isCheckedInt,
-//                                        review.id
-//                                    )
+                                if(!isImageUploadInProgress){
+                                    selectedImages = uris
+                                    val isCheckedInt = if (isChecked) 1 else 0
+                                    if (review != null) {
+                                        //edit
+                                        reviewViewModel.saveReview(
+                                            db,
+                                            context,
+                                            tripName,
+                                            reviewTitle.toString(),
+                                            rating.toInt(),
+                                            comment,
+                                            selectedImages,
+                                            isCheckedInt,
+                                            review.trip_id,
+                                            logInUser?.userId,
+                                            review.id,
+                                            created_at = review.created_at,
+                                            action = "Edit"
+                                        )
+                                    } else {
+                                        //add
+                                        reviewViewModel.saveReview(
+                                            db,
+                                            context,
+                                            selectedOption,
+                                            reviewTitle.toString(),
+                                            rating.toInt(),
+                                            comment,
+                                            selectedImages,
+                                            isCheckedInt,
+                                            trip_id = trip_id,
+                                            user_id = logInUser?.userId,
+                                            action = "Add"
+                                        )
+                                    }
+                                    navController.popBackStack()
                                 } else {
-//                                    reviewViewModel.saveReview(
-//                                        db,
-//                                        context,
-//                                        tripName,
-//                                        title.toString(),
-//                                        rating.toInt(),
-//                                        comment,
-//                                        selectedImages,
-//                                        isCheckedInt,
-//                                    )
-                                    //add
-//                                    saveReview(
-//                                        db,
-//                                        context,
-//                                        selectedOption,
-//                                        reviewTitle ?: "",
-//                                        rating.toInt(),
-//                                        comment,
-//                                        selectedImages,
-//                                        isCheckedInt
-//                                    )
+                                    Toast.makeText(context, "Image upload in progress", Toast.LENGTH_SHORT).show()
                                 }
-                                navController.popBackStack()
                             },
                             colors = ButtonDefaults.buttonColors(
                                 contentColor = Color.Black,
@@ -385,14 +398,18 @@ fun EditReviewScreen(
     }
 }
 
+
+
 @OptIn(ExperimentalCoilApi::class)
 @Composable
 fun ImageInputButton(
+    selectedImages: List<Uri>,
     context: Context,
     maxImages: Int = 9,
-    onImageSelected: (Uri) -> Unit
+    onImageSelected: (Uri) -> Unit,
+    onImageDeleted: (Uri) -> Unit,
 ) {
-    var imageUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
+    var imageUris by remember { mutableStateOf(selectedImages) }
 
     val imagePicker =
         rememberLauncherForActivityResult(
@@ -417,12 +434,24 @@ fun ImageInputButton(
         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
     ) {
         items(imageUris) { uri ->
+            var isImageSelectedForDeletion by remember { mutableStateOf(false) }
             Image(
-                painter = rememberImagePainter(uri),
+                painter = rememberAsyncImagePainter(uri),
                 contentDescription = null,
                 modifier = Modifier
                     .size(100.dp) // Set square size for each image
                     .padding(8.dp)
+                    .clickable {
+                        if (isImageSelectedForDeletion) {
+                            imageUris = imageUris.filterNot { it == uri }
+                            // Delete the image
+                            onImageDeleted(uri)
+                        } else {
+                            // Show toast to prompt for deletion
+                            Toast.makeText(context, "Click one more time to delete", Toast.LENGTH_SHORT).show()
+                            isImageSelectedForDeletion = true
+                        }
+                    }
             )
         }
 
@@ -454,8 +483,8 @@ fun ImageInputButton(
 }
 
 @Composable
-fun StarRatingInput(onRatingChanged: (Int) -> Unit) {
-    var selectedRating by remember { mutableStateOf(0) }
+fun StarRatingInput(rating: Int = 0, onRatingChanged: (Int) -> Unit) {
+    var selectedRating by remember { mutableStateOf(rating) }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         for (i in 1..5) {

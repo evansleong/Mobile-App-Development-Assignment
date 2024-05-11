@@ -22,14 +22,18 @@ class ReviewFirebase {
         comment: String,
         imageUris: List<Uri>,
         is_public: Int,
-        trip_id: String? = null,
-        user_id: String? = null,
+        trip_id: String? = "null",
+        user_id: String? = "null",
+        id: String = "null",
+        created_at: Long = 0L,
+        action: String,
     ) {
         val time = Instant.now().toEpochMilli()
         val imageUrls = mutableListOf<String>()
         for (uri in imageUris) {
             imageUrls.add(uri.toString())
         }
+        val imageUrlsString: String = imageUrls.joinToString(",")
 
         val newReview = hashMapOf(
             "trip_id" to trip_id,
@@ -39,50 +43,69 @@ class ReviewFirebase {
             "rating" to rating,
             "comment" to comment,
             "is_public" to is_public,
-            "imageUrls" to imageUrls,
-            "created_at" to time,
+            "imageUrls" to imageUrlsString,
+            "created_at" to if (created_at != 0L) created_at else time,
         )
-        db.collection("reviews")
-            .whereEqualTo("trip_id", trip_id)
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                if (!querySnapshot.isEmpty) {
-                    val reviewDoc =
-                        querySnapshot.documents[0]
-                    val reviewId = reviewDoc.id
-
-                    db.collection("reviews").document(reviewId)
-                        .update(newReview)
-                        .addOnSuccessListener {
-                            Toast.makeText(context, "Review updated successfully", Toast.LENGTH_SHORT)
-                                .show()
-                        }
-                        .addOnFailureListener {
-                            Toast.makeText(context, "Error updating review: $it", Toast.LENGTH_SHORT)
-                                .show()
-                        }
-                } else {
-                    db.collection("reviews")
-                        .add(newReview)
-                        .addOnSuccessListener { documentReference ->
-                            Toast.makeText(
-                                context,
-                                "Review added to Firestore with ID: ${documentReference.id}",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                        .addOnFailureListener {
-                            Toast.makeText(
-                                context,
-                                "Error adding review to Firestore",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
+        if (action == "Edit") {
+            db.collection("reviews")
+                .document(id)
+                .update(newReview as Map<String, Any>)
+                .addOnSuccessListener {
+                    Toast.makeText(context, "Review updated successfully", Toast.LENGTH_SHORT).show()
                 }
-            }
-            .addOnFailureListener {
-                Toast.makeText(context, "Error querying reviews: $it", Toast.LENGTH_SHORT).show()
-            }
+                .addOnFailureListener {e ->
+                    Log.e("Firestore", "Error getting documents: ${e.message}", e)
+                }
+        } else {
+            db.collection("reviews")
+                .add(newReview)
+                .addOnSuccessListener { documentReference ->
+                    Toast.makeText(context, "Review added to Firestore with ID: ${documentReference.id}", Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener { e ->
+                    Log.e("Firestore", "Error getting documents: ${e.message}", e)
+                }
+        }
+//        db.collection("reviews")
+//            .whereEqualTo("trip_id", trip_id)
+//            .get()
+//            .addOnSuccessListener { querySnapshot ->
+//                if (!querySnapshot.isEmpty) {
+//                    val reviewDoc = querySnapshot.documents[0]
+//                    val reviewId = reviewDoc.id
+//
+//                    db.collection("reviews").document(reviewId)
+//                        .update(newReview)
+//                        .addOnSuccessListener {
+//                            Toast.makeText(context, "Review updated successfully", Toast.LENGTH_SHORT)
+//                                .show()
+//                        }
+//                        .addOnFailureListener {
+//                            Toast.makeText(context, "Error updating review: $it", Toast.LENGTH_SHORT)
+//                                .show()
+//                        }
+//                } else {
+//                    db.collection("reviews")
+//                        .add(newReview)
+//                        .addOnSuccessListener { documentReference ->
+//                            Toast.makeText(
+//                                context,
+//                                "Review added to Firestore with ID: ${documentReference.id}",
+//                                Toast.LENGTH_SHORT
+//                            ).show()
+//                        }
+//                        .addOnFailureListener {
+//                            Toast.makeText(
+//                                context,
+//                                "Error adding review to Firestore",
+//                                Toast.LENGTH_SHORT
+//                            ).show()
+//                        }
+//                }
+//            }
+//            .addOnFailureListener {
+//                Toast.makeText(context, "Error querying reviews: $it", Toast.LENGTH_SHORT).show()
+//            }
     }
 
     fun readDataFromFirestore(db: FirebaseFirestore, callback: (List<Review>) -> Unit) {
@@ -93,6 +116,7 @@ class ReviewFirebase {
                 for (document in documents) {
                     try {
                         val review: Review = document.toObject(Review::class.java)
+                        review.id = document.id
                         reviews.add(review)
                     } catch (e: Exception) {
                         Log.e("Firestore", "Error converting document to Review: ${e.message}")

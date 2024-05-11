@@ -1,7 +1,5 @@
 package com.example.travelerapp
 
-import AddPINScreen
-import SignUpScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -66,7 +64,7 @@ fun SetUpNavGraph(
         composable(
              route = Screen.EditReview.route
         ){ backStackEntry ->
-            EditReviewScreen(navController, context = LocalContext.current, reviewViewModel, tripViewModel)
+            EditReviewScreen(navController, context = LocalContext.current, reviewViewModel, tripViewModel, userViewModel)
         }
         composable(
             route = Screen.UserDisplayPackageList.route
