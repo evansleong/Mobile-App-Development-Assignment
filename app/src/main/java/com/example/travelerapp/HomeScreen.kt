@@ -64,8 +64,9 @@ fun HomeScreen(
 
     LaunchedEffect(key1 = true) {
         tripViewModel.readTrip(db) { trips ->
-            // Update the tripListState with the fetched trips
-            tripListState.value = trips
+            tripListState.value = trips.filter { trip ->
+                trip.isAvailable != 0
+            }
         }
     }
 

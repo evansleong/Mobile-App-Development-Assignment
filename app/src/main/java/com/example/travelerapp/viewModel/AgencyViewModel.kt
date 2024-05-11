@@ -10,10 +10,11 @@ class AgencyViewModel : ViewModel() {
     var loggedInAgency: AgencyUser? = null
     private val database = AgencyUserFirebase()
 
-    fun addAgency(context: Context, db: FirebaseFirestore, agencyUsername: String, agencyEmail: String, agencyPassword: String){
+    fun addAgency(context: Context, db: FirebaseFirestore, agencyId: String, agencyUsername: String, agencyEmail: String, agencyPassword: String){
         database.addDataToFirestore(
             context = context,
             db = db,
+            agencyId = agencyId,
             agencyUsername = agencyUsername,
             agencyEmail = agencyEmail,
             agencyPassword = agencyPassword

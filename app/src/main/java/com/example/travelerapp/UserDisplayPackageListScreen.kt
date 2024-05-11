@@ -56,7 +56,9 @@ fun UserPackageListScreen(
 
     LaunchedEffect(key1 = true) {
         tripViewModel.readTrip(db) { trips ->
-            tripListState.value = trips
+            tripListState.value = trips.filter { trip ->
+                trip.isAvailable != 0
+            }
         }
     }
 

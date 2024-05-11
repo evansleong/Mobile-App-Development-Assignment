@@ -10,24 +10,27 @@
         fun addDataToFirestore(
             context: Context,
             db: FirebaseFirestore,
+            agencyId: String,
             agencyUsername: String,
             agencyEmail: String,
             agencyPassword: String
         ) {
 
             val agencyData = hashMapOf(
+                "agencyId" to agencyId,
                 "agencyUsername" to agencyUsername,
                 "agencyEmail" to agencyEmail,
                 "agencyPassword" to agencyPassword
             )
 
             db.collection("agencyUser")
-                .add(agencyData)
-                .addOnSuccessListener { documentReference ->
-                    Log.d("Firestore", "Agency added with ID: ${documentReference.id}")
+                .document(agencyId)
+                .set(agencyData)
+                .addOnSuccessListener {
+                    Log.d("Firestore", "Agency added with ID: $agencyId")
                     Toast.makeText(
                         context,
-                        "Agency added to Firestore with ID: ${documentReference.id}",
+                        "Agency added to Firestore with ID: $agencyId",
                         Toast.LENGTH_SHORT
                     ).show()
                 }

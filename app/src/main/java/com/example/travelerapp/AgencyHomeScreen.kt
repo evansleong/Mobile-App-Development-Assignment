@@ -87,7 +87,7 @@ fun AgencyHomeScreen(
             )
         },
         bottomBar = {
-            ReuseComponents.AgencyNavBar(text = "Welcome, ${loggedInAgency?.agencyUsername}", navController = navController)
+            ReuseComponents.AgencyNavBar(text = "AgencyHome", navController = navController)
         },
         floatingActionButtonPosition = FabPosition.End
     ) { contentPadding ->

@@ -43,6 +43,7 @@ import com.example.travelerapp.data.AgencyUser
 import com.example.travelerapp.viewModel.AgencyViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import java.util.UUID
 
 @Composable
 fun AgencySignUpScreen(
@@ -51,6 +52,8 @@ fun AgencySignUpScreen(
     viewModel: AgencyViewModel
 ) {
     val db = Firebase.firestore
+
+    val agencyId = UUID.randomUUID().toString().substring(0, 4)
 
     val agencyUsername = remember {
         mutableStateOf(TextFieldValue())
@@ -215,6 +218,7 @@ fun AgencySignUpScreen(
                                 viewModel.addAgency(
                                     context = context,
                                     db = db,
+                                    agencyId = agencyId,
                                     agencyUsername = agencyUsername.value.text,
                                     agencyEmail = agencyEmail.value.text,
                                     agencyPassword = agencyPassword.value.text

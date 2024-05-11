@@ -242,7 +242,7 @@ object ReuseComponents {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 56.dp, vertical = 16.dp)
+                    .padding(horizontal = 100.dp, vertical = 16.dp)
             ) {
                 val agencyHomeColor = if (text == "AgencyHome") Color.Blue else Color.Black
                 val agencyPackageColor = if (text == "AgencyPackage") Color.Blue else Color.Black

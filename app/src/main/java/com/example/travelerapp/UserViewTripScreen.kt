@@ -159,12 +159,11 @@ fun UserViewTripScreen(
                         }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
-                }
-                Column (
-//                    modifier = Modifier.weight(0.2f)
-                ){
-                    Button(onClick = { /*TODO*/ }) {
-                        Text(text = "Purchase")
+
+                    Button(onClick = {
+                        navController.navigate(route = Screen.UserBookingTripScreen.route)
+                    }) {
+                        Text(text = "Book Now")
                     }
                 }
             }

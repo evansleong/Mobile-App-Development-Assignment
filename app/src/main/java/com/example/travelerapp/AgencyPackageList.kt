@@ -81,6 +81,9 @@ fun AgencyPackageList(
         topBar = {
             ReuseComponents.TopBar(title = "Travel Package Management", navController, showBackButton = true)
         },
+        bottomBar = {
+            ReuseComponents.AgencyNavBar(text = "AgencyPackage", navController = navController)
+        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {

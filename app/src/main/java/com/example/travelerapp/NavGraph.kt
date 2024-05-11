@@ -72,6 +72,11 @@ fun SetUpNavGraph(
             UserPackageListScreen(navController, context = LocalContext.current , tripViewModel)
         }
         composable(
+            route = Screen.UserBookingTripScreen.route
+        ){
+            UserBookingTripScreen(navController, context = LocalContext.current , tripViewModel)
+        }
+        composable(
             route = Screen.UserViewTrip.route
         ){
             UserViewTripScreen(navController, context = LocalContext.current , tripViewModel)
