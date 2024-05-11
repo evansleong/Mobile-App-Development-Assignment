@@ -173,7 +173,7 @@ fun HomeTripItem(
                 .width(200.dp)
                 .clickable {
                     tripViewModel.selectedTripId = trip.tripId
-                    navController.navigate(route = Screen.AgencyPackageDetail.route)
+                    navController.navigate(route = Screen.UserViewTrip.route)
                 }
         ) {
             Image(

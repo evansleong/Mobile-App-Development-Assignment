@@ -39,6 +39,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.travelerapp.data.Trip
 import com.example.travelerapp.viewModel.TripViewModel
 import com.google.firebase.Firebase
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 
 @Composable
@@ -133,6 +134,10 @@ fun PurchaseableTripItem(
                     )
                     Text(
                         text = trip.tripLength
+                    )
+                    Text(
+                        text = "Available: ${trip.isAvailable}",
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }

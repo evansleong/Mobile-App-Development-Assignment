@@ -37,8 +37,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
 import com.example.travelerapp.data.Trip
 import com.example.travelerapp.viewModel.AgencyViewModel
 import com.example.travelerapp.viewModel.TripViewModel
@@ -185,7 +188,13 @@ fun AgencyHomeTripItem(
     navController: NavController,
     tripViewModel: TripViewModel,
 ) {
-    val painter: Painter = rememberAsyncImagePainter(trip.tripUri)
+    val painter =
+        rememberAsyncImagePainter(ImageRequest.Builder
+            (LocalContext.current).data(data = trip.tripUri).apply(block = fun ImageRequest.Builder.() {
+            crossfade(true)
+            placeholder(R.drawable.loading)
+        }).build()
+        )
 
     Card(
         modifier = Modifier
@@ -195,7 +204,7 @@ fun AgencyHomeTripItem(
                 tripViewModel.selectedTripId = trip.tripId
                 navController.navigate(route = Screen.AgencyPackageDetail.route)
             },
-            elevation = CardDefaults.cardElevation(
+        elevation = CardDefaults.cardElevation(
             defaultElevation = 50.dp
         )
     ) {
@@ -215,7 +224,7 @@ fun AgencyHomeTripItem(
                     .height(100.dp)
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
             )
             Column(
                 modifier = Modifier.fillMaxWidth()
@@ -234,10 +243,10 @@ fun AgencyHomeTripItem(
 
 
 
+
 @Preview
 @Composable
 fun PreviewAgencyHomeScreen() {
-    val email = "John Doe"
     AgencyHomeScreen(
         navController = rememberNavController(),
         viewModel = AgencyViewModel(),

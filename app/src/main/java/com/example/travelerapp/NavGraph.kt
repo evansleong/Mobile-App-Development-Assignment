@@ -74,6 +74,11 @@ fun SetUpNavGraph(
             UserPackageListScreen(navController, context = LocalContext.current , tripViewModel)
         }
         composable(
+            route = Screen.UserViewTrip.route
+        ){
+            UserViewTripScreen(navController, context = LocalContext.current , tripViewModel)
+        }
+        composable(
             route = Screen.Wallet.route
         ){
             WalletScreen(navController, context = LocalContext.current, walletViewModel, transactionViewModel)

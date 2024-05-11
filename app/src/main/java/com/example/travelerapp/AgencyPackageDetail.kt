@@ -83,86 +83,95 @@ fun AgencyPackageDetail(
                     .fillMaxSize()
                     .padding(contentPadding)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.LightGray),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Image(
-                        painter = rememberAsyncImagePainter(trip.tripUri),
-                        contentDescription = trip.tripUri,
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .aspectRatio(16f / 9f)
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Column(
+                            .padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Image(
+                            painter = rememberAsyncImagePainter(trip.tripUri),
+                            contentDescription = trip.tripUri,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(16f / 9f)
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
                         Text(
                             text = trip.tripName,
                             fontSize = 30.sp,
                             fontWeight = FontWeight.Bold
                         )
 
-                        Spacer(modifier = Modifier.height(30.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                        Text(
-                            text = "${trip.tripLength} - RM${trip.tripFees}/pax",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.ExtraBold
-                        )
+                        Card(
+                            modifier = Modifier
+                                .height(350.dp)
+                                .width(350.dp),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp)
+                            ) {
+                                Text(
+                                    text = "${trip.tripLength} - RM${trip.tripFees}/pax",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                                Spacer(modifier = Modifier.height(10.dp))
 
-                        Text(
-                            text = trip.tripDesc,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-
-                        Spacer(modifier = Modifier.height(30.dp))
-
-                        Text(
-                            text = "Packages Includes:",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Spacer(modifier = Modifier.height(5.dp))
-
-                        trip.options.forEach { option ->
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Filled.Info,
-                                    contentDescription = "Check Icon",
-                                    modifier = Modifier
-                                        .size(30.dp)
-                                        .padding(end = 11.dp)
+                                Text(
+                                    text = trip.tripDesc,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold
                                 )
 
                                 Spacer(modifier = Modifier.height(30.dp))
 
                                 Text(
-                                    text = option,
-                                    fontSize = 18.sp
+                                    text = "Packages Includes:",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold
                                 )
+
+                                Spacer(modifier = Modifier.height(5.dp))
+
+                                trip.options.forEach { option ->
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Info,
+                                            contentDescription = "Check Icon",
+                                            modifier = Modifier
+                                                .size(30.dp)
+                                                .padding(end = 11.dp)
+                                        )
+
+                                        Spacer(modifier = Modifier.height(30.dp))
+
+                                        Text(
+                                            text = option,
+                                            fontSize = 18.sp
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(16.dp))
                             }
                         }
-                    }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                    Button(
-                        onClick = {
-                            navController.navigate(route = Screen.AgencyEditPackage.route)
+                        Button(
+                            onClick = {
+                                navController.navigate(route = Screen.AgencyEditPackage.route)
+                            }
+                        ) {
+                            Text("Edit Package")
                         }
-                    ) {
-                        Text("Edit Package")
-                    }
                 }
             }
         }
@@ -174,3 +183,4 @@ fun AgencyPackageDetail(
 fun PreviewAgencyPackageDetail() {
     AgencyPackageDetail(navController = rememberNavController(), context = LocalContext.current, tripViewModel = TripViewModel())
 }
+

@@ -152,7 +152,8 @@ class DBHandler(context: Context) :
                         tripDeposit = cursorTrips.getDouble(4),
                         tripDesc = cursorTrips.getString(5),
                         depDate = cursorTrips.getString(6),
-                        retDate = cursorTrips.getString(7)
+                        retDate = cursorTrips.getString(7),
+                        isAvailable = cursorTrips.getInt(8)
                     )
                 )
             } while (cursorTrips.moveToNext())
