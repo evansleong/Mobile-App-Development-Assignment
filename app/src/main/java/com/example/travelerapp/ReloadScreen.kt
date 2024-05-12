@@ -125,15 +125,28 @@ fun ReloadScreen(
                     .clip(RoundedCornerShape(16.dp))
                     .background(color = Color(0xFFA0D3AF))
             ) {
-                EditNumberField(
-                    value = amountInput, onValueChange = { amountInput = it }, modifier = Modifier
+                TextField(
+                    value = amountInput,
+                    onValueChange = { amountInput = it },
+                    modifier = Modifier
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                         .padding(top = 8.dp)
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
                         .focusRequester(focusRequester)
-                        .background(color = Color(0xFFE1E1E1))
+                        .background(color = Color(0xFFE1E1E1)),
+                    label = { Text(text = "Enter your Reload Amount", color = Color.Black.copy(alpha = 0.32f), fontWeight = FontWeight.Light) },
+                    singleLine = true,
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color(0xFFE1E1E1),
+                        unfocusedContainerColor = Color(0xFFE1E1E1),
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
+                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 )
+
+
                 Row(
                     horizontalArrangement = Arrangement.SpaceAround,
                     modifier = Modifier
@@ -198,7 +211,6 @@ fun ReloadScreen(
                         .padding(top = 8.dp)
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
-                        .focusRequester(focusRequester)
                         .background(color = Color(0xFFE1E1E1)),
                     label = { Text(text = "What's the transaction for?", color = Color.Black.copy(alpha = 0.32f), fontWeight = FontWeight.Light) },
                     singleLine = true,
@@ -446,28 +458,6 @@ fun AmountButton(text: String, onClick: () -> Unit) {
     }
 }
 
-@Composable
-fun EditNumberField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier) {
-
-    TextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = modifier,
-        label = { Text(text = "Enter your Reload Amount", color = Color.Black.copy(alpha = 0.32f), fontWeight = FontWeight.Light) },
-        singleLine = true,
-        readOnly = true,
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color(0xFFE1E1E1),
-            unfocusedContainerColor = Color(0xFFE1E1E1),
-            focusedTextColor = Color.Black,
-            unfocusedTextColor = Color.Black,
-        ),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-    )
-}
 @Composable
 @Preview
 fun ReloadScreenPreview(){
