@@ -109,6 +109,7 @@ fun SignUpScreen(
                     onValueChange = { username.value = it }, // Added missing onValueChange lambda
                     shape = RoundedCornerShape(16.dp),
                     label = { BasicText(text = "Username") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -128,6 +129,7 @@ fun SignUpScreen(
                     shape = RoundedCornerShape(16.dp),
                     label = { BasicText(text = "Email") },
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     modifier = Modifier.fillMaxWidth()
                 )
 

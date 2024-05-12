@@ -72,14 +72,19 @@ fun SetUpNavGraph(
             UserPackageListScreen(navController, context = LocalContext.current , tripViewModel)
         }
         composable(
+            route = Screen.UserViewTrip.route
+        ){
+            UserViewTripScreen(navController, context = LocalContext.current , tripViewModel)
+        }
+        composable(
             route = Screen.UserBookingTripScreen.route
         ){
             UserBookingTripScreen(navController, context = LocalContext.current , tripViewModel)
         }
         composable(
-            route = Screen.UserViewTrip.route
+            route = Screen.Payment.route
         ){
-            UserViewTripScreen(navController, context = LocalContext.current , tripViewModel)
+            PaymentScreen(navController, context = LocalContext.current, tripViewModel, walletViewModel, transactionViewModel)
         }
         composable(
             route = Screen.Wallet.route
@@ -140,11 +145,6 @@ fun SetUpNavGraph(
             route = Screen.AgencyEditPackage.route
         ) {
             AgencyEditPackageScreen(navController, trip = Trip(), context = LocalContext.current, tripViewModel = tripViewModel)
-        }
-        composable(
-            route = Screen.Reload.route
-        ) {
-            ReloadScreen(navController, context = LocalContext.current, walletViewModel, transactionViewModel)
         }
     }
 }

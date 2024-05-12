@@ -14,12 +14,13 @@ class TransactionViewModel : ViewModel() {
         context: Context,
         operation: String,
         amount: String,
+        description: String,
         tripName: String? = "null",
         agencyUsername: String? = "null",
         user_id: String,
         trip_id: String? = "null",
     ) {
-        database.createTransaction(db,context, operation, amount, tripName, agencyUsername, user_id, trip_id)
+        database.createTransaction(db,context, operation, amount, description, tripName, agencyUsername, user_id, trip_id)
     }
 
     fun readTxs(db: FirebaseFirestore, callback: (List<Transaction>) -> Unit) {

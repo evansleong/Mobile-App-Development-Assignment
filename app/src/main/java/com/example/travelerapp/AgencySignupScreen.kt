@@ -134,6 +134,7 @@ fun AgencySignUpScreen(
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     shape = RoundedCornerShape(20.dp)
                 )
 
@@ -152,6 +153,7 @@ fun AgencySignUpScreen(
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     shape = RoundedCornerShape(20.dp),
                     isError = !isValidEmail
                 )
@@ -169,14 +171,11 @@ fun AgencySignUpScreen(
                 TextField(
                     value = agencyPassword.value,
                     onValueChange = { agencyPassword.value = it },
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
                     singleLine = true,
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password,
-                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password,),
                     trailingIcon = {
                         val image = if (passwordVisible)
                             R.drawable.visibility

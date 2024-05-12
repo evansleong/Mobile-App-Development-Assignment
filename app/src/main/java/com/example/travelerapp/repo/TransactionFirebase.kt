@@ -19,15 +19,17 @@ class TransactionFirebase {
         context: Context,
         operation: String,
         amount: String,
+        description: String,
         tripName: String? = "null",
         agencyUsername: String? = "null",
         user_id: String,
         trip_id: String? = "null",
     ) {
-        val time = Instant.now().toEpochMilli()
+        val time = System.currentTimeMillis()
+//        val time = Instant.now().toEpochMilli()
 
         val remarks = if (trip_id != "null") tripName else operation
-        val description = if (trip_id != "null") "$agencyUsername - Booking Fee" else ""
+//        val description = if (trip_id != "null") "$agencyUsername - Booking Fee" else ""
         val newTransaction = hashMapOf(
             "trip_id" to trip_id,
             "user_id" to user_id,

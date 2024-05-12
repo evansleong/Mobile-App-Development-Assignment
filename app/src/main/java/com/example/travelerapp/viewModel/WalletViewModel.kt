@@ -9,6 +9,7 @@ import com.example.travelerapp.repo.WalletFirebase
 import com.google.firebase.firestore.FirebaseFirestore
 import java.security.KeyStore
 import android.util.Base64
+import androidx.compose.runtime.mutableStateOf
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -42,15 +43,20 @@ class WalletViewModel : ViewModel() {
         this.userWallet?.walletPin = newPin
         database.updateWalletPIN(db, context, newPin, userWallet?.user_id)
     }
-    fun reload(db: FirebaseFirestore, context: Context, amount: String) {
+    fun updateBalance(db: FirebaseFirestore, context: Context, amount: String, action: String, callback: (Boolean) -> Unit) {
         val available = this.userWallet?.available?.toDouble()
-        val reloadAmount = amount.toDouble()
-        val total = available?.plus(reloadAmount)
+        val updateAmount = amount.toDouble()
+        var total: Double? = null
+        if (action == "Reload") {
+            total = available?.plus(updateAmount)
+        } else {
+            total = available?.minus(updateAmount)
+        }
 
         if (available != null) {
             this.userWallet?.available = total.toString()
         }
-        database.reloadBalance(db, context, total.toString(), userWallet?.user_id)
+        database.updateBalance(db, context, total.toString(), userWallet?.user_id, callback)
     }
 
     fun checkPin(pin: String): Boolean {
@@ -65,14 +71,6 @@ class WalletViewModel : ViewModel() {
         return userWallet?.walletPin.equals(pin)
     }
 
-    fun checkReloadSuccess(amount: String): Int {
-        val available = userWallet?.available?.toDouble()
-        val amount = amount.toDouble()
-        if (available != null) {
-            return available.compareTo(amount)
-        }
-        return 0
-    }
 //    private fun encrypt(pin: String): ByteArray {
 //        val keyStore = KeyStore.getInstance(ANDROID_KEY_STORE)
 //        keyStore.load(null)

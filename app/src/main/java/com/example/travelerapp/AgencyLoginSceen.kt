@@ -126,6 +126,8 @@ fun AgencyLoginScreen(
                 TextField(
                     value = agencyLoginEmail.value.text,
                     onValueChange = { agencyLoginEmail.value = agencyLoginEmail.value.copy(text = it) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     modifier = Modifier
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp)
@@ -146,9 +148,7 @@ fun AgencyLoginScreen(
                     onValueChange = { agencyLoginPassword.value = agencyLoginPassword.value.copy(text = it) },
                     singleLine = true,
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password,
-                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password,),
                     trailingIcon = {
                         val image = if (passwordVisible)
                             R.drawable.visibility

@@ -100,11 +100,12 @@ class WalletFirebase {
             }
     }
 
-    fun reloadBalance(
+    fun updateBalance(
         db: FirebaseFirestore,
         context: Context,
         amount: String,
         user_id: String?,
+        callback: (Boolean) -> Unit
     ) {
         val collectionRef = db.collection("wallets")
 
@@ -114,43 +115,21 @@ class WalletFirebase {
                 for (document in documents) {
                     // Get the document ID
                     val documentId = document.id
-//                    var available = document.get("available")
-//                    if (available is Double) {
-//                        var available = available
-//                        available += amount.toDouble()
-//                        // Perform further operations with available
-//                    } else if (available is Long) {
-//                        // If availableValue is of type Long, convert it to Double and perform calculations
-//                        var available = available.toDouble() // Convert Long to Double
-//                        available += amount.toDouble()
-//                        // Perform further operations with available
-//                    } else {
-//                        // Handle the case where availableValue is not of type Double or Long
-//                        // For example, you might need to handle other types like Int or Float
-//                    }
-//                    available += amount.toDouble()
-
                     collectionRef.document(documentId)
                         .update("available", amount)
                         .addOnSuccessListener { documentReference ->
-//                            createTransaction(db, context, "Reload", available, documentId)
-                            Toast.makeText(
-                                context,
-                                "Amount updated for document with ID: $documentId",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(context, "Amount updated for document with ID: $documentId", Toast.LENGTH_SHORT).show()
+                            callback(true)
                         }
                         .addOnFailureListener { e ->
-                            Toast.makeText(
-                                context,
-                                "Error updating Amount for document with ID: $documentId: $e",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(context, "Error updating Amount for document with ID: $documentId: $e", Toast.LENGTH_SHORT).show()
+                            callback(false)
                         }
                 }
             }
             .addOnFailureListener { e ->
                 Toast.makeText(context, "Error querying documents: $e", Toast.LENGTH_SHORT).show()
+                callback(false)
             }
     }
 }

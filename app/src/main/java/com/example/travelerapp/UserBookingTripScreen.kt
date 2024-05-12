@@ -2,7 +2,9 @@ package com.example.travelerapp
 
 import android.app.Activity
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,12 +48,16 @@ import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 
 @Composable
 fun UserBookingTripScreen(
     navController: NavController,
     context: Context,
-    tripViewModel: TripViewModel
+    tripViewModel: TripViewModel,
 ) {
     val db = Firebase.firestore
     val activity = context as Activity
@@ -59,7 +65,7 @@ fun UserBookingTripScreen(
 
     val selectedPackage = tripViewModel.selectedTripId
 
-    var numPax by remember { mutableStateOf(0) }
+    var numPax by remember { mutableStateOf("0") }
 
     LaunchedEffect(selectedPackage) {
         tripViewModel.readSingleTrip(db, selectedPackage.toString()) { trip ->
@@ -108,8 +114,7 @@ fun UserBookingTripScreen(
 
                         Card(
                             modifier = Modifier
-                                .height(400.dp)
-                                .width(350.dp),
+                                .fillMaxSize(),
                             shape = RoundedCornerShape(16.dp)
                         ) {
                             Column(
@@ -176,41 +181,55 @@ fun UserBookingTripScreen(
 
                                 Spacer(modifier = Modifier.height(16.dp))
                             }
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
 
-                        // TextField for number of passengers
-                        TextField(
-                            value = numPax.toString(),
-                            onValueChange = {
-                                numPax = it.toInt()
-                            },
-                            label = { Text(text = "Enter number of passengers") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                            Column(
+                                verticalArrangement = Arrangement.Bottom,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ){
+                                TextField(
+                                    value = numPax,
+                                    onValueChange = {
+                                        numPax = it
+                                    },
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                    colors = TextFieldDefaults.colors(
+                                        focusedContainerColor = Color(0xFFE1E1E1),
+                                        unfocusedContainerColor = Color(0xFFE1E1E1),
+                                        focusedTextColor = Color.Black,
+                                        unfocusedTextColor = Color.Black,
+                                    ),
+                                    label = { Text(text = "Enter number of passengers") },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp)
+                                )
 
-                        Text(
-                            text = "Booking Fee: RM ${trip.tripDeposit}",
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                                Text(
+                                    text = "Booking Fee: RM ${trip.tripDeposit}",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
 
-                        Button(onClick = {
-                            // Update Firestore isAvailable value
-                            val updatedAvailable = trip.isAvailable - numPax
-                            if (updatedAvailable >= 0) {
-                                db.collection("trips").document(trip.tripId).update("isAvailable", updatedAvailable)
-                                    .addOnSuccessListener {
-                                        // Update successful, proceed with payment or other actions
+                                Button(onClick = {
+                                    if (numPax.toInt() > 0){
+                                        tripViewModel.numPax = numPax.toInt()
+                                        navController.navigate(Screen.Payment.route)
+                                    } else {
+                                        Toast.makeText(context, "Please Enter Number More Than 0", Toast.LENGTH_SHORT).show()
                                     }
-                                    .addOnFailureListener { e ->
-                                        // Handle failure
-                                    }
-                            } else {
-                                // Handle insufficient availability error
+                                    // Update Firestore isAvailable value
+//                                    tripViewModel.updateAvailable(db, trip.isAvailable, numPax.toInt(), trip.tripId) {
+//                                        if(it){
+//                                            Toast.makeText(context, "Successfully update isAvailable to Firebase", Toast.LENGTH_SHORT).show()
+//                                            navController.navigate(Screen.Payment.route)
+//                                        } else{
+//                                            Toast.makeText(context, "Error updating isAvailable to Firebase", Toast.LENGTH_SHORT).show()
+//                                        }
+//                                    }
+                                }) {
+                                    Text(text = "Pay")
+                                }
                             }
-                        }) {
-                            Text(text = "Pay")
                         }
                     }
                 }

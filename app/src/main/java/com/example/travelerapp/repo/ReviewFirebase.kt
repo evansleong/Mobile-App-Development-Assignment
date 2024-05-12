@@ -28,7 +28,8 @@ class ReviewFirebase {
         created_at: Long = 0L,
         action: String,
     ) {
-        val time = Instant.now().toEpochMilli()
+        val time = System.currentTimeMillis()
+//        val time = Instant.now().toEpochMilli()
         val imageUrls = mutableListOf<String>()
         for (uri in imageUris) {
             imageUrls.add(uri.toString())

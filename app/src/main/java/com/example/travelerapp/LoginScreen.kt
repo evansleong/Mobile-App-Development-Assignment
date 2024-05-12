@@ -1,6 +1,7 @@
 package com.example.travelerapp
 
 import android.content.Context
+import android.inputmethodservice.Keyboard
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -148,6 +149,7 @@ fun LoginScreen(
                     shape = RoundedCornerShape(16.dp),
                     label = { BasicText(text = "Email") },
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -170,9 +172,7 @@ fun LoginScreen(
                     label = { BasicText(text = "Password") },
                     singleLine = true,
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password,
-                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password,),
                     trailingIcon = {
                         val image = if (passwordVisible)
                             R.drawable.visibility

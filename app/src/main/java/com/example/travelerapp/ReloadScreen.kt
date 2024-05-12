@@ -4,6 +4,7 @@ import ReuseComponents
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,8 +14,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -43,8 +46,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
+import androidx.navigation.compose.rememberNavController
 import com.example.travelerapp.viewModel.TransactionViewModel
 import com.example.travelerapp.viewModel.WalletViewModel
 import com.google.firebase.Firebase
@@ -98,7 +103,6 @@ fun ReloadScreen(
                             .padding(top = 2.dp)
                     )
                 }
-
             }
         }
 
@@ -180,6 +184,34 @@ fun ReloadScreen(
                 }
             }
 
+            var description by remember { mutableStateOf("") }
+            Column {
+                Text(
+                    text = "Description",
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+                TextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(top = 8.dp)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .focusRequester(focusRequester)
+                        .background(color = Color(0xFFE1E1E1)),
+                    label = { Text(text = "What's the transaction for?", color = Color.Black.copy(alpha = 0.32f), fontWeight = FontWeight.Light) },
+                    singleLine = true,
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color(0xFFE1E1E1),
+                        unfocusedContainerColor = Color(0xFFE1E1E1),
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
+                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                )
+            }
+
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
@@ -214,12 +246,13 @@ fun ReloadScreen(
                                 Toast.makeText(context, "Invalid PIN. PIN must be 6 digits.", Toast.LENGTH_SHORT).show()
                             } else {
                                 if (walletViewModel.checkPin(pin)){
-                                    walletViewModel.reload(db, context, amountInput)
-                                    if(walletViewModel.checkReloadSuccess(amountInput) > 0){
-                                        Toast.makeText(context, "Successfully Reload $amountInput into wallet", Toast.LENGTH_SHORT).show()
-                                        showDialog.value = false
-                                        navController.popBackStack()
-                                        walletViewModel.userWallet?.let { transactionViewModel.createTx(db, context, "Reload", amountInput, user_id = it.user_id) }
+                                    walletViewModel.updateBalance(db, context, amountInput, "Reload"){
+                                        if(it){
+                                            Toast.makeText(context, "Successfully Reload $amountInput into wallet", Toast.LENGTH_SHORT).show()
+                                            showDialog.value = false
+                                            walletViewModel.userWallet?.let { transactionViewModel.createTx(db, context, "Reload", amountInput, description, user_id = it.user_id) }
+                                            navController.popBackStack()
+                                        }
                                     }
                                 } else {
                                     wrongAttempts++
@@ -244,6 +277,7 @@ fun ReloadScreen(
                 }
             }
         }
+
         ReuseComponents.NavBar(text = title, navController = navController)
     }
 }
@@ -269,9 +303,11 @@ fun PinInputDialog(onContinue: (String) -> Unit, onDismiss: () -> Unit) {
                     Icon(
                         painter = painterResource(id = R.drawable.back_button),
                         contentDescription = "back_button",
-                        modifier = Modifier.size(20.dp).clickable {
-                            onDismiss()
-                        }
+                        modifier = Modifier
+                            .size(20.dp)
+                            .clickable {
+                                onDismiss()
+                            }
                     )
                 }
                 Text(
@@ -422,6 +458,7 @@ fun EditNumberField(
         modifier = modifier,
         label = { Text(text = "Enter your Reload Amount", color = Color.Black.copy(alpha = 0.32f), fontWeight = FontWeight.Light) },
         singleLine = true,
+        readOnly = true,
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color(0xFFE1E1E1),
             unfocusedContainerColor = Color(0xFFE1E1E1),
@@ -434,8 +471,10 @@ fun EditNumberField(
 @Composable
 @Preview
 fun ReloadScreenPreview(){
-//    ReloadScreen(
-//        navController = rememberNavController(),
-//        context = LocalContext.current
-//    )
+    ReloadScreen(
+        navController = rememberNavController(),
+        context = LocalContext.current,
+        walletViewModel = WalletViewModel(),
+        transactionViewModel = TransactionViewModel()
+    )
 }

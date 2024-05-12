@@ -134,6 +134,26 @@ class TripFirebase {
             }
     }
 
+    fun updateAvailableAmount(
+        db: FirebaseFirestore,
+        available: Int,
+        numPax: Int,
+        tripId: String,
+        callback: (Boolean) -> Unit
+    ){
+        val balance: Int = available - numPax
+        db.collection("trips")
+            .document(tripId)
+            .update("isAvailable", balance)
+            .addOnSuccessListener { documentSnapshot ->
+                callback(true) // Success, document updated
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Error getting document: ${e.message}", e)
+                callback(false)
+            }
+    }
+
     fun readSingleTripFromFirestore(
         db: FirebaseFirestore,
         tripId: String,

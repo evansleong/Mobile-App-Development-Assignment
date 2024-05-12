@@ -3,6 +3,7 @@ package com.example.travelerapp
 import android.app.Activity
 import android.content.Context
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -62,13 +63,6 @@ fun UserViewTripScreen(
     }
 
     tripState.value?.let { trip ->
-        var isEditing by remember { mutableStateOf(false) }
-
-        var editedTripName by remember { mutableStateOf(trip.tripName) }
-        var editedTripLength by remember { mutableStateOf(trip.tripLength) }
-        var editedTripFees by remember { mutableStateOf(trip.tripFees) }
-        var editedTripDesc by remember { mutableStateOf(trip.tripDesc) }
-
         Scaffold(
             topBar = {
                 ReuseComponents.TopBar(title = trip.tripName, navController, showBackButton = true)
@@ -105,8 +99,7 @@ fun UserViewTripScreen(
 
                     Card(
                         modifier = Modifier
-                            .height(400.dp)
-                            .width(350.dp),
+                            .fillMaxSize(),
                         shape = RoundedCornerShape(16.dp)
                     ) {
                         Column(
@@ -154,17 +147,25 @@ fun UserViewTripScreen(
                                     )
                                 }
                             }
-
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Column (
+                                verticalArrangement = Arrangement.Bottom,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Row (
+                                    horizontalArrangement = Arrangement.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                ){
+                                    Button(onClick = {
+                                        navController.navigate(route = Screen.UserBookingTripScreen.route)
+                                    }) {
+                                        Text(text = "Book Now")
+                                    }
+                                }
+                            }
                         }
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
 
-                    Button(onClick = {
-                        navController.navigate(route = Screen.UserBookingTripScreen.route)
-                    }) {
-                        Text(text = "Book Now")
-                    }
+
                 }
             }
         }

@@ -190,14 +190,17 @@ fun WalletScreen(
                     }
                 } else {
                     items(transactionList.value) { transaction ->
-                        val utcDateTime = remember {
-                            val instant = Instant.ofEpochMilli(transaction.created_at)
-                            LocalDateTime.ofInstant(instant, ZoneOffset.UTC)
-                        }
-                        val formattedDate = remember {
-                            val formatter = DateTimeFormatter.ofPattern("HH:mm dd MMMM yyyy")
-                            utcDateTime.format(formatter)
-                        }
+                        val currentDate = Date(transaction.created_at)
+                        val dateFormat = SimpleDateFormat("HH:mm dd MMMM yyyy", Locale.getDefault())
+                        val formattedDate = dateFormat.format(currentDate)
+//                        val utcDateTime = remember {
+//                            val instant = Instant.ofEpochMilli(transaction.created_at)
+//                            LocalDateTime.ofInstant(instant, ZoneOffset.UTC)
+//                        }
+//                        val formattedDate = remember {
+//                            val formatter = DateTimeFormatter.ofPattern("HH:mm dd MMMM yyyy")
+//                            utcDateTime.format(formatter)
+//                        }
                         Card(
                             colors = CardDefaults.cardColors(
                                 containerColor = Color.White,

@@ -171,7 +171,11 @@ fun EditReviewScreen(
                             modifier = Modifier
                                 .menuAnchor()
                                 .fillMaxWidth(),
-                            shape = RoundedCornerShape(20.dp)
+                            shape = RoundedCornerShape(20.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedTextColor = Color.Black,
+                                unfocusedTextColor = Color.Black,
+                            )
                         )
                         if (expanded) {
                             DropdownMenu(
@@ -206,6 +210,8 @@ fun EditReviewScreen(
                             .fillMaxWidth(),
                         shape = RoundedCornerShape(20.dp),
                         colors = TextFieldDefaults.colors(
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black,
                             unfocusedContainerColor = Color.Transparent,
                             focusedContainerColor = Color.Transparent,
                             focusedPlaceholderColor = Color.Gray,
@@ -231,6 +237,8 @@ fun EditReviewScreen(
                         focusedContainerColor = Color.Transparent,
                         focusedPlaceholderColor = Color.Gray,
                         unfocusedPlaceholderColor = Color.Gray,
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
                     ),
                     placeholder = { Text(text = "Enter Some Attractive Title Here") },
                     modifier = Modifier.fillMaxWidth()
@@ -272,6 +280,8 @@ fun EditReviewScreen(
                         unfocusedContainerColor = Color.White,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
                     ),
                     placeholder = { Text(text = "Share details of your own experience at this place") },
                     modifier = Modifier
@@ -448,7 +458,13 @@ fun ImageInputButton(
                             onImageDeleted(uri)
                         } else {
                             // Show toast to prompt for deletion
-                            Toast.makeText(context, "Click one more time to delete", Toast.LENGTH_SHORT).show()
+                            Toast
+                                .makeText(
+                                    context,
+                                    "Click one more time to delete",
+                                    Toast.LENGTH_SHORT
+                                )
+                                .show()
                             isImageSelectedForDeletion = true
                         }
                     }
