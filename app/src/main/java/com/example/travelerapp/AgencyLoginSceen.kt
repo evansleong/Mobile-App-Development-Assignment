@@ -125,9 +125,9 @@ fun AgencyLoginScreen(
 
                 TextField(
                     value = agencyLoginEmail.value.text,
-                    onValueChange = { agencyLoginEmail.value = agencyLoginEmail.value.copy(text = it) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    onValueChange = {
+                        agencyLoginEmail.value = agencyLoginEmail.value.copy(text = it)
+                    },
                     modifier = Modifier
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp)
@@ -145,10 +145,14 @@ fun AgencyLoginScreen(
                 var passwordVisible by rememberSaveable { mutableStateOf(false) }
                 TextField(
                     value = agencyLoginPassword.value.text,
-                    onValueChange = { agencyLoginPassword.value = agencyLoginPassword.value.copy(text = it) },
+                    onValueChange = {
+                        agencyLoginPassword.value = agencyLoginPassword.value.copy(text = it)
+                    },
                     singleLine = true,
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password,),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                    ),
                     trailingIcon = {
                         val image = if (passwordVisible)
                             R.drawable.visibility
@@ -200,12 +204,14 @@ fun AgencyLoginScreen(
                     onClick = {
                         val email = agencyLoginEmail.value.text
                         val password = agencyLoginPassword.value.text
-                        val loginSuccessful = viewModel.checkLoginCredentials(email, password, agencyUsers.value)
+                        val loginSuccessful =
+                            viewModel.checkLoginCredentials(email, password, agencyUsers.value)
 
                         if (loginSuccessful != null) {
                             viewModel.loggedInAgency = loginSuccessful
 
-                            Toast.makeText(context, "Login Up Successful", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Login Up Successful", Toast.LENGTH_SHORT)
+                                .show()
                             navController.navigate(Screen.AgencyHome.route) {
                                 popUpTo(Screen.AgencyHome.route) {
                                     inclusive = true
@@ -240,5 +246,9 @@ fun AgencyLoginScreen(
 @Preview
 @Composable
 fun AgencyLoginScreenPreview() {
-    AgencyLoginScreen(navController = rememberNavController(), context = LocalContext.current, viewModel = AgencyViewModel())
+    AgencyLoginScreen(
+        navController = rememberNavController(),
+        context = LocalContext.current,
+        viewModel = AgencyViewModel()
+    )
 }

@@ -117,7 +117,7 @@ fun PickUserTypeScreen(
 
                 Box(
                     modifier = Modifier
-//                    .fillMaxWidth()
+                    .fillMaxWidth()
                         .weight(1f)
                         .height(200.dp)
                         .padding(8.dp, 0.dp)

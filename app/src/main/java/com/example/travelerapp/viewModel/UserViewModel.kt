@@ -16,13 +16,15 @@ class UserViewModel: ViewModel() {
         userName: String,
         userEmail: String,
         userPw: String,
+        userUri: String? = null,
         userWalletPin: Int? = null ){
         database.addUDatatoFirestore(
             context = context,
             db = db,
             userName = userName,
             userEmail = userEmail,
-            userPw = userPw
+            userPw = userPw,
+            userImgUri = userUri
         )
     }
 

@@ -5,4 +5,5 @@ data class User (
     val userName: String = "",
     val userEmail: String = "",
     val userPw: String = "",
+    val userUri: String = "",
 )

@@ -13,12 +13,14 @@ class NormalUserFirebase {
         userName: String,
         userEmail: String,
         userPw: String,
+        userImgUri: String?
     ) {
 
         val userData = hashMapOf(
             "userName" to userName,
             "userEmail" to userEmail,
             "userPw" to userPw,
+            "userUri" to userImgUri
         )
 
         db.collection("User")
@@ -36,6 +38,29 @@ class NormalUserFirebase {
                 Toast.makeText(context, "Error adding user to Firestore", Toast.LENGTH_SHORT).show()
             }
     }
+
+//    fun editUserFirebase(
+//        context: Context,
+//        db: FirebaseFirestore,
+//        userEmail: String,
+//        newUserName: String,
+//        newUserPw: String,
+//        newUserImgUri: String
+//    ){
+//        val userRef = db.collection("User").document(userEmail)
+//
+//        val newUData = hashMapOf(
+//            "userUri" to newUserImgUri,
+//            "userName" to newUserName,
+//            "userPw" to newUserPw
+//        )
+//
+//        userRef.update(newUData)
+//            .addOnSuccessListener {
+//                Log.d("Firestore","User Data Updated")
+//                Toast.makeText(context,"User Data Updated",Toast.LENGTH_SHORT).show()
+//            }
+//    }
 
 
     fun readUserDataFromFirestore(db: FirebaseFirestore, callback: (List<User>) -> Unit) {

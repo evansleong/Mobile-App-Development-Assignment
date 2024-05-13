@@ -187,6 +187,11 @@ fun SignUpScreen(
                 ReuseComponents.CustomButton(
                     text = "Sign Up",
                     onClick = {
+//                        navController.navigate(Screen.Home.route) {
+//                                                popUpTo(Screen.Home.route) {
+//                                                    inclusive = true
+//                                                }
+//                                            }
                         if(checked.value) {
                             if (email.value != null && password.value != null && checked.value) {
                                 viewModel.addUser(

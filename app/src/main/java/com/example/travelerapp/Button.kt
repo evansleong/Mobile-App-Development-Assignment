@@ -1,4 +1,5 @@
 import android.graphics.Paint.Style
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,6 +10,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialogDefaults.shape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -32,9 +35,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Green
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -54,7 +60,8 @@ object ReuseComponents {
             colors = ButtonDefaults.buttonColors(
                 Color(0xFF5DB075)
             ),
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .padding(16.dp)
                 .fillMaxWidth()
         ) {
             Text(text)
@@ -104,7 +111,9 @@ object ReuseComponents {
                     painter = painterResource(R.drawable.home),
                     contentDescription = "Home",
                     tint = homeColor,
-                    modifier = Modifier.size(20.dp).clickable {
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable {
                             navController.navigate(route = Screen.Home.route)
                         }
                 )
@@ -112,25 +121,31 @@ object ReuseComponents {
                     painter = painterResource(R.drawable.resource_package),
                     contentDescription = "Package",
                     tint = packageColor,
-                    modifier = Modifier.size(20.dp).clickable {
-                        navController.navigate(route = Screen.UserDisplayPackageList.route)
-                    }
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable {
+                            navController.navigate(route = Screen.UserDisplayPackageList.route)
+                        }
                 )
                 Icon(
                     painter = painterResource(R.drawable.wallet),
                     contentDescription = "Wallet",
                     tint = walletColor,
-                    modifier = Modifier.size(20.dp).clickable {
-                        navController.navigate(route = Screen.Wallet.route)
-                    }
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable {
+                            navController.navigate(route = Screen.Wallet.route)
+                        }
                 )
                 Icon(
                     painter = painterResource(R.drawable.map),
                     contentDescription = "Trip",
                     tint = reviewColor,
-                    modifier = Modifier.size(20.dp).clickable {
-                        navController.navigate(route = Screen.Review.route)
-                    }
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable {
+                            navController.navigate(route = Screen.Review.route)
+                        }
                 )
             }
         }
@@ -141,6 +156,7 @@ object ReuseComponents {
                navController: NavController,
                showBackButton: Boolean = false,
                showLogoutButton: Boolean = false,
+               isAtSettingPage: Boolean = false,
                onLogout: (() -> Unit)? = null) {
         var expanded by remember { mutableStateOf(false) }
 
@@ -179,51 +195,53 @@ object ReuseComponents {
                     color = Color.Black,
                     modifier = Modifier.weight(1f),
                 )
-                IconButton(
-                    onClick = {}
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        contentDescription = "Notification",
-                        tint = Color.Black
-                    )
-                }
-                Box {
+                if(!isAtSettingPage) {
                     IconButton(
-                        onClick = { expanded = true }
+                        onClick = { navController.navigate(route = Screen.Settings.route) }
                     ) {
                         Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "More",
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
                             tint = Color.Black
                         )
                     }
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
-                        modifier = Modifier
-                            .background(Color.White),
-                    ) {
-                        items.forEach {
-                            DropdownMenuItem(onClick = {
-                                expanded = false
-                                // Depending on the option selected, perform some action
-                                when (it) {
-                                    "Profile" -> {
-                                        navController.navigate(route = Screen.Profile.route)
-                                    }
-
-                                    "Settings" -> {
-                                        navController.navigate(route = Screen.Settings.route)
-                                    }
-
-                                    "Logout" -> {
-                                        onLogout?.invoke()
-                                    }
-                                }
-                            },
-                                text = { Text(it) }
+                    Box {
+                        IconButton(
+                            onClick = { expanded = true }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "More",
+                                tint = Color.Black
                             )
+                        }
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false },
+                            modifier = Modifier
+                                .background(Color.White),
+                        ) {
+                            items.forEach {
+                                DropdownMenuItem(onClick = {
+                                    expanded = false
+                                    // Depending on the option selected, perform some action
+                                    when (it) {
+                                        "Profile" -> {
+                                            navController.navigate(route = Screen.Profile.route)
+                                        }
+
+//                                    "Settings" -> {
+//                                        navController.navigate(route = Screen.Settings.route)
+//                                    }
+
+                                        "Logout" -> {
+                                            onLogout?.invoke()
+                                        }
+                                    }
+                                },
+                                    text = { Text(it) }
+                                )
+                            }
                         }
                     }
                 }
@@ -251,20 +269,42 @@ object ReuseComponents {
                     painter = painterResource(R.drawable.home),
                     contentDescription = "Home",
                     tint = agencyHomeColor,
-                    modifier = Modifier.size(20.dp).clickable {
-                        navController.navigate(route = Screen.AgencyHome.route)
-                    }
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable {
+                            navController.navigate(route = Screen.AgencyHome.route)
+                        }
                 )
                 Icon(
                     painter = painterResource(R.drawable.map),
                     contentDescription = "Package",
                     tint = agencyPackageColor,
-                    modifier = Modifier.size(20.dp).clickable {
-                        navController.navigate(route = Screen.AgencyPackageList.route)
-                    }
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable {
+                            navController.navigate(route = Screen.AgencyPackageList.route)
+                        }
                 )
             }
         }
+    }
+
+    @Composable
+    fun RoundImg(
+        modifier: Modifier = Modifier,
+        painter: Painter,
+        contentDescription: String?
+    ){
+        Image(
+            modifier = Modifier
+                .fillMaxHeight()
+//                .height(50.dp)
+//                .padding(8.dp)
+                .clip(CircleShape),
+            painter = painter,
+            contentDescription = contentDescription,
+            contentScale = ContentScale.Fit,
+            )
     }
 
     @Composable
@@ -312,7 +352,10 @@ object ReuseComponents {
                                 contentAlignment = Alignment.Center,
                                 modifier = Modifier
                                     .weight(1f)
-                                    .background(if(isToday)Color(0xFF43b3fb) else Color.White, CircleShape)
+                                    .background(
+                                        if (isToday) Color(0xFF43b3fb) else Color.White,
+                                        CircleShape
+                                    )
                                     .padding(10.dp)
                             ) {
                                 Text(

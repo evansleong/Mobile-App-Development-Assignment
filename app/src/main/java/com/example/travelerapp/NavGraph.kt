@@ -109,7 +109,7 @@ fun SetUpNavGraph(
         composable(
             route = Screen.Settings.route
         ) {
-            SettingsScreen(navController)
+            SettingsScreen(navController,context = LocalContext.current)
         }
         composable(
             route = Screen.AgencyLogin.route
