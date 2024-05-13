@@ -224,6 +224,7 @@ fun LoginScreen(
                         val password = logInPw.value
                         val loginSuccessful = viewModel.checkULoginCred(email, password, users.value)
 
+
                         if (loginSuccessful != null) {
                             viewModel.loggedInUser = loginSuccessful
 

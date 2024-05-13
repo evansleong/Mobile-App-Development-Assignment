@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.navigation.NavController
 import com.example.travelerapp.R
 import com.example.travelerapp.Screen
+import com.example.travelerapp.ui.theme.CusFont1
 import java.util.Calendar
 
 
@@ -64,7 +65,7 @@ object ReuseComponents {
                 .padding(16.dp)
                 .fillMaxWidth()
         ) {
-            Text(text)
+            Text(text, style = TextStyle(fontFamily = CusFont1))
         }
     }
 
@@ -329,7 +330,7 @@ object ReuseComponents {
                     ) {
                         Text(
                             text = it.substring(0, 3),
-                            style = TextStyle(Color(0xFF43b3fb)))
+                            style = TextStyle(Color(0xFF43b3fb), fontFamily = CusFont1))
                     }
                 }
             }
@@ -360,7 +361,7 @@ object ReuseComponents {
                             ) {
                                 Text(
                                     text = dayCounter++.toString(),
-                                    style = TextStyle(Color.Gray)
+                                    style = TextStyle(Color.Gray,fontFamily = CusFont1)
                                     )
                             }
                         } else {

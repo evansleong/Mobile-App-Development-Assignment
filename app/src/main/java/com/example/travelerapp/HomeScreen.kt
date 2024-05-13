@@ -48,6 +48,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.travelerapp.data.Trip
+import com.example.travelerapp.ui.theme.CusFont1
 import com.example.travelerapp.ui.theme.HeadingTxt
 import com.example.travelerapp.viewModel.TripViewModel
 import com.google.firebase.Firebase
@@ -85,12 +86,23 @@ fun HomeScreen(
 //            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            HeadingTxt(text = "Recent Activities")
+            Text(text = "Recent Activities",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, fontFamily = CusFont1)
+            )
 //            Text(text = "calendar")
             Box(modifier = Modifier.padding(16.dp)) {
                 ReuseComponents.DatePicker()
             }
-            HeadingTxt("Explore Travel Package")
+//            HeadingTxt("Explore Travel Package")
+            Text(text = "Explore Travel Package",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold,fontFamily = CusFont1)
+            )
 
             // travel package list slider
             Box(

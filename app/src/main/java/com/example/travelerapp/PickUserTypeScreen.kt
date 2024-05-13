@@ -34,6 +34,7 @@ import androidx.navigation.NavController
 import com.example.travelerapp.R
 import com.example.travelerapp.R.*
 import com.example.travelerapp.R.drawable.blank_profile_picture_973460_1_1_1024x1024
+import com.example.travelerapp.ui.theme.CusFont1
 
 @Composable
 fun PickUserTypeScreen(
@@ -64,7 +65,7 @@ fun PickUserTypeScreen(
 
             Text(
                 text = "Choose User Type",
-                style = TextStyle(color = Color.White, fontSize = 30.sp, fontWeight = FontWeight.ExtraBold)
+                style = TextStyle(color = Color.White, fontSize = 30.sp, fontWeight = FontWeight.ExtraBold,fontFamily = CusFont1)
             )
 
             Spacer(modifier = Modifier.height(96.dp))
