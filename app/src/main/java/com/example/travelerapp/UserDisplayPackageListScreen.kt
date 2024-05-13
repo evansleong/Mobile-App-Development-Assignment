@@ -68,9 +68,6 @@ fun UserPackageListScreen(
         val dbHandler = DBHandler(context)
         val title = "Travel Package"
         ReuseComponents.TopBar(title = title, navController, showBackButton = true)
-
-        Spacer(modifier = Modifier.height(20.dp))
-
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -78,6 +75,7 @@ fun UserPackageListScreen(
                 PurchaseableTripItem(trip = trip, navController = navController, tripViewModel)
             }
         }
+        ReuseComponents.NavBar(text = title, navController = navController)
     }
 }
 

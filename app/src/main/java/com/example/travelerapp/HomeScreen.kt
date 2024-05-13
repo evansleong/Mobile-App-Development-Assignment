@@ -116,11 +116,7 @@ fun HomeScreen(
 
                 IconButton(
                     onClick = {
-                        navController.navigate(route = Screen.UserDisplayPackageList.route) {
-                            popUpTo(Screen.Home.route) {
-                                inclusive = true
-                            }
-                        }
+                        navController.navigate(route = Screen.UserDisplayPackageList.route)
                     },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)

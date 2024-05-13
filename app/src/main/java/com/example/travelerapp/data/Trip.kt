@@ -11,6 +11,9 @@ data class Trip(
     @get:PropertyName("isAvailable")
     @set:PropertyName("isAvailable")
     var isAvailable: Int = 0,
+    @get:PropertyName("noOfUserBooked")
+    @set:PropertyName("noOfUserBooked")
+    var noOfUserBooked: Int = 0,
     val tripDesc: String = "",
     val depDate: String = "",
     val retDate: String = "",

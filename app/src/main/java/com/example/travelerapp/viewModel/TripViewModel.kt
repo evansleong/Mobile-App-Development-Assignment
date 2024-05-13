@@ -14,7 +14,7 @@ class TripViewModel : ViewModel() {
     var selectedTripId: String? = null
     var numPax: Int = 0
     private val database = TripFirebase()
-    fun addTrip(context: Context, db: FirebaseFirestore, tripId: String, tripPackageName: String, tripLength: String, tripPackageFees: Double, tripPackageDeposit: Double, tripPackageDesc: String, tripPackageDeptDate: String, tripPackageRetDate: String, uploadedImageUri: String?, selectedOption: List<String>, isAvailable: Int, agencyUsername: String){
+    fun addTrip(context: Context, db: FirebaseFirestore, tripId: String, tripPackageName: String, tripLength: String, tripPackageFees: Double, tripPackageDeposit: Double, tripPackageDesc: String, tripPackageDeptDate: String, tripPackageRetDate: String, uploadedImageUri: String?, selectedOption: List<String>, isAvailable: Int, noOfUserBooked: Int, agencyUsername: String){
         database.addDataToFirestore(
             context = context,
             db = db,
@@ -29,6 +29,7 @@ class TripViewModel : ViewModel() {
             uploadedImageUri = uploadedImageUri,
             selectedOption = selectedOption,
             isAvailable = isAvailable,
+            noOfUserBooked = noOfUserBooked,
             agencyUsername = agencyUsername
         )
     }

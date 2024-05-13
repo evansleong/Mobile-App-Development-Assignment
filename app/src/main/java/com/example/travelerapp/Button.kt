@@ -103,7 +103,7 @@ object ReuseComponents {
                     .padding(horizontal = 56.dp, vertical = 16.dp)
             ) {
                 val homeColor = if (text == "Home") Color.Blue else Color.Black
-                val packageColor = if (text == "Package") Color.Blue else Color.Black
+                val packageColor = if (text == "Travel Package") Color.Blue else Color.Black
                 val walletColor = if (text == "Wallet") Color.Blue else Color.Black
                 val reviewColor = if (text == "Review") Color.Blue else Color.Black
 
@@ -119,7 +119,7 @@ object ReuseComponents {
                 )
                 Icon(
                     painter = painterResource(R.drawable.resource_package),
-                    contentDescription = "Package",
+                    contentDescription = "Travel Package",
                     tint = packageColor,
                     modifier = Modifier
                         .size(20.dp)

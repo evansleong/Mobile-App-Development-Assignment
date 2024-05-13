@@ -59,6 +59,7 @@ import com.example.travelerapp.data.Trip
 import com.example.travelerapp.viewModel.TripViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import java.time.temporal.ChronoUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -110,6 +111,18 @@ fun AgencyEditPackageScreen(
         selectedOptions = trip.options.toMutableSet()
     }
 
+//    fun calculateTripLength(departureMillis: Long?, returnMillis: Long?): String {
+//        if (departureMillis != null && returnMillis != null) {
+//            val departureDate = DateUtils().convertMillisToLocalDate(departureMillis)
+//            val returnDate = DateUtils().convertMillisToLocalDate(returnMillis)
+//            val days = ChronoUnit.DAYS.between(departureDate, returnDate) + 1
+//            val nights = if (days > 1) days - 1 else 0
+//            return if (days < 2) "1 DAY TRIP" else "$days DAYS $nights NIGHTS"
+//        }
+//        return "invalid"// Default to 1 DAY TRIP if dates are not selected
+//    }
+
+
     tripState.value?.let { trip ->
         var isEditing by remember { mutableStateOf(false) }
         var editedTripName by remember { mutableStateOf(trip.tripName) }
@@ -118,7 +131,8 @@ fun AgencyEditPackageScreen(
         var editedTripDesc by remember { mutableStateOf(trip.tripDesc) }
         var editedDepartureDate by remember { mutableStateOf(trip.depDate) }
         var editedReturnDate by remember { mutableStateOf(trip.retDate) }
-        var editedTripLength by remember { mutableStateOf(trip.tripLength) }
+        val editedTripLength by remember { mutableStateOf(trip.tripLength) }
+//        val editedTripLength = remember { mutableStateOf(calculateTripLength(tripPackageDeptDate.selectedDateMillis, tripPackageRetDate.selectedDateMillis)) }
         var editedOptions by remember { mutableStateOf(trip.options.joinToString(separator = "\n")) }
         var readOldImageUri by remember { mutableStateOf(trip.tripUri) }
 
@@ -251,6 +265,19 @@ fun AgencyEditPackageScreen(
 
                     item {
                         Spacer(modifier = Modifier.height(20.dp))
+                        Text(text = "Trip Length", fontWeight = FontWeight.Bold)
+                        Box {
+                            TextField(
+                                value = editedTripLength,
+                                onValueChange = {},
+                                readOnly = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+
+                    item {
+                        Spacer(modifier = Modifier.height(20.dp))
                         Text("Options (Select at least 1):", fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.height(16.dp))
                         val allOptions = listOf("Included breakfast", "Free Parking", "Travel Insurance", "Tipping and Taxes", "Full Board Meals", "Airport Transport")
@@ -267,6 +294,7 @@ fun AgencyEditPackageScreen(
                                 if (selectedOptions.isEmpty()) {
                                     selectedOptions = trip.options.toMutableSet() // Keep previous options
                                 }
+
                                 tripViewModel.editTrip(
                                     context = navController.context,
                                     db = Firebase.firestore,
@@ -342,7 +370,8 @@ fun EditableDateFieldWithButton(
     date: String,
     onDateChanged: (String) -> Unit,
     datePickerState: DatePickerState,
-    dateToString: String
+    dateToString: String,
+//    editedTripLength: (String) -> Unit,
 ) {
     var selectedDate by remember { mutableStateOf(date) }
     var showDatePicker by remember { mutableStateOf(false) }
@@ -384,7 +413,12 @@ fun EditableDateFieldWithButton(
                 Button(
                     onClick = {
                         showDatePicker = false
-                        onDateChanged(selectedDate) // Update the selected date
+                        onDateChanged(selectedDate)
+                        // Update the selected date
+//                        editedTripLength.val = calculateTripLength(
+//                            tripPackageDeptDate.selectedDateMillis,
+//                            tripPackageRetDate.selectedDateMillis
+//                        )
                     }
                 ) {
                     Text(text = "OK")

@@ -19,7 +19,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -29,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
@@ -81,6 +84,8 @@ fun AgencyAddPackageScreen(
     }
 
     var expanded by remember { mutableStateOf(false) }
+
+    var showConfirmDialog by remember { mutableStateOf(false) }
 
     var isDialogOpen by remember { mutableStateOf(false) }
 
@@ -276,6 +281,16 @@ fun AgencyAddPackageScreen(
         return isValid
     }
 
+    fun showConfirmationDialog() {
+        showConfirmDialog = true
+    }
+
+    fun handleSaveButtonClick() {
+        if (validateInputs()) {
+            showConfirmationDialog()
+        }
+    }
+
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -317,7 +332,7 @@ fun AgencyAddPackageScreen(
                 }
             } else {
                 Image(
-                    painter = painterResource(R.drawable.upload_image),
+                    painter = painterResource(R.drawable.uploadimg),
                     contentDescription = "Upload Photo Placeholder",
                     modifier = Modifier
                         .fillMaxWidth()
@@ -342,6 +357,7 @@ fun AgencyAddPackageScreen(
                         value = tripPackageName.value,
                         onValueChange = { tripPackageName.value = it },
                         placeholder = { Text(text = "Enter the trip location") },
+                        singleLine = true,
                         isError = tripPackageNameError,
                         modifier = Modifier
                             .fillMaxWidth(),
@@ -364,6 +380,7 @@ fun AgencyAddPackageScreen(
                         value = tripPackageFees.value,
                         onValueChange = { tripPackageFees.value = it },
                         placeholder = { Text(text = "MYR") },
+                        singleLine = true,
                         isError = tripPackageFeesError,
                         modifier = Modifier
                             .fillMaxWidth(),
@@ -389,6 +406,7 @@ fun AgencyAddPackageScreen(
                         value = tripPackageDeposit.value,
                         onValueChange = { tripPackageDeposit.value = it },
                         placeholder = { Text(text = "MYR") },
+                        singleLine = true,
                         isError = tripPackageDepositError,
                         modifier = Modifier
                             .fillMaxWidth(),
@@ -414,9 +432,19 @@ fun AgencyAddPackageScreen(
                         value = tripPackageDesc.value,
                         onValueChange = { tripPackageDesc.value = it },
                         placeholder = { Text(text = "Enter the trip desc:") },
+                        singleLine = true,
+                        isError = tripPackageDescError,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(20.dp)
                     )
+                    if (tripPackageDescError) {
+                        Text(
+                            text = "DO NOT LEAVE BLANK",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
                 }
 
                 item {
@@ -426,6 +454,7 @@ fun AgencyAddPackageScreen(
                         value = tripAvailable.value,
                         onValueChange = { tripAvailable.value = it },
                         placeholder = { Text(text = "No. of PAX") },
+                        singleLine = true,
                         isError = tripPackageFeesError,
                         modifier = Modifier
                             .fillMaxWidth(),
@@ -700,40 +729,83 @@ fun AgencyAddPackageScreen(
                 item {
                     ReuseComponents.CustomButton(
                         text = "Save",
-                        onClick = {
-                            if (validateInputs()) {
-                            dbHandler.addNewTrip(
-                                tripPackageName.value.text,
-                                tripLength.value,
-                                tripPackageFees.value.text.toDouble(),
-                                tripPackageDeposit.value.text.toDouble(),
-                                tripPackageDesc.value.text,
-                                deptDateToString,
-                                retDateToString,
-                                uploadedImageUri?.toString(),
-                                selectedOption
-                            )
-                                tripViewModel.addTrip(
-                                    context = context,
-                                    db = db,
-                                    tripId = tripId,
-                                    tripPackageName = tripPackageName.value.text,
-                                    tripLength = tripLength.value,
-                                    tripPackageFees = tripPackageFees.value.text.toDouble(),
-                                    tripPackageDeposit = tripPackageDeposit.value.text.toDouble(),
-                                    tripPackageDesc = tripPackageDesc.value.text,
-                                    tripPackageDeptDate = deptDateToString,
-                                    tripPackageRetDate = retDateToString,
-                                    uploadedImageUri = uploadedImageUri?.toString(),
-                                    selectedOption = selectedOption,
-                                    isAvailable = tripAvailable.value.text.toInt(),
-                                    agencyUsername = loggedInAgency?.agencyUsername ?: "user"
-                                )
-                            Toast.makeText(context, "Trip Added to Database", Toast.LENGTH_SHORT)
-                                .show()
-                        }
-                        })
+                        onClick = { handleSaveButtonClick() }
+                    )
                 }
+
+                item {
+                    // Confirmation Dialog
+                    if (showConfirmDialog) {
+                        AlertDialog(
+                            onDismissRequest = { showConfirmDialog = false },
+                            title = {
+                                Text("Confirm Save")
+                            },
+                            text = {
+                                Text("Are you sure you want to save this trip package?")
+                            },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        // Save the trip package data
+                                        dbHandler.addNewTrip(
+                                            tripPackageName.value.text,
+                                            tripLength.value,
+                                            tripPackageFees.value.text.toDouble(),
+                                            tripPackageDeposit.value.text.toDouble(),
+                                            tripPackageDesc.value.text,
+                                            deptDateToString,
+                                            retDateToString,
+                                            uploadedImageUri?.toString(),
+                                            selectedOption
+                                        )
+                                        tripViewModel.addTrip(
+                                            context = context,
+                                            db = db,
+                                            tripId = tripId,
+                                            tripPackageName = tripPackageName.value.text,
+                                            tripLength = tripLength.value,
+                                            tripPackageFees = tripPackageFees.value.text.toDouble(),
+                                            tripPackageDeposit = tripPackageDeposit.value.text.toDouble(),
+                                            tripPackageDesc = tripPackageDesc.value.text,
+                                            tripPackageDeptDate = deptDateToString,
+                                            tripPackageRetDate = retDateToString,
+                                            uploadedImageUri = uploadedImageUri?.toString(),
+                                            selectedOption = selectedOption,
+                                            isAvailable = tripAvailable.value.text.toInt(),
+                                            noOfUserBooked = 0,
+                                            agencyUsername = loggedInAgency?.agencyUsername
+                                                ?: "user"
+                                        )
+                                        Toast.makeText(
+                                            context,
+                                            "Trip Added to Database",
+                                            Toast.LENGTH_SHORT
+                                        )
+                                            .show()
+                                        showConfirmDialog = false
+                                        navController.popBackStack()
+                                    },
+                                    colors = ButtonDefaults.textButtonColors(
+                                        contentColor = MaterialTheme.colorScheme.primary
+                                    )
+                                ) {
+                                    Text("Save")
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(
+                                    onClick = { showConfirmDialog = false },
+                                    colors = ButtonDefaults.textButtonColors(
+                                        contentColor = MaterialTheme.colorScheme.primary
+                                    )
+                                ) {
+                                    Text("Cancel")
+                                }
+                            }
+                        )
+                }
+            }
             }
         }
     }

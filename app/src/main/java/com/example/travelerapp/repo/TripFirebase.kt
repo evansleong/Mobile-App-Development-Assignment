@@ -21,6 +21,7 @@ class TripFirebase {
         uploadedImageUri: String?,
         selectedOption: List<String>,
         isAvailable: Int,
+        noOfUserBooked: Int,
         agencyUsername: String,
 //    isChecked: Boolean
     ) {
@@ -37,6 +38,7 @@ class TripFirebase {
             "tripUri" to uploadedImageUri,
             "options" to selectedOption,
             "isAvailable" to isAvailable,
+            "noOfUserBooked" to noOfUserBooked,
             "agencyUsername" to agencyUsername,
 //        "isActive" to isChecked
         )
@@ -142,9 +144,15 @@ class TripFirebase {
         callback: (Boolean) -> Unit
     ){
         val balance: Int = available - numPax
+        val numBooked: Int = numPax
         db.collection("trips")
             .document(tripId)
-            .update("isAvailable", balance)
+            .update(
+                mapOf(
+                    "isAvailable" to balance,
+                    "noOfUserBooked" to numBooked
+                )
+            )
             .addOnSuccessListener { documentSnapshot ->
                 callback(true) // Success, document updated
             }

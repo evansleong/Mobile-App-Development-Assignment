@@ -21,6 +21,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -112,6 +113,7 @@ fun AgencyHomeScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
+
             Text(
                 text = " Pkgs booked",
                 modifier = Modifier
@@ -143,7 +145,7 @@ fun AgencyHomeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                        elevation = CardDefaults.cardElevation(
+                    elevation = CardDefaults.cardElevation(
                         defaultElevation = 10.dp
                     )
                 ) {
@@ -152,34 +154,68 @@ fun AgencyHomeScreen(
                         modifier = Modifier.fillMaxWidth(),
                         contentPadding = PaddingValues(horizontal = 8.dp)
                     ) {
-                        items(tripListState.value.take(3)) { trip ->
-                            AgencyHomeTripItem(trip = trip, navController = navController, tripViewModel)
+                        // Add Package button if no packages
+                        if (tripListState.value.isEmpty()) {
+                            item {
+                                Text(
+                                    text = "No Travel Packages Yet...",
+                                    modifier = Modifier
+                                        .padding(vertical = 50.dp, horizontal = 90.dp)
+                                )
+                            }
+                        } else {
+                            items(tripListState.value.take(3)) { trip ->
+                                AgencyHomeTripItem(trip = trip, navController = navController, tripViewModel)
+                            }
                         }
                     }
                 }
 
-                IconButton(
-                    onClick = {
-                        navController.navigate(route = Screen.AgencyPackageList.route) {
-                            popUpTo(Screen.Home.route) {
-                                inclusive = true
+                // Navigate to Package List button
+                if (tripListState.value.isNotEmpty()) {
+                    FloatingActionButton(
+                        onClick = {
+                            navController.navigate(route = Screen.AgencyPackageList.route) {
+                                popUpTo(Screen.Home.route) {
+                                    inclusive = true
+                                }
                             }
-                        }
-                    },
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(20.dp)
-                        .offset(y = (-300).dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowForward,
-                        contentDescription = "Navigate to Package List"
-                    )
+                        },
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(20.dp)
+                            .offset(y = (-295).dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowForward,
+                            contentDescription = "Navigate to Package List"
+                        )
+                    }
+                } else {
+                    FloatingActionButton(
+                        onClick = {
+                            navController.navigate(route = Screen.AgencyAddPackage.route) {
+                                popUpTo(Screen.Home.route) {
+                                    inclusive = true
+                                }
+                            }
+                        },
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(20.dp)
+                            .offset(y = (-350).dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Navigate to Add Package"
+                        )
+                    }
                 }
             }
         }
     }
 }
+
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable

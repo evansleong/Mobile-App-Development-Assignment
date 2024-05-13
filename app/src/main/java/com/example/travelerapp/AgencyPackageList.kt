@@ -6,6 +6,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,6 +34,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -66,7 +68,15 @@ fun AgencyPackageList(
 
     val loggedInAgency = viewModel.loggedInAgency
 
+    val noPackages = remember { mutableStateOf(false) }
+
+    val (refreshTrigger, setRefreshTrigger) = remember { mutableIntStateOf(0) }
+
     val tripListState = remember { mutableStateOf<List<Trip>>(emptyList()) }
+
+    fun refreshScreen() {
+        setRefreshTrigger(refreshTrigger + 1)
+    }
 
     LaunchedEffect(key1 = true) {
         tripViewModel.readTrip(db) { trips ->
@@ -74,12 +84,17 @@ fun AgencyPackageList(
                 trip.agencyUsername == loggedInAgency?.agencyUsername
             }
             tripListState.value = filteredTrips
+            noPackages.value = filteredTrips.isEmpty()
         }
     }
 
     Scaffold(
         topBar = {
-            ReuseComponents.TopBar(title = "Travel Package Management", navController, showBackButton = true)
+            ReuseComponents.TopBar(
+                title = "Travel Package Management",
+                navController,
+                showBackButton = true
+            )
         },
         bottomBar = {
             ReuseComponents.AgencyNavBar(text = "AgencyPackage", navController = navController)
@@ -99,18 +114,39 @@ fun AgencyPackageList(
         },
         floatingActionButtonPosition = FabPosition.End
     ) { contentPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding)
-        ) {
-            items(tripListState.value) { trip ->
-                TripItem(trip = trip, navController = navController, tripViewModel) {
-                    tripViewModel.deleteTrip(
-                        db,
-                        trip.tripId,
-                        onSuccess = {},
-                        onFailure = {}
+        if (noPackages.value) {
+            // Show a message when there are no packages
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("No packages found.", fontSize = 18.sp)
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding)
+            ) {
+                items(tripListState.value) { trip ->
+                    TripItem(
+                        trip = trip,
+                        navController = navController,
+                        tripViewModel,
+                        onDeleteTrip = {
+                        tripViewModel.deleteTrip(
+                            db,
+                            trip.tripId,
+                            onSuccess = {
+                                refreshScreen()
+                            },
+                            onFailure = {}
+                        )
+                    },
+                        onRefresh = { refreshScreen() }
                     )
                 }
             }
@@ -124,11 +160,13 @@ fun TripItem(
     trip: Trip,
     navController: NavController,
     tripViewModel: TripViewModel,
-    onDeleteTrip: () -> Unit
+    onDeleteTrip: () -> Unit,
+    onRefresh: () -> Unit
 ) {
     val painter: Painter = rememberAsyncImagePainter(model = Uri.parse(trip.tripUri))
 
     val showDialog = remember { mutableStateOf(false) }
+    val showDeletedMessage = remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -175,6 +213,10 @@ fun TripItem(
                         text = trip.tripLength,
                         fontSize = 15.sp
                     )
+                    Text(
+                        text = "No. of booked user: ${trip.noOfUserBooked}/${trip.noOfUserBooked+trip.isAvailable}",
+                        fontSize = 15.sp
+                    )
                 }
                 IconButton(
                     onClick = { showDialog.value = true },
@@ -188,7 +230,7 @@ fun TripItem(
             }
         }
     }
-    
+
     Spacer(modifier = Modifier.height(15.dp))
 
     if (showDialog.value) {
@@ -200,6 +242,8 @@ fun TripItem(
                 Button(onClick = {
                     showDialog.value = false
                     onDeleteTrip()
+                    showDeletedMessage.value = true
+                    onRefresh()
                 }) {
                     Text("Confirm")
                 }
@@ -207,6 +251,20 @@ fun TripItem(
             dismissButton = {
                 Button(onClick = { showDialog.value = false }) {
                     Text("Cancel")
+                }
+            }
+        )
+    }
+
+    // Show a message when trip is successfully deleted
+    if (showDeletedMessage.value) {
+        AlertDialog(
+            onDismissRequest = { showDeletedMessage.value = false },
+            title = { Text("Trip Package has been successfully deleted") },
+            text = { Text("The trip package '${trip.tripName}' has been deleted") },
+            confirmButton = {
+                Button(onClick = { showDeletedMessage.value = false }) {
+                    Text("OK")
                 }
             }
         )
