@@ -180,6 +180,13 @@ fun UserBookingTripScreen(
                                 }
 
                                 Spacer(modifier = Modifier.height(16.dp))
+
+
+                                Text(
+                                    text = "Available: ${trip.isAvailable}",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
 
                             Column(
@@ -189,7 +196,8 @@ fun UserBookingTripScreen(
                                 TextField(
                                     value = numPax,
                                     onValueChange = {
-                                        numPax = it
+                                        val newValue = it.filter { char -> char.isDigit() }
+                                        numPax = newValue
                                     },
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                     colors = TextFieldDefaults.colors(
@@ -198,6 +206,7 @@ fun UserBookingTripScreen(
                                         focusedTextColor = Color.Black,
                                         unfocusedTextColor = Color.Black,
                                     ),
+                                    singleLine = true,
                                     label = { Text(text = "Enter number of passengers") },
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -212,20 +221,15 @@ fun UserBookingTripScreen(
 
                                 Button(onClick = {
                                     if (numPax.toInt() > 0){
-                                        tripViewModel.numPax = numPax.toInt()
-                                        navController.navigate(Screen.Payment.route)
-                                    } else {
-                                        Toast.makeText(context, "Please Enter Number More Than 0", Toast.LENGTH_SHORT).show()
+                                        if(numPax.toInt() < trip.isAvailable){
+                                            tripViewModel.numPax = numPax.toInt()
+                                            navController.navigate(Screen.Payment.route)
+                                        } else {
+                                            Toast.makeText(context, "Number of Passenger Exceed the available number for the package!!!", Toast.LENGTH_LONG).show()
+                                        }
+                                    }  else {
+                                        Toast.makeText(context, "Please enter a number greater than 0 for the number of passengers.", Toast.LENGTH_LONG).show()
                                     }
-                                    // Update Firestore isAvailable value
-//                                    tripViewModel.updateAvailable(db, trip.isAvailable, numPax.toInt(), trip.tripId) {
-//                                        if(it){
-//                                            Toast.makeText(context, "Successfully update isAvailable to Firebase", Toast.LENGTH_SHORT).show()
-//                                            navController.navigate(Screen.Payment.route)
-//                                        } else{
-//                                            Toast.makeText(context, "Error updating isAvailable to Firebase", Toast.LENGTH_SHORT).show()
-//                                        }
-//                                    }
                                 }) {
                                     Text(text = "Pay")
                                 }

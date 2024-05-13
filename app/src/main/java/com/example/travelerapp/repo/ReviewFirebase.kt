@@ -4,13 +4,8 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
-import com.example.travelerapp.DBHandler
-import com.example.travelerapp.createTransaction
 import com.example.travelerapp.data.Review
-import com.example.travelerapp.data.Trip
-import com.example.travelerapp.data.Wallet
 import com.google.firebase.firestore.FirebaseFirestore
-import java.time.Instant
 
 class ReviewFirebase {
     fun saveReview(
@@ -27,6 +22,7 @@ class ReviewFirebase {
         id: String = "null",
         created_at: Long = 0L,
         action: String,
+        callback: (String) -> Unit
     ) {
         val time = System.currentTimeMillis()
 //        val time = Instant.now().toEpochMilli()
@@ -53,60 +49,24 @@ class ReviewFirebase {
                 .update(newReview as Map<String, Any>)
                 .addOnSuccessListener {
                     Toast.makeText(context, "Review updated successfully", Toast.LENGTH_SHORT).show()
+                    callback(id)
                 }
                 .addOnFailureListener {e ->
                     Log.e("Firestore", "Error getting documents: ${e.message}", e)
+                    callback("null")
                 }
         } else {
             db.collection("reviews")
                 .add(newReview)
                 .addOnSuccessListener { documentReference ->
                     Toast.makeText(context, "Review added to Firestore with ID: ${documentReference.id}", Toast.LENGTH_SHORT).show()
+                    callback(documentReference.id)
                 }
                 .addOnFailureListener { e ->
                     Log.e("Firestore", "Error getting documents: ${e.message}", e)
+                    callback("null")
                 }
         }
-//        db.collection("reviews")
-//            .whereEqualTo("trip_id", trip_id)
-//            .get()
-//            .addOnSuccessListener { querySnapshot ->
-//                if (!querySnapshot.isEmpty) {
-//                    val reviewDoc = querySnapshot.documents[0]
-//                    val reviewId = reviewDoc.id
-//
-//                    db.collection("reviews").document(reviewId)
-//                        .update(newReview)
-//                        .addOnSuccessListener {
-//                            Toast.makeText(context, "Review updated successfully", Toast.LENGTH_SHORT)
-//                                .show()
-//                        }
-//                        .addOnFailureListener {
-//                            Toast.makeText(context, "Error updating review: $it", Toast.LENGTH_SHORT)
-//                                .show()
-//                        }
-//                } else {
-//                    db.collection("reviews")
-//                        .add(newReview)
-//                        .addOnSuccessListener { documentReference ->
-//                            Toast.makeText(
-//                                context,
-//                                "Review added to Firestore with ID: ${documentReference.id}",
-//                                Toast.LENGTH_SHORT
-//                            ).show()
-//                        }
-//                        .addOnFailureListener {
-//                            Toast.makeText(
-//                                context,
-//                                "Error adding review to Firestore",
-//                                Toast.LENGTH_SHORT
-//                            ).show()
-//                        }
-//                }
-//            }
-//            .addOnFailureListener {
-//                Toast.makeText(context, "Error querying reviews: $it", Toast.LENGTH_SHORT).show()
-//            }
     }
 
     fun readDataFromFirestore(db: FirebaseFirestore, callback: (List<Review>) -> Unit) {

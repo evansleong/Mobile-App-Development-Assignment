@@ -115,7 +115,7 @@ fun EditReviewScreen(
 
     val maxWords = 30
     val maxImages = 9
-    val title = review?.title
+    var title = review?.title
     val tripName = review?.trip_name.toString()
     var reviewTitle by remember { mutableStateOf(title) }
     var rating by remember { mutableStateOf(review?.rating ?: 0) }
@@ -123,6 +123,9 @@ fun EditReviewScreen(
     var isChecked by remember { mutableStateOf(review != null && review?.is_public == 1) }
     var trip_id: String = "null"
 
+    if(title == null){
+        title = "No Title"
+    }
     var expanded by remember { mutableStateOf(false) }
     var selectedOption by remember { mutableStateOf("") }
     var isImageUploadInProgress by remember { mutableStateOf(false) }
@@ -227,11 +230,11 @@ fun EditReviewScreen(
                     value = reviewTitle ?: "",
                     onValueChange = {
                         // Limit the input to maxWords words
-                        if (it.count { c -> c == ' ' } < maxWords) {
+                        if (it.length <= maxWords) {
                             reviewTitle = it
                         }
                     },
-                    maxLines = 1,
+                    singleLine = true,
                     colors = TextFieldDefaults.colors(
                         unfocusedContainerColor = Color.Transparent,
                         focusedContainerColor = Color.Transparent,
@@ -244,7 +247,7 @@ fun EditReviewScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Text(
-                    text = "Max $maxWords words",
+                    text = "Max $maxWords characters",
                     color = Color.Gray,
                     style = MaterialTheme.typography.labelSmall,
                     modifier = Modifier.padding(start = 8.dp)
@@ -363,7 +366,21 @@ fun EditReviewScreen(
                                             review.id,
                                             created_at = review.created_at,
                                             action = "Edit"
-                                        )
+                                        ) {
+//                                            dbHandler.saveReview(
+//                                                it,
+//                                                tripName,
+//                                                reviewTitle.toString(),
+//                                                rating.toInt(),
+//                                                comment,
+//                                                selectedImages,
+//                                                isCheckedInt,
+//                                                review.trip_id,
+//                                                logInUser?.userId,
+//                                                created_at = review.created_at,
+//                                                action = "Edit"
+//                                            )
+                                        }
                                     } else {
                                         //add
                                         reviewViewModel.saveReview(
@@ -378,7 +395,20 @@ fun EditReviewScreen(
                                             trip_id = trip_id,
                                             user_id = logInUser?.userId,
                                             action = "Add"
-                                        )
+                                        ){
+                                            dbHandler.saveReview(
+                                                it,
+                                                selectedOption,
+                                                reviewTitle.toString(),
+                                                rating.toInt(),
+                                                comment,
+                                                selectedImages,
+                                                isCheckedInt,
+                                                trip_id = trip_id,
+                                                user_id = logInUser?.userId,
+                                                action = "Add"
+                                            )
+                                        }
                                     }
                                     navController.popBackStack()
                                 } else {

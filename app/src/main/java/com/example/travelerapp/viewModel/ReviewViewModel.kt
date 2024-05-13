@@ -30,8 +30,9 @@ class ReviewViewModel : ViewModel() {
         id: String = "null",
         created_at: Long = 0L,
         action: String,
+        callback: (String) -> Unit
     ) {
-        database.saveReview(db,context,trip_name, title, rating, comment, imageUris, is_public, trip_id, user_id, id, created_at, action)
+        database.saveReview(db,context,trip_name, title, rating, comment, imageUris, is_public, trip_id, user_id, id, created_at, action, callback)
     }
 
     fun readReviews(db: FirebaseFirestore, callback: (List<Review>) -> Unit) {

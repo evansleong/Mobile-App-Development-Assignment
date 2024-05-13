@@ -67,6 +67,7 @@ fun ReloadScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
+        val maxWords = 30
         val title = "Wallet"
         ReuseComponents.TopBar(title = title, navController)
         val wallet = walletViewModel.userWallet
@@ -127,7 +128,10 @@ fun ReloadScreen(
             ) {
                 TextField(
                     value = amountInput,
-                    onValueChange = { amountInput = it },
+                    onValueChange = {
+                        val newValue = it.filter { char -> char.isDigit() }
+                        amountInput = newValue
+                    },
                     modifier = Modifier
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                         .padding(top = 8.dp)
@@ -143,7 +147,7 @@ fun ReloadScreen(
                         focusedTextColor = Color.Black,
                         unfocusedTextColor = Color.Black,
                     ),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                 )
 
 
@@ -189,7 +193,7 @@ fun ReloadScreen(
                         Text(text = "Other")
                     }
                     if (focusTextInput.value) {
-                        LaunchedEffect(Unit) {
+                        LaunchedEffect(amountInput) {
                             focusRequester.requestFocus()
                             focusTextInput.value = false
                         }
@@ -197,18 +201,20 @@ fun ReloadScreen(
                 }
             }
 
-            var description by remember { mutableStateOf("") }
+            var description by remember { mutableStateOf("Reload") }
             Column {
                 Text(
                     text = "Description",
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    modifier = Modifier.padding(horizontal = 16.dp).padding(top = 8.dp)
                 )
                 TextField(
                     value = description,
-                    onValueChange = { description = it },
+                    onValueChange = {
+                        if (it.length <= maxWords) {
+                            description = it
+                        } },
                     modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .padding(top = 8.dp)
+                        .padding(horizontal = 16.dp)
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
                         .background(color = Color(0xFFE1E1E1)),
@@ -222,17 +228,20 @@ fun ReloadScreen(
                     ),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 )
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 32.dp),
-            ) {
+                Text(
+                    text = "Max $maxWords characters",
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
                 Button(
-                    onClick = { showDialog.value = true },
+                    onClick = {
+                        if (amountInput.isNotEmpty()) {
+                            if (amountInput.toInt() > 0) {
+                                showDialog.value = true
+                            }
+                        }
+                    },
                     colors = ButtonDefaults.buttonColors(
                         contentColor = Color.Black,
                         containerColor = Color(0xFFEDE9E9)
@@ -250,6 +259,15 @@ fun ReloadScreen(
                             .padding(horizontal = 16.dp, vertical = 10.dp)
                     )
                 }
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 32.dp),
+            ) {
                 var wrongAttempts = 0
                 if (showDialog.value) {
                     PinInputDialog(
@@ -260,9 +278,13 @@ fun ReloadScreen(
                                 if (walletViewModel.checkPin(pin)){
                                     walletViewModel.updateBalance(db, context, amountInput, "Reload"){
                                         if(it){
+                                            val dbHandler: DBHandler = DBHandler(context)
+                                            dbHandler.updateBalance(wallet?.user_id.toString(), wallet?.available.toString(), amountInput, "Reload")
                                             Toast.makeText(context, "Successfully Reload $amountInput into wallet", Toast.LENGTH_SHORT).show()
                                             showDialog.value = false
-                                            walletViewModel.userWallet?.let { transactionViewModel.createTx(db, context, "Reload", amountInput, description, user_id = it.user_id) }
+                                            walletViewModel.userWallet?.let { transactionViewModel.createTx(db, context, "Reload", amountInput, description, user_id = it.user_id){ id ->
+                                                dbHandler.createTransaction(id, "Reload", amountInput, description, user_id = it.user_id)
+                                            } }
                                             navController.popBackStack()
                                         }
                                     }

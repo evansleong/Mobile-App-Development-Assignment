@@ -1,17 +1,10 @@
 package com.example.travelerapp.repo
 
 import android.content.Context
-import android.net.Uri
 import android.util.Log
 import android.widget.Toast
-import com.example.travelerapp.DBHandler
-import com.example.travelerapp.createTransaction
-import com.example.travelerapp.data.Review
 import com.example.travelerapp.data.Transaction
-import com.example.travelerapp.data.Trip
-import com.example.travelerapp.data.Wallet
 import com.google.firebase.firestore.FirebaseFirestore
-import java.time.Instant
 
 class TransactionFirebase {
     fun createTransaction(
@@ -21,9 +14,10 @@ class TransactionFirebase {
         amount: String,
         description: String,
         tripName: String? = "null",
-        agencyUsername: String? = "null",
+//        agencyUsername: String? = "null",
         user_id: String,
         trip_id: String? = "null",
+        callback: (String) -> Unit,
     ) {
         val time = System.currentTimeMillis()
 //        val time = Instant.now().toEpochMilli()
@@ -48,10 +42,12 @@ class TransactionFirebase {
                     "Transaction added to Firestore with ID: ${documentReference.id}",
                     Toast.LENGTH_SHORT
                 ).show()
+                callback(documentReference.id)
             }
             .addOnFailureListener {
                 Toast.makeText(context, "Error adding transaction to Firestore", Toast.LENGTH_SHORT)
                     .show()
+                callback("null")
             }
     }
 

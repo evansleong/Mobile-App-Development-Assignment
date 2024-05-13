@@ -130,7 +130,11 @@ fun WalletScreen(
                 ){
                     Button(
                         onClick = {
-                            navController.navigate(route = Screen.Reload.route)
+                            navController.navigate(route = Screen.Reload.route) {
+                                popUpTo(Screen.Reload.route) {
+                                    inclusive = true
+                                }
+                            }
                         },
                         colors = ButtonDefaults.buttonColors(
                             contentColor = Color(0xFF5DB075),

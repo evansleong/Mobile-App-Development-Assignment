@@ -43,6 +43,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.travelerapp.DBHandler
 import com.example.travelerapp.Screen
 import com.example.travelerapp.viewModel.UserViewModel
+import com.example.travelerapp.viewModel.WalletViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
@@ -53,7 +54,7 @@ fun SignUpScreen(
     navController: NavController,
     context: Context,
     dbHandler: DBHandler,
-    viewModel: UserViewModel
+    viewModel: UserViewModel,
 ) {
     val db = Firebase.firestore
     var username = remember { mutableStateOf(TextFieldValue()) }
@@ -267,6 +268,6 @@ fun SignUpScreenPreview(){
         navController = rememberNavController(),
         context = LocalContext.current,
         dbHandler = db,
-        viewModel = UserViewModel()
+        viewModel = UserViewModel(),
     )
 }

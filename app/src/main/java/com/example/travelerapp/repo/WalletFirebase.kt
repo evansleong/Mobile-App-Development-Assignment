@@ -1,26 +1,17 @@
 package com.example.travelerapp.repo
 
 import android.content.Context
-import android.util.Base64
 import android.util.Log
 import android.widget.Toast
 import com.example.travelerapp.DBHandler
-import com.example.travelerapp.createTransaction
-import com.example.travelerapp.data.AgencyUser
-import com.example.travelerapp.data.Trip
 import com.example.travelerapp.data.Wallet
-import com.example.travelerapp.decrypt
-import com.example.travelerapp.encrypt
 import com.google.firebase.firestore.FirebaseFirestore
-import java.security.KeyStore
-import javax.crypto.Cipher
-import javax.crypto.SecretKey
 
 private const val ANDROID_KEY_STORE = "AndroidKeyStore"
 private const val AES_MODE = "AES/GCM/NoPadding"
 private const val KEY_ALIAS = "WalletPin"
 class WalletFirebase {
-    fun createWallet(db: FirebaseFirestore, context: Context, user_id: String) {
+    fun createWallet(db: FirebaseFirestore, context: Context, user_id: String, callback: (String) -> Unit) {
         val dbHandler: DBHandler = DBHandler(context)
         val newWallet = hashMapOf(
             "user_id" to user_id,
@@ -36,10 +27,12 @@ class WalletFirebase {
                     "Wallet added to Firestore with ID: ${documentReference.id}",
                     Toast.LENGTH_SHORT
                 ).show()
+                callback(documentReference.id)
             }
             .addOnFailureListener {
                 Toast.makeText(context, "Error adding wallet to Firestore", Toast.LENGTH_SHORT)
                     .show()
+                callback("null")
             }
     }
 
@@ -64,7 +57,7 @@ class WalletFirebase {
     }
 
 
-    fun updateWalletPIN(db: FirebaseFirestore, context: Context, pin: String, user_id: String?) {
+    fun updateWalletPIN(db: FirebaseFirestore, context: Context, pin: String, user_id: String?, callback: (String) -> Unit) {
         val collectionRef = db.collection("wallets")
 
         collectionRef.whereEqualTo("user_id", user_id)
@@ -80,6 +73,7 @@ class WalletFirebase {
                                 "WalletPin updated for document with ID: $documentId",
                                 Toast.LENGTH_SHORT
                             ).show()
+                            callback(user_id.toString())
                         }
                         .addOnFailureListener { e ->
                             Toast.makeText(
@@ -87,6 +81,7 @@ class WalletFirebase {
                                 "Error updating walletPin for document with ID: $documentId: $e",
                                 Toast.LENGTH_SHORT
                             ).show()
+                            callback("null")
                         }
                 }
             }
@@ -97,6 +92,7 @@ class WalletFirebase {
                     "Error querying documents: $e",
                     Toast.LENGTH_SHORT
                 ).show()
+                callback("null")
             }
     }
 

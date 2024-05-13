@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -30,7 +29,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.travelerapp.DBHandler
 import com.example.travelerapp.Screen
-import com.example.travelerapp.updateWalletPIN
 import com.example.travelerapp.viewModel.WalletViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -120,7 +118,9 @@ fun AddPINScreen(
                 onClick = {
                     if (pin1.isNotEmpty() && pin2.isNotEmpty()) {
                         if (pin1 == pin2) {
-                            walletViewModel.updatePin(db, context, pin2)
+                            walletViewModel.updatePin(db, context, pin2){
+                                dbHandler.updateWalletPin(pin2, it)
+                            }
                             Toast.makeText(context, "Welcome to Traveller Apps", Toast.LENGTH_SHORT)
                                 .show()
                             navController.navigate(Screen.Home.route) {

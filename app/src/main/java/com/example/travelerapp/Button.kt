@@ -115,7 +115,11 @@ object ReuseComponents {
                     modifier = Modifier
                         .size(20.dp)
                         .clickable {
-                            navController.navigate(route = Screen.Home.route)
+                            navController.navigate(route = Screen.Home.route){
+                                popUpTo(Screen.Home.route) {
+                                    inclusive = false
+                                }
+                            }
                         }
                 )
                 Icon(
@@ -125,7 +129,11 @@ object ReuseComponents {
                     modifier = Modifier
                         .size(20.dp)
                         .clickable {
-                            navController.navigate(route = Screen.UserDisplayPackageList.route)
+                            navController.navigate(route = Screen.UserDisplayPackageList.route){
+                                popUpTo(Screen.UserDisplayPackageList.route) {
+                                    inclusive = false
+                                }
+                            }
                         }
                 )
                 Icon(
@@ -135,7 +143,11 @@ object ReuseComponents {
                     modifier = Modifier
                         .size(20.dp)
                         .clickable {
-                            navController.navigate(route = Screen.Wallet.route)
+                            navController.navigate(route = Screen.Wallet.route) {
+                                popUpTo(Screen.Wallet.route) {
+                                    inclusive = false
+                                }
+                            }
                         }
                 )
                 Icon(
@@ -145,7 +157,11 @@ object ReuseComponents {
                     modifier = Modifier
                         .size(20.dp)
                         .clickable {
-                            navController.navigate(route = Screen.Review.route)
+                            navController.navigate(route = Screen.Review.route) {
+                                popUpTo(Screen.Review.route) {
+                                    inclusive = false
+                                }
+                            }
                         }
                 )
             }

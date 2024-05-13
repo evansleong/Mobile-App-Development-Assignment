@@ -147,6 +147,13 @@ fun UserViewTripScreen(
                                     )
                                 }
                             }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Available: ${trip.isAvailable}",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+
                             Column (
                                 verticalArrangement = Arrangement.Bottom,
                                 modifier = Modifier.fillMaxSize()

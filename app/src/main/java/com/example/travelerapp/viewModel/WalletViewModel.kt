@@ -22,8 +22,8 @@ class WalletViewModel : ViewModel() {
     var userWallet: Wallet? = null
     private val database = WalletFirebase()
 
-    fun createWallet(db: FirebaseFirestore, context: Context, user_id: String) {
-        database.createWallet(db, context, user_id)
+    fun createWallet(db: FirebaseFirestore, context: Context, user_id: String, callback: (String) -> Unit) {
+        database.createWallet(db, context, user_id, callback)
     }
 
     fun readWallets(db: FirebaseFirestore, callback: (List<Wallet>) -> Unit){
@@ -37,11 +37,11 @@ class WalletViewModel : ViewModel() {
         return wallets.find { it.user_id == user_id }
     }
 
-    fun updatePin(db: FirebaseFirestore, context: Context, newPin: String){
+    fun updatePin(db: FirebaseFirestore, context: Context, newPin: String, callback: (String) -> Unit){
 //        val pin: ByteArray = encrypt(newPin)
 //        val base64String = Base64.encodeToString(pin, Base64.DEFAULT)
         this.userWallet?.walletPin = newPin
-        database.updateWalletPIN(db, context, newPin, userWallet?.user_id)
+        database.updateWalletPIN(db, context, newPin, userWallet?.user_id, callback)
     }
     fun updateBalance(db: FirebaseFirestore, context: Context, amount: String, action: String, callback: (Boolean) -> Unit) {
         val available = this.userWallet?.available?.toDouble()

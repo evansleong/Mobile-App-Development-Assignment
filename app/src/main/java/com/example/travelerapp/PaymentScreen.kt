@@ -1,6 +1,7 @@
 package com.example.travelerapp
 
 import ReuseComponents
+import android.annotation.SuppressLint
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -29,6 +30,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,6 +60,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 
 
+@SuppressLint("UnrememberedMutableState")
 @Composable
 fun PaymentScreen(
     navController: NavController,
@@ -70,6 +73,7 @@ fun PaymentScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
+        val maxWords = 50
         val title = "Wallet"
         ReuseComponents.TopBar(title = title, navController)
         val wallet = walletViewModel.userWallet
@@ -78,7 +82,7 @@ fun PaymentScreen(
         val tripState = remember { mutableStateOf<Trip?>(null) }
         val deposit = remember { mutableStateOf(0.0) }
         val selectedPackage = tripViewModel.selectedTripId
-        LaunchedEffect(selectedPackage) {
+        LaunchedEffect(key1 = true) {
             tripViewModel.readSingleTrip(db, selectedPackage.toString()) { trip ->
                 if (trip != null) {
                     tripState.value = trip
@@ -102,16 +106,23 @@ fun PaymentScreen(
                 Spacer(modifier = Modifier.padding(top = 240.dp))
                 Column {
                     Text(
-                        text = "Your Balance",
+                        text = "Transfer To : ${tripState.value?.agencyUsername}",
                         style = MaterialTheme.typography.titleMedium,
                         color = Color(0xFFFCFCFC),
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
                     )
                     Text(
-                        text = "MYR${wallet?.available}",
+                        text = "For Package: ",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color(0xFFFCFCFC),
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                    )
+                    Text(
+                        text = "${tripState.value?.tripLength} ${tripState.value?.tripName}",
                         color = Color.White,
-                        fontSize = 36.sp,
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.ExtraBold,
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
@@ -138,40 +149,70 @@ fun PaymentScreen(
                     .clip(RoundedCornerShape(16.dp))
                     .background(color = Color(0xFFA0D3AF))
             ) {
-                TextField(
-                    value = amount.toString(),
-                    onValueChange = {  },
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .padding(top = 8.dp)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                        .focusRequester(focusRequester)
-                        .background(color = Color(0xFFE1E1E1)),
-                    label = { Text(text = "Enter your Reload Amount", color = Color.Black.copy(alpha = 0.32f), fontWeight = FontWeight.Light) },
-                    singleLine = true,
-                    readOnly = true,
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFFE1E1E1),
-                        unfocusedContainerColor = Color(0xFFE1E1E1),
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
-                    ),
-                )
+            }
+            TextField(
+                value = amount.toString(),
+                onValueChange = {  },
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(top = 8.dp)
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .focusRequester(focusRequester)
+                    .background(color = Color(0xFFE1E1E1)),
+                label = { Text(text = "Payment Amount", color = Color.Black.copy(alpha = 0.32f), fontWeight = FontWeight.Light) },
+                singleLine = true,
+                readOnly = true,
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color(0xFFE1E1E1),
+                    unfocusedContainerColor = Color(0xFFE1E1E1),
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black,
+                ),
+            )
+            Column (modifier = Modifier.padding(horizontal = 16.dp)){
+                Row {
+                    Text(
+                        text = if ((amount.compareTo(wallet?.available?.toDouble() ?: 0.0) < 0)) "Your balance = RM ${wallet?.available}" else "Insufficient Balance! Click here to",
+                        color = Color.Gray,
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                    Text(
+                        text = if ((amount.compareTo(wallet?.available?.toDouble() ?: 0.0) < 0)) "" else "Reload",
+                        color = Color.Blue,
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .clickable {
+                                navController.navigate(Screen.Reload.route) {
+                                    popUpTo(Screen.Reload.route) {
+                                        inclusive = false
+                                    }
+                                }
+                            }
+                    )
+                }
             }
 
             var description by remember { mutableStateOf("") }
+            description = "${tripState.value?.tripLength} ${tripState.value?.tripName}"
             Column {
                 Text(
                     text = "Description",
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    modifier = Modifier
+                        .padding(horizontal = 18.dp)
+                        .padding(top = 16.dp)
                 )
                 TextField(
                     value = description,
-                    onValueChange = { description = it },
+                    onValueChange = {
+                        if (it.length <= maxWords) {
+                        description = it
+                    } },
                     modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .padding(top = 8.dp)
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 4.dp)
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
                         .focusRequester(focusRequester)
@@ -185,6 +226,12 @@ fun PaymentScreen(
                         unfocusedTextColor = Color.Black,
                     ),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                )
+                Text(
+                    text = "Max $maxWords characters",
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(start = 24.dp)
                 )
             }
 
@@ -207,7 +254,7 @@ fun PaymentScreen(
                         .padding(horizontal = 32.dp, vertical = 16.dp)
                 ) {
                     Text(
-                        text = "Pay",
+                        text = "Pay Now",
                         textAlign = TextAlign.Center,
                         fontSize = 16.sp,
                         modifier = Modifier
@@ -225,10 +272,14 @@ fun PaymentScreen(
 
                                     walletViewModel.updateBalance(db, context, amount.toString(), "Payment") {
                                         if (it) {
+                                            val dbHandler: DBHandler = DBHandler(context)
+                                            dbHandler.updateBalance(wallet?.user_id.toString(), wallet?.available.toString(), amount.toString(), "Payment")
                                             Toast.makeText(context, "Successfully make Payment RM$amount", Toast.LENGTH_SHORT).show()
                                             showDialog.value = false
                                             wallet?.user_id?.let {
-                                                transactionViewModel.createTx(db, context, "Payment", amount.toString(), description, user_id = it)
+                                                transactionViewModel.createTx(db, context, "Payment", amount.toString(), description, user_id = it, trip_id = tripState.value?.tripId){ id ->
+                                                    dbHandler.createTransaction(id, "Reload", amount.toString(), description, user_id = it, trip_id = tripState.value?.tripId)
+                                                }
                                             }
                                             tripState.value?.let {
                                                 tripViewModel.updateAvailable(db, it.isAvailable, tripViewModel.numPax.toInt(), it.tripId) {
