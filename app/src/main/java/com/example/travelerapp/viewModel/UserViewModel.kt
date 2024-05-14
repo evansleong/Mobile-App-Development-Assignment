@@ -17,14 +17,17 @@ class UserViewModel: ViewModel() {
         userEmail: String,
         userPw: String,
         userUri: String? = null,
-        userWalletPin: Int? = null ){
+        userWalletPin: Int? = null,
+        callback: (String) -> Unit
+    ){
         database.addUDatatoFirestore(
             context = context,
             db = db,
             userName = userName,
             userEmail = userEmail,
             userPw = userPw,
-            userImgUri = userUri
+            userImgUri = userUri,
+            callback
         )
     }
 

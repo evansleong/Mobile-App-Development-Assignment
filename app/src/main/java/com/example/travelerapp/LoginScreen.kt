@@ -248,10 +248,6 @@ fun LoginScreen(
                                     }
                                 }
                             } else{
-                                walletViewModel.createWallet(db, context, loginSuccessful.userId) {
-                                    val dbHandler: DBHandler = DBHandler(context)
-                                    dbHandler.createWallet(it, loginSuccessful.userId)
-                                }
                                 Toast.makeText(context, "wallet null", Toast.LENGTH_SHORT).show()
                             }
 

@@ -116,7 +116,7 @@ fun WalletScreen(
                         Text(
                             text = "MYR${wallet.available}",
                             color = Color.White,
-                            fontSize = 36.sp,
+                            fontSize = 32.sp,
                             fontWeight = FontWeight.ExtraBold,
                             modifier = Modifier
                                 .padding(horizontal = 16.dp)
@@ -145,7 +145,7 @@ fun WalletScreen(
                         Text(
                             text = "+ RELOAD",
                             fontWeight = FontWeight.ExtraBold,
-                            fontSize = 16.sp,
+                            fontSize = 14.sp,
                             modifier = Modifier
                                 .padding(horizontal = 12.dp, vertical = 2.dp)
                                 .sizeIn(maxHeight = 20.dp)
@@ -197,14 +197,6 @@ fun WalletScreen(
                         val currentDate = Date(transaction.created_at)
                         val dateFormat = SimpleDateFormat("HH:mm dd MMMM yyyy", Locale.getDefault())
                         val formattedDate = dateFormat.format(currentDate)
-//                        val utcDateTime = remember {
-//                            val instant = Instant.ofEpochMilli(transaction.created_at)
-//                            LocalDateTime.ofInstant(instant, ZoneOffset.UTC)
-//                        }
-//                        val formattedDate = remember {
-//                            val formatter = DateTimeFormatter.ofPattern("HH:mm dd MMMM yyyy")
-//                            utcDateTime.format(formatter)
-//                        }
                         Card(
                             colors = CardDefaults.cardColors(
                                 containerColor = Color.White,

@@ -73,7 +73,7 @@ fun PaymentScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        val maxWords = 50
+        val maxWords = 30
         val title = "Wallet"
         ReuseComponents.TopBar(title = title, navController)
         val wallet = walletViewModel.userWallet

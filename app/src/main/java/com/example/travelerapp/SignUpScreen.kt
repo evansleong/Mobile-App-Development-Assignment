@@ -55,6 +55,7 @@ fun SignUpScreen(
     context: Context,
     dbHandler: DBHandler,
     viewModel: UserViewModel,
+    walletViewModel: WalletViewModel
 ) {
     val db = Firebase.firestore
     var username = remember { mutableStateOf(TextFieldValue()) }
@@ -201,7 +202,12 @@ fun SignUpScreen(
                                     userName = username.value.text,
                                     userEmail = email.value.text,
                                     userPw = password.value.text
-                                )
+                                ){
+                                    walletViewModel.createWallet(db, context, it) {wallet_id ->
+                                        val dbHandler: DBHandler = DBHandler(context)
+                                        dbHandler.createWallet(wallet_id, it)
+                                    }
+                                }
                                 showToast.value = true
                                 checked.value = false
 //                                auth.createUserWithEmailAndPassword(email, password)
@@ -269,5 +275,6 @@ fun SignUpScreenPreview(){
         context = LocalContext.current,
         dbHandler = db,
         viewModel = UserViewModel(),
+        walletViewModel = WalletViewModel()
     )
 }

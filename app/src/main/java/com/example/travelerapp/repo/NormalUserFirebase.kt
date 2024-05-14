@@ -13,7 +13,8 @@ class NormalUserFirebase {
         userName: String,
         userEmail: String,
         userPw: String,
-        userImgUri: String?
+        userImgUri: String?,
+        callback: (String) -> Unit
     ) {
 
         val userData = hashMapOf(
@@ -27,15 +28,13 @@ class NormalUserFirebase {
             .add(userData)
             .addOnSuccessListener { documentReference ->
                 Log.d("Firestore", "User added with ID: ${documentReference.id}")
-                Toast.makeText(
-                    context,
-                    "User added to Firestore with ID: ${documentReference.id}",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(context, "User added to Firestore with ID: ${documentReference.id}", Toast.LENGTH_SHORT).show()
+                callback(documentReference.id)
             }
             .addOnFailureListener { e ->
                 Log.e("Firestore", "Error adding user", e)
                 Toast.makeText(context, "Error adding user to Firestore", Toast.LENGTH_SHORT).show()
+                callback("null")
             }
     }
 

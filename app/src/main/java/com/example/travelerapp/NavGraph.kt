@@ -49,7 +49,7 @@ fun SetUpNavGraph(
         composable(
             route = Screen.Signup.route
         ){
-            SignUpScreen(navController, context = LocalContext.current, dbHandler, userViewModel)
+            SignUpScreen(navController, context = LocalContext.current, dbHandler, userViewModel, walletViewModel)
         }
         composable(
             route = Screen.AddPIN.route

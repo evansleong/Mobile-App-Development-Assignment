@@ -71,6 +71,7 @@ class ReviewFirebase {
 
     fun readDataFromFirestore(db: FirebaseFirestore, callback: (List<Review>) -> Unit) {
         db.collection("reviews")
+            .orderBy("created_at", com.google.firebase.firestore.Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { documents ->
                 val reviews = mutableListOf<Review>()
