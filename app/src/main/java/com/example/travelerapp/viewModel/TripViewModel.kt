@@ -101,4 +101,14 @@ class TripViewModel : ViewModel() {
     fun readMultipleTrips(db: FirebaseFirestore, tripId: List<String>, callback: (List<Trip?>) -> Unit) {
         database.readMultipleTripFromFirestore(db, tripId, callback)
     }
+
+    fun addPurchasedTrip(
+        db: FirebaseFirestore,
+        context: Context,
+        tripId: String,
+        agencyUsername: String,
+        noPax: Int,
+    ){
+        database.addPurchasedTrip(db, context, tripId, agencyUsername, noPax)
+    }
 }

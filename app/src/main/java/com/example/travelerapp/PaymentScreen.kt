@@ -280,6 +280,7 @@ fun PaymentScreen(
                                                 transactionViewModel.createTx(db, context, "Payment", amount.toString(), description, user_id = it, trip_id = tripState.value?.tripId){ id ->
                                                     dbHandler.createTransaction(id, "Reload", amount.toString(), description, user_id = it, trip_id = tripState.value?.tripId)
                                                 }
+                                                tripViewModel.addPurchasedTrip(db, context, tripState.value?.tripId.toString(), tripState.value?.agencyUsername.toString(), tripViewModel.numPax)
                                             }
                                             tripState.value?.let {
                                                 tripViewModel.updateAvailable(db, it.isAvailable, tripViewModel.numPax.toInt(), it.tripId) {
