@@ -7,8 +7,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+//import androidx.compose.foundation.layout.FlowColumnScopeInstance.align
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,8 +19,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Button
@@ -26,6 +30,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,7 +39,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -81,7 +88,7 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.background)
                 .weight(1f),
 //            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -90,34 +97,67 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, fontFamily = CusFont1)
+                style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, fontFamily = CusFont1),
+                color = MaterialTheme.colorScheme.onSecondary
             )
 //            Text(text = "calendar")
-            Box(modifier = Modifier.padding(16.dp)) {
+            Box(modifier = Modifier.padding(16.dp)
+                    .clickable { navController.navigate(
+                        route = Screen.UserPackagePurchased.route) }) {
                 ReuseComponents.DatePicker()
             }
 //            HeadingTxt("Explore Travel Package")
-            Text(text = "Explore Travel Package",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold,fontFamily = CusFont1)
-            )
+            Row (
+                modifier = Modifier.fillMaxWidth()
+//                    .padding(16.dp)
+                ,
+                verticalAlignment = Alignment.CenterVertically
+
+            ){
+
+                Text(
+                    text = "Explore Travel Package",
+                    modifier = Modifier
+//                        .fillMaxWidth()
+                        ,
+                    style = TextStyle(
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = CusFont1
+                    ),
+                    color = MaterialTheme.colorScheme.onSecondary
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                IconButton(onClick = {
+                    navController.navigate(route = Screen.UserDisplayPackageList.route)
+                }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowRight,
+                        contentDescription = "Navigate to Package List",
+                        tint = MaterialTheme.colorScheme.onBackground)
+                }
+            }
 
             // travel package list slider
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .padding(vertical = 16.dp)
+                    .background(MaterialTheme.colorScheme.background)
             ) {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
+                        .background(MaterialTheme.colorScheme.background)
                 ) {
                     // Horizontal list of user travel packages
                     LazyRow(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .background(MaterialTheme.colorScheme.background),
                         contentPadding = PaddingValues(horizontal = 8.dp)
                     ) {
                         items(tripListState.value.take(3)) { trip ->
@@ -126,33 +166,36 @@ fun HomeScreen(
                     }
                 }
 
-                IconButton(
-                    onClick = {
-                        navController.navigate(route = Screen.UserDisplayPackageList.route)
-                    },
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(20.dp)
-                        .offset(y = (-300).dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowForward,
-                        contentDescription = "Navigate to Package List"
-                    )
-                }
+//                IconButton(
+//                    onClick = {
+//                        navController.navigate(route = Screen.UserDisplayPackageList.route)
+//                    },
+//                    modifier = Modifier
+//                        .align(Alignment.BottomEnd)
+//                        .padding(20.dp)
+//                        .offset(y = (-198).dp)
+//                ) {
+//                    Icon(
+//                        imageVector = Icons.Default.ArrowForward,
+//                        contentDescription = "Navigate to Package List",
+//                        tint = MaterialTheme.colorScheme.onBackground
+//                    )
+//                }
             }
 
-            Text(
-                modifier = Modifier.clickable {
-                    navController.navigate(route = Screen.AgencyHome.route)
-                },
-                text = "Agency Home Screen")
-
-            Text(
-                modifier = Modifier.clickable {
-                    navController.navigate(route = Screen.AgencyAddPackage.route)
-                },
-                text = "Add Package Screen")
+//            Text(
+//                modifier = Modifier.clickable {
+//                    navController.navigate(route = Screen.AgencyHome.route)
+//                },
+//                text = "Agency Home Screen",
+//                color = MaterialTheme.colorScheme.onSecondary)
+//
+//            Text(
+//                modifier = Modifier.clickable {
+//                    navController.navigate(route = Screen.AgencyAddPackage.route)
+//                },
+//                text = "Add Package Screen",
+//                color = MaterialTheme.colorScheme.onSecondary)
         }
 
         ReuseComponents.NavBar(text = title, navController = navController)
@@ -171,50 +214,66 @@ fun HomeTripItem(
         modifier = Modifier
             .padding(8.dp)
             .width(200.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(color = Color.Transparent)
             .clickable {
                 tripViewModel.selectedTripId = trip.tripId
                 navController.navigate(route = Screen.AgencyPackageDetail.route)
             }
     ) {
-        Column(
-            modifier = Modifier
-                .padding(8.dp)
-                .width(200.dp)
-                .clickable {
-                    tripViewModel.selectedTripId = trip.tripId
-                    navController.navigate(route = Screen.UserViewTrip.route)
-                }
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
         ) {
-            Image(
-                painter = painter,
-                contentDescription = trip.tripName,
-                modifier = Modifier
-                    .height(100.dp)
-                    .fillMaxWidth(),
-                contentScale = ContentScale.Crop
-            )
-            Column(
-                modifier = Modifier.fillMaxWidth()
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+//                color = Color(0xff48444d),
+//                shape = RoundedCornerShape(20.dp)
             ) {
-                Text(
-                    text = trip.tripName,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "RM${trip.tripFees}/pax", // Displaying the price
-                    style = TextStyle(fontSize = 12.sp) // Adjust font size as needed
-                )
-                Text(
-                    text = trip.tripLength
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(20.dp))
+                        .clickable {
+                            tripViewModel.selectedTripId = trip.tripId
+                            navController.navigate(route = Screen.UserViewTrip.route)
+                        },
+                ) {
+                    Image(
+                        painter = painter,
+                        contentDescription = trip.tripName,
+                        modifier = Modifier
+                            .height(100.dp)
+                            .clip(RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp))
+                            .fillMaxWidth()
+                        ,
+                        contentScale = ContentScale.Crop
+                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        Text(
+                            text = trip.tripName,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "RM${trip.tripFees}/pax", // Displaying the price
+                            style = TextStyle(fontSize = 12.sp) // Adjust font size as needed
+                        )
+                        Text(
+                            text = trip.tripLength
+                        )
+                    }
+                }
             }
         }
     }
 }
 
-
-@Composable
 @Preview
+@Composable
 fun HomeScreenPreview(){
     HomeScreen(
         navController = rememberNavController(),

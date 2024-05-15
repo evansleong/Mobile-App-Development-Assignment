@@ -56,4 +56,14 @@ class UserViewModel: ViewModel() {
     fun isEmailAv(email: String, users: List<User>): Boolean {
         return users.none { it.userEmail == email }
     }
+
+    fun isUEmailV(email:String): Boolean{
+        val emailRegex = "^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})"
+        return email.matches(emailRegex.toRegex())
+    }
+
+    fun isUPwV(pw:String):Boolean{
+        val pwRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}\$"
+        return pw.matches(pwRegex.toRegex())
+    }
 }
