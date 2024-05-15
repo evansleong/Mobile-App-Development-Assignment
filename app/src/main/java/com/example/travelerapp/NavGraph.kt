@@ -149,7 +149,16 @@ fun SetUpNavGraph(
         composable(
             route = Screen.AgencySetting.route
         ) {
-            AgencySettingScreen(navController, context = LocalContext.current, viewModel = agencyViewModel)
+            AgencySettingScreen(
+                navController,
+                context = LocalContext.current,
+                viewModel = agencyViewModel
+            )
+        }
+        composable(
+            route = Screen.UserPackagePurchased.route
+        ){
+            UserPackagePurchased(navController,userViewModel,tripViewModel)
         }
     }
 }

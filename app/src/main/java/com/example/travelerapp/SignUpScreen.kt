@@ -42,6 +42,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.travelerapp.DBHandler
 import com.example.travelerapp.Screen
+import com.example.travelerapp.data.User
 import com.example.travelerapp.viewModel.UserViewModel
 import com.example.travelerapp.viewModel.WalletViewModel
 import com.google.firebase.auth.FirebaseAuth
@@ -63,6 +64,17 @@ fun SignUpScreen(
     var password = remember { mutableStateOf(TextFieldValue()) }
     val checked = remember { mutableStateOf(false) }
     val showToast = remember { mutableStateOf(false) }
+
+    val vEmail = viewModel.isUEmailV(email.value.text)
+    val vPw = viewModel.isUPwV(password.value.text)
+
+    val vSignUp = vEmail && vPw && checked.value
+
+    val userSU = remember {
+        mutableStateOf(emptyList<User>())
+    }
+
+    viewModel.readUData(db){ userList -> userSU.value = userList }
 
     Column(
         modifier = Modifier
@@ -195,7 +207,9 @@ fun SignUpScreen(
 //                                                }
 //                                            }
                         if(checked.value) {
-                            if (email.value != null && password.value != null && checked.value) {
+                            if (vSignUp) {
+                                if(viewModel.isUNameAv(username.value.text,userSU.value) &&
+                                    viewModel.isEmailAv(email.value.text,userSU.value)){
                                 viewModel.addUser(
                                     context = context,
                                     db = db,
@@ -220,7 +234,9 @@ fun SignUpScreen(
 //                                                }
 //                                            }
 //                                        }
-//                                    }
+                                    }else{
+                                        Toast.makeText(context,"Username or Email has been used, please enter a different one",Toast.LENGTH_SHORT).show()
+                                }
                             }else{
                                 Toast.makeText(context,"Please fill up your Email and Password",Toast.LENGTH_SHORT).show()
                             }

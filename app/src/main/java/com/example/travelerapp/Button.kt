@@ -19,6 +19,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -93,7 +94,7 @@ object ReuseComponents {
     @Composable
     fun NavBar(text: String, navController: NavController) {
         Surface(
-            color = Color.White,
+            color = MaterialTheme.colorScheme.background,
             modifier = Modifier
                 .fillMaxWidth()
         ) {
@@ -103,10 +104,10 @@ object ReuseComponents {
                     .fillMaxWidth()
                     .padding(horizontal = 56.dp, vertical = 16.dp)
             ) {
-                val homeColor = if (text == "Home") Color.Blue else Color.Black
-                val packageColor = if (text == "Travel Package") Color.Blue else Color.Black
-                val walletColor = if (text == "Wallet") Color.Blue else Color.Black
-                val reviewColor = if (text == "Review") Color.Blue else Color.Black
+                val homeColor = if (text == "Home") Color.Blue else MaterialTheme.colorScheme.onBackground
+                val packageColor = if (text == "Travel Package") Color.Blue else MaterialTheme.colorScheme.onBackground
+                val walletColor = if (text == "Wallet") Color.Blue else MaterialTheme.colorScheme.onBackground
+                val reviewColor = if (text == "Review") Color.Blue else MaterialTheme.colorScheme.onBackground
 
                 Icon(
                     painter = painterResource(R.drawable.home),
@@ -187,7 +188,7 @@ object ReuseComponents {
         }
 
         Surface(
-            color = Color.White,
+            color = MaterialTheme.colorScheme.background,
             modifier = Modifier
                 .fillMaxWidth()
         ) {
@@ -204,14 +205,14 @@ object ReuseComponents {
                         Icon(
                             painter = painterResource(R.drawable.back_button),
                             contentDescription = "Back",
-                            tint = Color.Black,
+                            tint = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.size(20.dp)
                         )
                     }
                 }
                 Text(
                     text = title,
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.weight(1f),
                 )
                 if (!isAtSettingPage) {
@@ -227,7 +228,7 @@ object ReuseComponents {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Settings",
-                            tint = Color.Black
+                            tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
                     Box {
@@ -237,14 +238,14 @@ object ReuseComponents {
                             Icon(
                                 imageVector = Icons.Default.MoreVert,
                                 contentDescription = "More",
-                                tint = Color.Black
+                                tint = MaterialTheme.colorScheme.onBackground
                             )
                         }
                         DropdownMenu(
                             expanded = expanded,
                             onDismissRequest = { expanded = false },
                             modifier = Modifier
-                                .background(Color.White),
+                                .background(MaterialTheme.colorScheme.background),
                         ) {
                             items.forEach {
                                 DropdownMenuItem(onClick = {
@@ -359,7 +360,7 @@ object ReuseComponents {
                     ) {
                         Text(
                             text = it.substring(0, 3),
-                            style = TextStyle(Color(0xFF43b3fb), fontFamily = CusFont1))
+                            style = TextStyle(MaterialTheme.colorScheme.onSurface, fontFamily = CusFont1))
                     }
                 }
             }
@@ -383,7 +384,7 @@ object ReuseComponents {
                                 modifier = Modifier
                                     .weight(1f)
                                     .background(
-                                        if (isToday) Color(0xFF43b3fb) else Color.White,
+                                        if (isToday) Color(0xFF43b3fb) else MaterialTheme.colorScheme.background,
                                         CircleShape
                                     )
                                     .padding(10.dp)

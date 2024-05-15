@@ -34,6 +34,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -98,7 +99,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .weight(1f)
-                .background(Color.White),
+                .background(MaterialTheme.colorScheme.background),
 //            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -116,7 +117,7 @@ fun SettingsScreen(
                 ) {
                     Surface (
                         modifier = Modifier.fillMaxSize(),
-                        color = Color(0xFFf9f9f9),
+                        color = MaterialTheme.colorScheme.surface,
                         shape = RoundedCornerShape(20.dp)
                     ){
                         Row(

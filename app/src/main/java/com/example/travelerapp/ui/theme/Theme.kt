@@ -20,12 +20,14 @@ val Teal200 = Color(0xFF03DAC5)
 val Teal700 = Color(0xFF018786)
 val BlueGrey700 = Color(0xFF455A64)
 val BlueGrey300 = Color(0xFF90A4AE)
+val CustomGreen1 = Color(0xFF5DB075)
 
 private val DarkColorScheme = darkColorScheme(
     primary = Teal200,
     secondary = Teal700,
     tertiary = BlueGrey700,
-    background = Color.Black,
+    background = Color(0xff262626),
+//    background = Color.Black,
     surface = Color.DarkGray,
     onPrimary = Color.White,
     onSecondary = Color.White,
@@ -39,7 +41,7 @@ private val LightColorScheme = lightColorScheme(
     secondary = Teal200,
     tertiary = BlueGrey300,
     background = Color.White,
-    surface = Color.LightGray,
+    surface = Color(0xFFf9f9f9),
     onPrimary = Color.White,
     onSecondary = Color.Black,
     onTertiary = Color.Black,
@@ -47,6 +49,7 @@ private val LightColorScheme = lightColorScheme(
     onSurface = Color.Black
 )
 
+//Color(0xFF43b3fb)
 @Composable
 fun TravelerAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
