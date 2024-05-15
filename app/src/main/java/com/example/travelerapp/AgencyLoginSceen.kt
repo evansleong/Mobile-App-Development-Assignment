@@ -16,6 +16,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,8 +65,28 @@ fun AgencyLoginScreen(
     val checked = remember {
         mutableStateOf(false)
     }
+    val rememberMeChecked = remember { mutableStateOf(false) }
 
     val agencyUsers = remember { mutableStateOf(emptyList<AgencyUser>()) }
+
+    // Check if the user is already logged in
+    LaunchedEffect(Unit) {
+        val loginDetails = viewModel.getLoginDetails(context)
+        if (loginDetails != null) {
+            val (email, password) = loginDetails
+            agencyLoginEmail.value = TextFieldValue(email)
+            agencyLoginPassword.value = TextFieldValue(password)
+            val loginSuccessful = viewModel.checkLoginCredentials(email, password, agencyUsers.value)
+            if (loginSuccessful != null) {
+                viewModel.loggedInAgency = loginSuccessful
+                navController.navigate(Screen.AgencyHome.route) {
+                    popUpTo(Screen.AgencyLogin.route) {
+                        inclusive = true
+                    }
+                }
+            }
+        }
+    }
 
     viewModel.readAgencyData(db) { agencyUserList ->
         agencyUsers.value = agencyUserList
@@ -128,6 +149,7 @@ fun AgencyLoginScreen(
                     onValueChange = {
                         agencyLoginEmail.value = agencyLoginEmail.value.copy(text = it)
                     },
+                    singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp)
@@ -178,21 +200,8 @@ fun AgencyLoginScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Checkbox(
-                            checked = checked.value,
-                            onCheckedChange = { isChecked -> checked.value = isChecked },
-                            colors = CheckboxDefaults.colors(checkedColor = Color.Green)
-                        )
-                        Text("I would like to receive your newsletter and other promotional information")
-                    }
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Checkbox(
-                            checked = checked.value,
-                            onCheckedChange = { isChecked -> checked.value = isChecked },
+                            checked = rememberMeChecked.value,
+                            onCheckedChange = { isChecked -> rememberMeChecked.value = isChecked },
                             colors = CheckboxDefaults.colors(checkedColor = Color.Green)
                         )
                         Text("Remember me")
@@ -209,11 +218,13 @@ fun AgencyLoginScreen(
 
                         if (loginSuccessful != null) {
                             viewModel.loggedInAgency = loginSuccessful
-
+                            if (rememberMeChecked.value) {
+                                viewModel.saveLoginDetails(context, email, password)
+                            }
                             Toast.makeText(context, "Login Up Successful", Toast.LENGTH_SHORT)
                                 .show()
                             navController.navigate(Screen.AgencyHome.route) {
-                                popUpTo(Screen.AgencyHome.route) {
+                                popUpTo(Screen.AgencyLogin.route) {
                                     inclusive = true
                                 }
                             }

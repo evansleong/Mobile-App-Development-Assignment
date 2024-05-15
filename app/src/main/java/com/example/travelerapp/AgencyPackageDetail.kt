@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -117,7 +118,7 @@ fun AgencyPackageDetail(
                                 modifier = Modifier.padding(16.dp)
                             ) {
                                 Text(
-                                    text = "${trip.tripLength} - RM${trip.tripFees}/pax",
+                                    text = "${trip.tripLength} - RM${String.format("%.2f", trip.tripFees)}/pax",
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.ExtraBold
                                 )
@@ -143,7 +144,7 @@ fun AgencyPackageDetail(
                                 trip.options.forEach { option ->
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Icon(
-                                            imageVector = Icons.Filled.Info,
+                                            imageVector = Icons.Filled.ArrowForward,
                                             contentDescription = "Check Icon",
                                             modifier = Modifier
                                                 .size(30.dp)

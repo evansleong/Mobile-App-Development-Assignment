@@ -19,6 +19,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -171,9 +172,11 @@ fun AgencyAddPackageScreen(
             val returnDate = DateUtils().convertMillisToLocalDate(returnMillis)
             val days = ChronoUnit.DAYS.between(departureDate, returnDate) + 1
             val nights = if (days > 1) days - 1 else 0
-            return if (days < 2) "1 DAY TRIP" else "$days DAYS $nights NIGHTS"
+            return if (days < 2) "1 DAY TRIP"
+                    else if (days < 0) "INVALID DEPARTURE AND RETURN DATE"
+                    else "$days DAYS $nights NIGHTS"
         }
-        return tripLengthOptions[0] // Default to 1 DAY TRIP if dates are not selected
+        return "INVALID DEPARTURE AND RETURN DATE" // Default to 1 DAY TRIP if dates are not selected
     }
 
     val imagePicker = rememberLauncherForActivityResult(
@@ -487,10 +490,11 @@ fun AgencyAddPackageScreen(
                             keyboardActions = KeyboardActions(
                                 onDone = { showDeptDateDialog = true }
                             ),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(20.dp)
                         )
                         Icon(
-                            painter = painterResource(R.drawable.calender),
+                            imageVector = Icons.Default.DateRange,
                             contentDescription = "Calendar",
                             modifier = Modifier
                                 .size(50.dp)
@@ -512,7 +516,7 @@ fun AgencyAddPackageScreen(
                                         )
                                     }
                                 ) {
-                                    Text(text = "ok")
+                                    Text(text = "Confirm")
                                 }
                             },
                             dismissButton = {
@@ -544,10 +548,11 @@ fun AgencyAddPackageScreen(
                             keyboardActions = KeyboardActions(
                                 onDone = { showRetDateDialog = true }
                             ),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(20.dp)
                         )
                         Icon(
-                            painter = painterResource(R.drawable.calender),
+                            imageVector = Icons.Default.DateRange,
                             contentDescription = "Calendar",
                             modifier = Modifier
                                 .size(50.dp)
@@ -568,7 +573,7 @@ fun AgencyAddPackageScreen(
                                             tripPackageRetDate.selectedDateMillis
                                         )}
                                 ) {
-                                    Text(text = "ok")
+                                    Text(text = "Confirm")
                                 }
                             },
                             dismissButton = {
@@ -597,7 +602,8 @@ fun AgencyAddPackageScreen(
                             ),
                             onValueChange = {},
                             readOnly = true,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(20.dp)
                         )
                     }
                 }

@@ -111,4 +111,8 @@ class TripViewModel : ViewModel() {
     ){
         database.addPurchasedTrip(db, context, tripId, agencyUsername, noPax)
     }
+
+    fun readPurchasedTrips(db: FirebaseFirestore, agencyUsername: String, callback: (Int) -> Unit) {
+        database.readPurchasedTrips(db, agencyUsername, callback)
+    }
 }

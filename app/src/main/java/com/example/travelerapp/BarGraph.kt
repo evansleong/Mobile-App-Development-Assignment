@@ -53,7 +53,7 @@ fun BarGraph(
     val xAxisScaleHeight = 80.dp
 
     val yAxisScaleSpacing by remember {
-        mutableStateOf(100f)
+        mutableStateOf(150f)
     }
     val yAxisTextWidth by remember {
         mutableStateOf(110.dp)

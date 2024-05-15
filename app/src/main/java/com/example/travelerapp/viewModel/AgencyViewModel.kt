@@ -1,23 +1,29 @@
 package com.example.travelerapp.viewModel
 
 import android.content.Context
+import android.content.SharedPreferences
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import com.example.travelerapp.repo.AgencyUserFirebase
 import com.example.travelerapp.data.AgencyUser
+import com.google.firebase.Firebase
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.storage
+import java.util.UUID
 
 class AgencyViewModel : ViewModel() {
     var loggedInAgency: AgencyUser? = null
     private val database = AgencyUserFirebase()
 
-    fun addAgency(context: Context, db: FirebaseFirestore, agencyId: String, agencyUsername: String, agencyEmail: String, agencyPassword: String){
+    fun addAgency(context: Context, db: FirebaseFirestore, agencyId: String, agencyUsername: String, agencyEmail: String, agencyPassword: String, agencyPicture: String?){
         database.addDataToFirestore(
             context = context,
             db = db,
             agencyId = agencyId,
             agencyUsername = agencyUsername,
             agencyEmail = agencyEmail,
-            agencyPassword = agencyPassword
+            agencyPassword = agencyPassword,
+            agencyPicture = agencyPicture
         )
     }
 
@@ -28,6 +34,35 @@ class AgencyViewModel : ViewModel() {
         )
     }
 
+    fun editAgencyPicture(context: Context, db: FirebaseFirestore, agencyId: String, newPicture: String){
+        database.editAgencyProfilePicture(
+            context = context,
+            db = db,
+            agencyId = agencyId,
+            newAgencyPicture = newPicture
+        )
+    }
+
+    fun uploadImage(context: Context, imageUri: Uri?, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
+        if (imageUri != null) {
+            val storageRef = Firebase.storage.reference
+            val imageRef = storageRef.child("images/${UUID.randomUUID()}")
+            val uploadTask = imageRef.putFile(imageUri)
+
+            uploadTask.addOnSuccessListener { taskSnapshot ->
+                // Image uploaded successfully
+                imageRef.downloadUrl.addOnSuccessListener { uri ->
+                    // Get the download URL
+                    onSuccess(uri.toString())
+                }.addOnFailureListener { exception ->
+                    onFailure(exception)
+                }
+            }.addOnFailureListener { exception ->
+                onFailure(exception)
+            }
+        }
+    }
+
     fun checkLoginCredentials(
         email: String,
         password: String,
@@ -35,6 +70,27 @@ class AgencyViewModel : ViewModel() {
     ): AgencyUser? {
         // Check if there is any user with the provided email and password
         return agencyUsers.find { it.agencyEmail == email && it.agencyPassword == password }
+    }
+
+    fun saveLoginDetails(context: Context, email: String, password: String) {
+        val sharedPreferences: SharedPreferences = context.getSharedPreferences("agency_prefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("email", email)
+        editor.putString("password", password)
+        editor.putBoolean("isLoggedIn", true)
+        editor.apply()
+    }
+
+    fun getLoginDetails(context: Context): Pair<String, String>? {
+        val sharedPreferences: SharedPreferences = context.getSharedPreferences("agency_prefs", Context.MODE_PRIVATE)
+        val email = sharedPreferences.getString("email", null)
+        val password = sharedPreferences.getString("password", null)
+        val isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
+        return if (email != null && password != null && isLoggedIn) {
+            Pair(email, password)
+        } else {
+            null
+        }
     }
 
     // Function to check if the username is available

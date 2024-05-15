@@ -111,16 +111,16 @@ fun AgencyEditPackageScreen(
         selectedOptions = trip.options.toMutableSet()
     }
 
-//    fun calculateTripLength(departureMillis: Long?, returnMillis: Long?): String {
-//        if (departureMillis != null && returnMillis != null) {
-//            val departureDate = DateUtils().convertMillisToLocalDate(departureMillis)
-//            val returnDate = DateUtils().convertMillisToLocalDate(returnMillis)
-//            val days = ChronoUnit.DAYS.between(departureDate, returnDate) + 1
-//            val nights = if (days > 1) days - 1 else 0
-//            return if (days < 2) "1 DAY TRIP" else "$days DAYS $nights NIGHTS"
-//        }
-//        return "invalid"// Default to 1 DAY TRIP if dates are not selected
-//    }
+    fun calculateTripLength(departureMillis: Long?, returnMillis: Long?): String {
+        if (departureMillis != null && returnMillis != null) {
+            val departureDate = DateUtils().convertMillisToLocalDate(departureMillis)
+            val returnDate = DateUtils().convertMillisToLocalDate(returnMillis)
+            val days = ChronoUnit.DAYS.between(departureDate, returnDate) + 1
+            val nights = if (days > 1) days - 1 else 0
+            return if (days < 2) "1 DAY TRIP" else "$days DAYS $nights NIGHTS"
+        }
+        return "invalid"  // Default to "invalid" if dates are not selected
+    }
 
 
     tripState.value?.let { trip ->
@@ -131,7 +131,7 @@ fun AgencyEditPackageScreen(
         var editedTripDesc by remember { mutableStateOf(trip.tripDesc) }
         var editedDepartureDate by remember { mutableStateOf(trip.depDate) }
         var editedReturnDate by remember { mutableStateOf(trip.retDate) }
-        val editedTripLength by remember { mutableStateOf(trip.tripLength) }
+        var editedTripLength by remember { mutableStateOf(calculateTripLength(tripPackageDeptDate.selectedDateMillis, tripPackageRetDate.selectedDateMillis)) }
 //        val editedTripLength = remember { mutableStateOf(calculateTripLength(tripPackageDeptDate.selectedDateMillis, tripPackageRetDate.selectedDateMillis)) }
         var editedOptions by remember { mutableStateOf(trip.options.joinToString(separator = "\n")) }
         var readOldImageUri by remember { mutableStateOf(trip.tripUri) }
@@ -244,7 +244,13 @@ fun AgencyEditPackageScreen(
                         Text(text = "Departure Date", fontWeight = FontWeight.Bold)
                         EditableDateFieldWithButton(
                             date = editedDepartureDate,
-                            onDateChanged = { editedDepartureDate = it },
+                            onDateChanged = { newDate ->
+                                editedDepartureDate = newDate
+                                editedTripLength = calculateTripLength(
+                                    tripPackageDeptDate.selectedDateMillis,
+                                    tripPackageRetDate.selectedDateMillis
+                                )
+                            },
                             datePickerState = tripPackageDeptDate,
                             dateToString = deptDateToString
                         )

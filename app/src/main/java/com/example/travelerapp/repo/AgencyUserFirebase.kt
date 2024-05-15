@@ -13,14 +13,16 @@
             agencyId: String,
             agencyUsername: String,
             agencyEmail: String,
-            agencyPassword: String
+            agencyPassword: String,
+            agencyPicture: String?,
         ) {
 
             val agencyData = hashMapOf(
                 "agencyId" to agencyId,
                 "agencyUsername" to agencyUsername,
                 "agencyEmail" to agencyEmail,
-                "agencyPassword" to agencyPassword
+                "agencyPassword" to agencyPassword,
+                "agencyPicture" to agencyPicture
             )
 
             db.collection("agencyUser")
@@ -66,6 +68,48 @@
                     Log.e("Firestore", "Error getting documents: ${e.message}", e)
                 }
         }
+
+        fun editAgencyProfilePicture(
+            context: Context,
+            db: FirebaseFirestore,
+            agencyId: String,
+            newAgencyPicture: String,
+        ) {
+            val agencyRef = db.collection("agencyUser").document(agencyId)
+
+            val newData = hashMapOf<String, Any>(
+                "agencyPicture" to newAgencyPicture,
+            )
+
+            agencyRef
+                .update(newData)
+                .addOnSuccessListener {
+                    Log.d("Firestore", "Trip edited successfully")
+                    Toast.makeText(context, "Trip edited successfully", Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener { e ->
+                    Log.e("Firestore", "Error editing trip: ${e.message}", e)
+                    Toast.makeText(context, "Error editing trip", Toast.LENGTH_SHORT).show()
+                }
+        }
+
+        fun fetchAgencyPicture(agencyId: String, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
+            val firestore = FirebaseFirestore.getInstance()
+            firestore.collection("agencies")
+                .document(agencyId)
+                .get()
+                .addOnSuccessListener { document ->
+                    val pictureUrl = document.getString("agencyPicture")
+                    if (!pictureUrl.isNullOrEmpty()) {
+                        onSuccess(pictureUrl)
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    onFailure(exception)
+                }
+        }
+
+
     }
 
 
