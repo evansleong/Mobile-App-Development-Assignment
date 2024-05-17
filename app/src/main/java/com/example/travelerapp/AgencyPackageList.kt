@@ -78,7 +78,7 @@ fun AgencyPackageList(
         setRefreshTrigger(refreshTrigger + 1)
     }
 
-    LaunchedEffect(key1 = true) {
+    LaunchedEffect(key1 = refreshTrigger) {
         tripViewModel.readTrip(db) { trips ->
             val filteredTrips = trips.filter { trip ->
                 trip.agencyUsername == loggedInAgency?.agencyUsername
@@ -243,7 +243,6 @@ fun TripItem(
                     showDialog.value = false
                     onDeleteTrip()
                     showDeletedMessage.value = true
-                    onRefresh()
                 }) {
                     Text("Confirm")
                 }

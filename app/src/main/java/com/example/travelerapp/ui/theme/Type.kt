@@ -20,7 +20,7 @@ val CusFont1 = FontFamily(
 )
 
 val CusFont2 = FontFamily(
-    Font(R.font.archivo_black)
+    Font(R.font.alegreya_sans_medium)
 )
 
 // Set of Material typography styles to start with

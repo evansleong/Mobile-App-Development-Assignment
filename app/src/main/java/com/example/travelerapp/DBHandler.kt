@@ -19,7 +19,7 @@ class DBHandler(context: Context) :
     override fun onCreate(db: SQLiteDatabase) {
         val createTripTable = """
             CREATE TABLE trips (
-                trip_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                trip_id TEXT PRIMARY KEY,
                 trip_name TEXT NOT NULL,
                 trip_length TEXT NOT NULL,               
                 trip_fees REAL NOT NULL,
@@ -27,8 +27,11 @@ class DBHandler(context: Context) :
                 trip_desc TEXT NOT NULL,
                 trip_dep_date TEXT NOT NULL,
                 trip_ret_date TEXT NOT NULL,
-                trip_image_uri TEXT,
-                trip_options TEXT
+                trip_image_uri TEXT NOT NULL,
+                trip_options TEXT NOT NULL,
+                is_available INTEGER,
+                no_user_booked INTEGER,
+                agency_username TEXT NOT NULL
             )
             """
 
@@ -138,33 +141,61 @@ class DBHandler(context: Context) :
         return user
     }
 
-    fun getAllTrips(): List<Trip> {
+    fun getAllTrips(agencyUsername: String): List<Trip> {
         val tripList: ArrayList<Trip> = ArrayList()
         val db = this.readableDatabase
-        val cursorTrips: Cursor = db.rawQuery("SELECT * FROM trips", null)
+        val selectionArgs = arrayOf(agencyUsername)
+        val cursorTrips: Cursor = db.rawQuery("SELECT * FROM trips WHERE agency_username=?", selectionArgs)
+
         if (cursorTrips.moveToFirst()) {
             do {
-                tripList.add(
-                    Trip(
-                        tripName = cursorTrips.getString(1),
-                        tripLength = cursorTrips.getString(2),
-                        tripFees = cursorTrips.getDouble(3),
-                        tripDeposit = cursorTrips.getDouble(4),
-                        tripDesc = cursorTrips.getString(5),
-                        depDate = cursorTrips.getString(6),
-                        retDate = cursorTrips.getString(7),
-                        isAvailable = cursorTrips.getInt(8)
-                    )
-                )
-            } while (cursorTrips.moveToNext())
+                val tripIdIndex = cursorTrips.getColumnIndex("trip_id")
+                val tripNameIndex = cursorTrips.getColumnIndex("trip_name")
+                val tripLengthIndex = cursorTrips.getColumnIndex("trip_length")
+                val tripFeesIndex = cursorTrips.getColumnIndex("trip_fees")
+                val tripDepositIndex = cursorTrips.getColumnIndex("trip_deposit")
+                val tripDescIndex = cursorTrips.getColumnIndex("trip_desc")
+                val tripDepDateIndex = cursorTrips.getColumnIndex("trip_dep_date")
+                val tripRetDateIndex = cursorTrips.getColumnIndex("trip_ret_date")
+                val tripImageUriIndex = cursorTrips.getColumnIndex("trip_image_uri")
+//                val tripOptionsIndex = cursorTrips.getColumnIndex("trip_options")
+                val isAvailableIndex = cursorTrips.getColumnIndex("is_available")
+                val noUserBookedIndex = cursorTrips.getColumnIndex("no_user_booked")
+                val agencyUsernameIndex = cursorTrips.getColumnIndex("agency_username")
 
+                if (tripIdIndex >= 0 && tripNameIndex >= 0 && tripLengthIndex >= 0 && tripFeesIndex >= 0 &&
+                    tripDepositIndex >= 0 && tripDescIndex >= 0 && tripDepDateIndex >= 0 &&
+                    tripRetDateIndex >= 0 && tripImageUriIndex >= 0 &&
+                    isAvailableIndex >= 0 && noUserBookedIndex >= 0 && agencyUsernameIndex >= 0) {
+
+                    val trip = Trip(
+                        tripId = cursorTrips.getString(tripIdIndex),
+                        tripName = cursorTrips.getString(tripNameIndex),
+                        tripLength = cursorTrips.getString(tripLengthIndex),
+                        tripFees = cursorTrips.getDouble(tripFeesIndex),
+                        tripDeposit = cursorTrips.getDouble(tripDepositIndex),
+                        tripDesc = cursorTrips.getString(tripDescIndex),
+                        depDate = cursorTrips.getString(tripDepDateIndex),
+                        retDate = cursorTrips.getString(tripRetDateIndex),
+                        tripUri = cursorTrips.getString(tripImageUriIndex),
+//                        options = cursorTrips.getString(tripOptionsIndex),
+                        isAvailable = cursorTrips.getInt(isAvailableIndex),
+                        noOfUserBooked = cursorTrips.getInt(noUserBookedIndex),
+                        agencyUsername = cursorTrips.getString(agencyUsernameIndex)
+                    )
+                    tripList.add(trip)
+                }
+            } while (cursorTrips.moveToNext())
         }
+
         cursorTrips.close()
         db.close()
+
         return tripList
     }
 
     fun addNewTrip(
+        tripId: String,
         tripName: String,
         tripLength: String,
         tripFees: Double,
@@ -173,11 +204,15 @@ class DBHandler(context: Context) :
         depDate: String,
         retDate: String,
         imageUri: String?,
-        tripOptions: List<String>
+        tripOptions: List<String>,
+        isAvailable: Int,
+        noOfUserBooked: Int,
+        agencyUsername: String,
     ) {
         val optionsString = tripOptions.joinToString(", ")
         val db = this.writableDatabase
         val values = ContentValues().apply {
+            put("trip_id", tripId)
             put("trip_name", tripName)
             put("trip_length", tripLength)
             put("trip_fees", tripFees)
@@ -187,6 +222,9 @@ class DBHandler(context: Context) :
             put("trip_ret_date", retDate)
             put("trip_image_uri", imageUri)
             put("trip_options", optionsString)
+            put("is_available", isAvailable)
+            put("no_user_booked", noOfUserBooked)
+            put("agency_username", agencyUsername)
         }
         db.insert("trips", null, values)
         db.close()
@@ -468,6 +506,6 @@ class DBHandler(context: Context) :
 
     companion object {
         private const val DB_NAME = "travelerDB"
-        private const val DB_VERSION = 16
+        private const val DB_VERSION = 19
     }
 }

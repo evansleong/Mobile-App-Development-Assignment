@@ -753,18 +753,6 @@ fun AgencyAddPackageScreen(
                             confirmButton = {
                                 TextButton(
                                     onClick = {
-                                        // Save the trip package data
-                                        dbHandler.addNewTrip(
-                                            tripPackageName.value.text,
-                                            tripLength.value,
-                                            tripPackageFees.value.text.toDouble(),
-                                            tripPackageDeposit.value.text.toDouble(),
-                                            tripPackageDesc.value.text,
-                                            deptDateToString,
-                                            retDateToString,
-                                            uploadedImageUri?.toString(),
-                                            selectedOption
-                                        )
                                         tripViewModel.addTrip(
                                             context = context,
                                             db = db,
@@ -780,8 +768,24 @@ fun AgencyAddPackageScreen(
                                             selectedOption = selectedOption,
                                             isAvailable = tripAvailable.value.text.toInt(),
                                             noOfUserBooked = 0,
-                                            agencyUsername = loggedInAgency?.agencyUsername
-                                                ?: "user"
+                                            agencyUsername = loggedInAgency?.agencyUsername ?: "user",
+                                            onSuccess = {
+                                                dbHandler.addNewTrip(
+                                                    tripId,
+                                                    tripPackageName.value.text,
+                                                    tripLength.value,
+                                                    tripPackageFees.value.text.toDouble(),
+                                                    tripPackageDeposit.value.text.toDouble(),
+                                                    tripPackageDesc.value.text,
+                                                    deptDateToString,
+                                                    retDateToString,
+                                                    uploadedImageUri?.toString(),
+                                                    selectedOption,
+                                                    tripAvailable.value.text.toInt(),
+                                                    0,
+                                                    loggedInAgency?.agencyUsername ?: ""
+                                                )
+                                            },
                                         )
                                         Toast.makeText(
                                             context,

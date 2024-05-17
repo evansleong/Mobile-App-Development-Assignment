@@ -34,6 +34,14 @@ class AgencyViewModel : ViewModel() {
         )
     }
 
+    fun readSingleAgencyData(db: FirebaseFirestore, agencyId: String, callback: (AgencyUser?) -> Unit) {
+        database.readSingleAgencyFromFirestore(
+            db = db,
+            agencyId = agencyId,
+            callback = callback
+        )
+    }
+
     fun editAgencyPicture(context: Context, db: FirebaseFirestore, agencyId: String, newPicture: String){
         database.editAgencyProfilePicture(
             context = context,
@@ -114,5 +122,10 @@ class AgencyViewModel : ViewModel() {
         // Password must contain at least 1 uppercase, 1 lowercase, and be at least 8 characters long
         val passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}\$"
         return password.matches(passwordRegex.toRegex())
+    }
+
+    // Function to ensure all fields are not empty
+    fun areFieldsNotEmpty(username: String, email: String, password: String): Boolean {
+        return username.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty()
     }
 }

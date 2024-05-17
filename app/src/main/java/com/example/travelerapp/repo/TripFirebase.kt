@@ -1,9 +1,17 @@
 package com.example.travelerapp.repo
 
 import android.content.Context
+import android.graphics.Color
 import android.util.Log
 import android.widget.Toast
+import com.example.travelerapp.data.PieChartInput
 import com.example.travelerapp.data.Trip
+import com.example.travelerapp.ui.theme.blueGray
+import com.example.travelerapp.ui.theme.brightBlue
+import com.example.travelerapp.ui.theme.green
+import com.example.travelerapp.ui.theme.orange
+import com.example.travelerapp.ui.theme.purple
+import com.example.travelerapp.ui.theme.redOrange
 import com.google.firebase.firestore.FirebaseFirestore
 
 class TripFirebase {
@@ -23,6 +31,7 @@ class TripFirebase {
         isAvailable: Int,
         noOfUserBooked: Int,
         agencyUsername: String,
+        onSuccess: () -> Unit
 //    isChecked: Boolean
     ) {
 
@@ -40,7 +49,6 @@ class TripFirebase {
             "isAvailable" to isAvailable,
             "noOfUserBooked" to noOfUserBooked,
             "agencyUsername" to agencyUsername,
-//        "isActive" to isChecked
         )
 
         db.collection("trips")
@@ -53,6 +61,7 @@ class TripFirebase {
                     "Trip added to Firestore with ID: $tripId",
                     Toast.LENGTH_SHORT
                 ).show()
+                onSuccess()
             }
             .addOnFailureListener { e ->
                 Log.e("Firestore", "Error adding document", e)
@@ -230,6 +239,34 @@ class TripFirebase {
                 }
         }
     }
+
+//    fun readPurchasedTripsForPieChart(db: FirebaseFirestore, agencyUsername: String, onResult: (List<PieChartInput>) -> Unit) {
+//        db.collection("purchasedTrips")
+//            .whereEqualTo("agencyUsername", agencyUsername)
+//            .get()
+//            .addOnSuccessListener { documents ->
+//                val tripPaxMap = mutableMapOf<String, Int>()
+//                for (document in documents) {
+//                    val tripId = document.getString("tripId") ?: continue
+//                    val noOfPax = document.getLong("noOfPax")?.toInt() ?: continue
+//                    tripPaxMap[tripId] = tripPaxMap.getOrDefault(tripId, 0) + noOfPax
+//                }
+//                val pieChartInputList = tripPaxMap.map { (tripId, noOfPax) ->
+//                    PieChartInput(
+//                        color = getRandomColor(),  // Define this method to get a color for each trip
+//                        value = noOfPax,
+//                        description = tripId
+//                    )
+//                }
+//                onResult(pieChartInputList)
+//            }
+//    }
+//
+//    // Implement a method to generate random or predefined colors
+//    private fun getRandomColor(): androidx.compose.ui.graphics.Color {
+//        val colors = listOf(brightBlue, purple, blueGray, redOrange, green, orange)
+//        return colors.random()
+//    }
 
     fun addPurchasedTrip(
         db: FirebaseFirestore,

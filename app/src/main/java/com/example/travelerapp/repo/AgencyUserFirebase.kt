@@ -4,6 +4,7 @@
     import android.util.Log
     import android.widget.Toast
     import com.example.travelerapp.data.AgencyUser
+    import com.example.travelerapp.data.Trip
     import com.google.firebase.firestore.FirebaseFirestore
 
     class AgencyUserFirebase {
@@ -66,6 +67,34 @@
                 }
                 .addOnFailureListener { e ->
                     Log.e("Firestore", "Error getting documents: ${e.message}", e)
+                }
+        }
+
+        fun readSingleAgencyFromFirestore(
+            db: FirebaseFirestore,
+            agencyId: String,
+            callback: (AgencyUser?) -> Unit
+        ) {
+            db.collection("agencyUser")
+                .document(agencyId)
+                .get()
+                .addOnSuccessListener { documentSnapshot ->
+                    if (documentSnapshot.exists()) {
+                        try {
+                            val agency: AgencyUser? = documentSnapshot.toObject(AgencyUser::class.java)
+                            callback(agency)
+                        } catch (e: Exception) {
+                            Log.e("Firestore", "Error converting document to Trip: ${e.message}")
+                            callback(null)
+                        }
+                    } else {
+                        Log.e("Firestore", "Document does not exist for tripId: $agencyId")
+                        callback(null)
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("Firestore", "Error getting document: ${e.message}", e)
+                    callback(null)
                 }
         }
 

@@ -104,6 +104,8 @@ fun AgencySettingScreen(
         mutableStateOf<Uri?>(null)
     }
 
+//    var readOldImageUri by remember { mutableStateOf("") }
+
     val darkTheme = remember {
         mutableStateOf(false)
     }
@@ -116,7 +118,13 @@ fun AgencySettingScreen(
         mutableStateOf("English")
     }
 
-    changeImgUri = Uri.parse(loggedInAgency?.agencyPicture ?: "")
+    LaunchedEffect(loggedInAgency) {
+        loggedInAgency?.agencyPicture?.let {
+            changeImgUri = Uri.parse(it)
+        }
+    }
+
+//    changeImgUri = Uri.parse(loggedInAgency?.agencyPicture ?: "")
 
     fun handleImageUpload(context: Context, imageUri: Uri?) {
         viewModel.uploadImage(
@@ -124,6 +132,7 @@ fun AgencySettingScreen(
             imageUri = imageUri,
             onSuccess = { downloadUrl ->
                 changeImgUri = Uri.parse(downloadUrl)
+//                readOldImageUri = downloadUrl
             },
             onFailure = { exception ->
                 Log.e("ImageUpload", "Error uploading image: ${exception.message}")
@@ -188,7 +197,9 @@ fun AgencySettingScreen(
                                 .fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+//                            if (changeImgUri != null || readOldImageUri.isNotEmpty()) {
                             if (changeImgUri != null) {
+//                                val displayImageUri = changeImgUri ?: Uri.parse(readOldImageUri)
                                 Image(
                                     painter = rememberAsyncImagePainter(changeImgUri),
                                     contentDescription = null,

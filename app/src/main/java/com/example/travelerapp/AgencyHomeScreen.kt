@@ -1,6 +1,7 @@
 package com.example.travelerapp
 
 import ReuseComponents.TopBar
+import android.graphics.Paint
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.items
@@ -19,43 +20,69 @@ import java.util.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+//import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.example.travelerapp.data.PieChartInput
 import com.example.travelerapp.data.Test
 import com.example.travelerapp.data.Trip
+import com.example.travelerapp.ui.theme.blueGray
+import com.example.travelerapp.ui.theme.brightBlue
+import com.example.travelerapp.ui.theme.gray
+import com.example.travelerapp.ui.theme.green
+import com.example.travelerapp.ui.theme.orange
+import com.example.travelerapp.ui.theme.purple
+import com.example.travelerapp.ui.theme.redOrange
+import com.example.travelerapp.ui.theme.white
 import com.example.travelerapp.viewModel.AgencyViewModel
 import com.example.travelerapp.viewModel.TripViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import kotlin.math.PI
+import kotlin.math.atan2
 
 @Composable
 fun AgencyHomeScreen(
@@ -63,15 +90,6 @@ fun AgencyHomeScreen(
     viewModel: AgencyViewModel,
     tripViewModel: TripViewModel
 ) {
-//    Testing
-//    val charts = listOf(
-//        Test(value = 20f, color = Color.Black),
-//        Test(value = 30f, color = Color.Gray),
-//        Test(value = 40f, color = Color.Green),
-//        Test(value = 10f, color = Color.Red),
-//    )
-
-
     val db = Firebase.firestore
 
     val isLoggedIn = remember { mutableStateOf(true) }
@@ -79,6 +97,7 @@ fun AgencyHomeScreen(
 
     val tripListState = remember { mutableStateOf<List<Trip>>(emptyList()) }
     val totalUsersState = remember { mutableStateOf(0) }
+    val pieChartDataState = remember { mutableStateOf<List<PieChartInput>>(emptyList()) }
 
     val purchasedTripsState = remember { mutableStateOf<List<Trip>>(emptyList()) }
 
@@ -94,6 +113,10 @@ fun AgencyHomeScreen(
         tripViewModel.readPurchasedTrips(db, loggedInAgency?.agencyUsername ?: "") { totalUsers ->
             totalUsersState.value = totalUsers
         }
+
+//        tripViewModel.readPurchasedTripsForPieChart(db, loggedInAgency?.agencyUsername ?: "") { pieChartData ->
+//            pieChartDataState.value = pieChartData
+//        }
     }
 
     Scaffold(
@@ -136,15 +159,17 @@ fun AgencyHomeScreen(
                 fontSize = 18.sp // Larger font size for "current date" text
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
-
-//            ChartCirclePie(modifier = Modifier, charts)
-
+//            PieChart(
+//                modifier = Modifier
+//                    .size(150.dp),
+//                input = pieChartDataState.value,
+//                centerText = "${pieChartDataState.value.sumOf { it.value }} persons were asked"
+//            )
 
             Text(
                 text = " Pkgs booked: ${totalUsersState.value}",
                 modifier = Modifier
-                    .padding(bottom = 15.dp),
+                    .padding(bottom = 4.dp, start = 10.dp),
                 color = Color.Red,
                 fontWeight = FontWeight.Bold,
                 fontSize = 25.sp
@@ -152,15 +177,46 @@ fun AgencyHomeScreen(
 
             // Divider below the "pkgs booked" text
             Divider(
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = 5.dp)
             )
 
-            Text(
-                text = "Your travel package list",
-                modifier = Modifier.padding(start = 15.dp),
-                fontSize = 20.sp,
-                fontWeight = FontWeight.ExtraBold
-            )
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Your travel package list",
+                    modifier = Modifier.padding(start = 15.dp),
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+
+                // Navigate to Package List button
+                if (tripListState.value.isNotEmpty()) {
+                    IconButton(onClick = {
+                        navController.navigate(route = Screen.AgencyPackageList.route)
+                    }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowRight,
+                            contentDescription = "Navigate to Package List",
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                } else {
+                    IconButton(onClick = {
+                        navController.navigate(route = Screen.AgencyAddPackage.route)
+                    }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Navigate to Add Package",
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
+            }
 
             // User travel package list slider
             Box(
@@ -195,47 +251,6 @@ fun AgencyHomeScreen(
                                 AgencyHomeTripItem(trip = trip, navController = navController, tripViewModel)
                             }
                         }
-                    }
-                }
-
-                // Navigate to Package List button
-                if (tripListState.value.isNotEmpty()) {
-                    FloatingActionButton(
-                        onClick = {
-                            navController.navigate(route = Screen.AgencyPackageList.route) {
-                                popUpTo(Screen.Home.route) {
-                                    inclusive = true
-                                }
-                            }
-                        },
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(20.dp)
-                            .offset(y = (-270).dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowForward,
-                            contentDescription = "Navigate to Package List"
-                        )
-                    }
-                } else {
-                    FloatingActionButton(
-                        onClick = {
-                            navController.navigate(route = Screen.AgencyAddPackage.route) {
-                                popUpTo(Screen.Home.route) {
-                                    inclusive = true
-                                }
-                            }
-                        },
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(20.dp)
-                            .offset(y = (-350).dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Navigate to Add Package"
-                        )
                     }
                 }
             }
@@ -304,74 +319,213 @@ fun AgencyHomeTripItem(
     }
 }
 
+
+
 //@Composable
-//private fun ChartCirclePie(
-//    modifier: Modifier,
-//    charts: List<Test>,
-//    size: Dp = 200.dp,
-//    strokeWidth: Dp = 16.dp
+//fun PieChart(
+//    modifier: Modifier = Modifier,
+//    radius:Float = 175f,
+//    innerRadius:Float = 90f,
+//    transparentWidth:Float = 50f,
+//    input:List<PieChartInput>,
+//    centerText:String = ""
 //) {
-//    val myText = "ChartCirclePie"
-//    val textMeasurer = rememberTextMeasurer()
-//    val textLayoutResult = textMeasurer.measure(text = AnnotatedString(myText))
-//    val textSize = textLayoutResult.size
+//    var circleCenter by remember {
+//        mutableStateOf(Offset.Zero)
+//    }
 //
-//    Canvas(modifier = modifier
-//        .size(size)
-//        .background(Color.LightGray)
-//        .padding(12.dp), onDraw = {
+//    var inputList by remember {
+//        mutableStateOf(input)
+//    }
+//    var isCenterTapped by remember {
+//        mutableStateOf(false)
+//    }
 //
-//        var startAngle = 0f
-//        var sweepAngle = 0f
+//    Box(
+//        modifier = modifier,
+//        contentAlignment = Alignment.Center
+//    ){
+//        Canvas(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .pointerInput(true) {
+//                    detectTapGestures(
+//                        onTap = { offset ->
+//                            val tapAngleInDegrees = (-atan2(
+//                                x = circleCenter.y - offset.y,
+//                                y = circleCenter.x - offset.x
+//                            ) * (180f / PI).toFloat() - 90f).mod(360f)
+//                            val centerClicked = if (tapAngleInDegrees < 90) {
+//                                offset.x < circleCenter.x + innerRadius && offset.y < circleCenter.y + innerRadius
+//                            } else if (tapAngleInDegrees < 180) {
+//                                offset.x > circleCenter.x - innerRadius && offset.y < circleCenter.y + innerRadius
+//                            } else if (tapAngleInDegrees < 270) {
+//                                offset.x > circleCenter.x - innerRadius && offset.y > circleCenter.y - innerRadius
+//                            } else {
+//                                offset.x < circleCenter.x + innerRadius && offset.y > circleCenter.y - innerRadius
+//                            }
 //
-//        charts.forEach {
-//            val brush = createStripeBrush(
-//                stripeColor = it.color,
-//                stripeWidth = 2.dp,
-//                stripeToGapRatio = 2f
-//            )
+//                            if (centerClicked) {
+//                                inputList = inputList.map {
+//                                    it.copy(isTapped = !isCenterTapped)
+//                                }
+//                                isCenterTapped = !isCenterTapped
+//                            } else {
+//                                val anglePerValue = 360f / input.sumOf {
+//                                    it.value
+//                                }
+//                                var currAngle = 0f
+//                                inputList.forEach { pieChartInput ->
 //
-//            sweepAngle = (it.value / 100) * 360
+//                                    currAngle += pieChartInput.value * anglePerValue
+//                                    if (tapAngleInDegrees < currAngle) {
+//                                        val description = pieChartInput.description
+//                                        inputList = inputList.map {
+//                                            if (description == it.description) {
+//                                                it.copy(isTapped = !it.isTapped)
+//                                            } else {
+//                                                it.copy(isTapped = false)
+//                                            }
+//                                        }
+//                                        return@detectTapGestures
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    )
+//                }
+//        ){
+//            val width = size.width
+//            val height = size.height
+//            circleCenter = Offset(x= width/2f,y= height/2f)
 //
-//            drawArc(
-//                color = Color.Red,
-//                startAngle = startAngle,
-//                sweepAngle = sweepAngle,
-//                useCenter = false,
-//                style = Stroke(
-//                    width = strokeWidth.toPx(),
-//                    cap = StrokeCap.Round,
-//                    join = StrokeJoin.Round
+//            val totalValue = input.sumOf {
+//                it.value
+//            }
+//            val anglePerValue = 360f/totalValue
+//            var currentStartAngle = 0f
+//
+//            inputList.forEach { pieChartInput ->
+//                val scale = if(pieChartInput.isTapped) 1.1f else 1.0f
+//                val angleToDraw = pieChartInput.value * anglePerValue
+//                scale(scale){
+//                    drawArc(
+//                        color = pieChartInput.color,
+//                        startAngle = currentStartAngle,
+//                        sweepAngle = angleToDraw,
+//                        useCenter = true,
+//                        size = Size(
+//                            width = radius*2f,
+//                            height = radius*2f
+//                        ),
+//                        topLeft = Offset(
+//                            (width-radius*2f)/2f,
+//                            (height - radius*2f)/2f
+//                        )
+//                    )
+//                    currentStartAngle += angleToDraw
+//                }
+//                var rotateAngle = currentStartAngle-angleToDraw/2f-90f
+//                var factor = 1f
+//                if(rotateAngle>90f){
+//                    rotateAngle = (rotateAngle+180).mod(360f)
+//                    factor = -0.92f
+//                }
+//
+//                val percentage = (pieChartInput.value/totalValue.toFloat()*100).toInt()
+//
+//                drawContext.canvas.nativeCanvas.apply {
+//                    if(percentage>3){
+//                        rotate(rotateAngle){
+//                            drawText(
+//                                "$percentage %",
+//                                circleCenter.x,
+//                                circleCenter.y+(radius-(radius-innerRadius)/2f)*factor,
+//                                Paint().apply {
+//                                    textSize = 13.sp.toPx()
+//                                    textAlign = Paint.Align.CENTER
+//                                    color = white.toArgb()
+//                                }
+//                            )
+//                        }
+//                    }
+//                }
+//                if(pieChartInput.isTapped){
+//                    val tabRotation = currentStartAngle - angleToDraw - 90f
+//                    rotate(tabRotation){
+//                        drawRoundRect(
+//                            topLeft = circleCenter,
+//                            size = Size(12f,radius*1.2f),
+//                            color = gray,
+//                            cornerRadius = CornerRadius(15f,15f)
+//                        )
+//                    }
+//                    rotate(tabRotation+angleToDraw){
+//                        drawRoundRect(
+//                            topLeft = circleCenter,
+//                            size = Size(12f,radius*1.2f),
+//                            color = gray,
+//                            cornerRadius = CornerRadius(15f,15f)
+//                        )
+//                    }
+//                    rotate(rotateAngle){
+//                        drawContext.canvas.nativeCanvas.apply {
+//                            drawText(
+//                                "${pieChartInput.description}: ${pieChartInput.value}",
+//                                circleCenter.x,
+//                                circleCenter.y + radius*1.3f*factor,
+//                                Paint().apply {
+//                                    textSize = 22.sp.toPx()
+//                                    textAlign = Paint.Align.CENTER
+//                                    color = white.toArgb()
+//                                    isFakeBoldText = true
+//                                }
+//                            )
+//                        }
+//                    }
+//                }
+//            }
+//
+//            if(inputList.first().isTapped){
+//                rotate(-90f){
+//                    drawRoundRect(
+//                        topLeft = circleCenter,
+//                        size = Size(12f,radius*1.2f),
+//                        color = gray,
+//                        cornerRadius = CornerRadius(15f,15f)
+//                    )
+//                }
+//            }
+//            drawContext.canvas.nativeCanvas.apply {
+//                drawCircle(
+//                    circleCenter.x,
+//                    circleCenter.y,
+//                    innerRadius,
+//                    Paint().apply {
+//                        color = white.copy(alpha = 0.6f).toArgb()
+//                        setShadowLayer(10f,0f,0f, gray.toArgb())
+//                    }
 //                )
+//            }
+//
+//            drawCircle(
+//                color = white.copy(0.2f),
+//                radius = innerRadius+transparentWidth/2f
 //            )
 //
-//            startAngle += sweepAngle
 //        }
-//
-//        drawText(
-//            textMeasurer, myText,
-//            topLeft = Offset(
-//                (this.size.width - textSize.width) / 2f,
-//                (this.size.height - textSize.height) / 2f
-//            ),
+//        Text(
+//            centerText,
+//            modifier = Modifier
+//                .width(Dp(innerRadius / 1.5f))
+//                .padding(25.dp),
+//            fontWeight = FontWeight.SemiBold,
+//            fontSize = 17.sp,
+//            textAlign = TextAlign.Center
 //        )
-//    })
 //
+//    }
 //}
-//
-//fun createStripeBrush(
-//    stripeColor: Color,
-//    stripeWidth: Dp,
-//    stripeToGapRatio: Float
-//): Brush {
-//    return Brush.verticalGradient(
-//        colors = listOf(stripeColor.copy(alpha = 0.6f), stripeColor.copy(alpha = 0.8f), stripeColor.copy(alpha = 1f)),
-//        startY = 0f,
-//        endY = stripeWidth.value * stripeToGapRatio
-//    )
-//}
-
-
 
 @Preview
 @Composable

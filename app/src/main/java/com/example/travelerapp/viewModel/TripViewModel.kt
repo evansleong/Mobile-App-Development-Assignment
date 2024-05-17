@@ -3,6 +3,7 @@ package com.example.travelerapp.viewModel
 import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
+import com.example.travelerapp.data.PieChartInput
 import com.example.travelerapp.repo.TripFirebase
 import com.example.travelerapp.data.Trip
 import com.google.firebase.Firebase
@@ -14,7 +15,7 @@ class TripViewModel : ViewModel() {
     var selectedTripId: String? = null
     var numPax: Int = 0
     private val database = TripFirebase()
-    fun addTrip(context: Context, db: FirebaseFirestore, tripId: String, tripPackageName: String, tripLength: String, tripPackageFees: Double, tripPackageDeposit: Double, tripPackageDesc: String, tripPackageDeptDate: String, tripPackageRetDate: String, uploadedImageUri: String?, selectedOption: List<String>, isAvailable: Int, noOfUserBooked: Int, agencyUsername: String){
+    fun addTrip(context: Context, db: FirebaseFirestore, tripId: String, tripPackageName: String, tripLength: String, tripPackageFees: Double, tripPackageDeposit: Double, tripPackageDesc: String, tripPackageDeptDate: String, tripPackageRetDate: String, uploadedImageUri: String?, selectedOption: List<String>, isAvailable: Int, noOfUserBooked: Int, agencyUsername: String, onSuccess: () -> Unit){
         database.addDataToFirestore(
             context = context,
             db = db,
@@ -30,7 +31,8 @@ class TripViewModel : ViewModel() {
             selectedOption = selectedOption,
             isAvailable = isAvailable,
             noOfUserBooked = noOfUserBooked,
-            agencyUsername = agencyUsername
+            agencyUsername = agencyUsername,
+            onSuccess = onSuccess
         )
     }
 
@@ -115,4 +117,8 @@ class TripViewModel : ViewModel() {
     fun readPurchasedTrips(db: FirebaseFirestore, agencyUsername: String, callback: (Int) -> Unit) {
         database.readPurchasedTrips(db, agencyUsername, callback)
     }
+
+//    fun readPurchasedTripsForPieChart(db: FirebaseFirestore, agencyUsername: String, callback: (List<PieChartInput>) -> Unit) {
+//        database.readPurchasedTripsForPieChart(db, agencyUsername,callback)
+//    }
 }

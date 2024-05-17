@@ -210,7 +210,12 @@ fun AgencySignUpScreen(
                 ReuseComponents.CustomButton(
                     text = "Sign Up",
                     onClick = {
-                        if (isSignUpEnabled) {
+                        if (viewModel.areFieldsNotEmpty(
+                                agencyUsername.value.text,
+                                agencyEmail.value.text,
+                                agencyPassword.value.text
+                            ) && isSignUpEnabled
+                        ) {
                             if (viewModel.isUsernameAvailable(agencyUsername.value.text, agencyUsers.value) &&
                                 viewModel.isEmailAvailable(agencyEmail.value.text, agencyUsers.value)
                             ) {
@@ -233,7 +238,11 @@ fun AgencySignUpScreen(
                                 ).show()
                             }
                         } else {
-                            Toast.makeText(context, "Please fill all fields correctly and agree to the Terms and Privacy", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                "Please fill all fields correctly and agree to the Terms and Privacy",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                 )
