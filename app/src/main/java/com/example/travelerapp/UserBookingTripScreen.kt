@@ -221,7 +221,7 @@ fun UserBookingTripScreen(
 
                                 Button(onClick = {
                                     if (numPax.toInt() > 0){
-                                        if(numPax.toInt() < trip.isAvailable){
+                                        if(numPax.toInt() <= trip.isAvailable){
                                             tripViewModel.numPax = numPax.toInt()
                                             navController.navigate(Screen.Payment.route)
                                         } else {

@@ -93,7 +93,8 @@ fun ReviewScreen(
         transactionViewModel.readTxs(db) { lists ->
             val filteredId = lists.filter { tx ->
                 user?.userId == tx.user_id && tx.trip_id != "null"
-            }
+            }.distinctBy { it.trip_id }
+
             // Update the tripListState with the fetched trips
             tripIds.value = filteredId.map { it.trip_id }
         }

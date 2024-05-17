@@ -245,7 +245,13 @@ fun PaymentScreen(
                     .padding(top = 32.dp),
             ) {
                 Button(
-                    onClick = { showDialog.value = true },
+                    onClick = {
+                        if ((amount.compareTo(wallet?.available?.toDouble() ?: 0.0) < 0)) {
+                            showDialog.value = true
+                        } else {
+                            Toast.makeText(context, "Insufficient Balance! Please Reload!", Toast.LENGTH_SHORT).show()
+                        }
+                    },
                     colors = ButtonDefaults.buttonColors(
                         contentColor = Color.Black,
                         containerColor = Color(0xFFEDE9E9)
