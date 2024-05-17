@@ -3,10 +3,14 @@ package com.example.travelerapp
 import ReuseComponents
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+//import androidx.compose.foundation.layout.FlowColumnScopeInstance.weight
+//import androidx.compose.foundation.layout.FlowColumnScopeInstance.weight
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -57,7 +61,7 @@ fun UserPackagePurchased(
     userViewModel: UserViewModel,
     tripViewModel: TripViewModel,
     purchassedTripViewModel: PurchassedTripViewModel
-){
+) {
     val title = "Your Packages"
     val db = Firebase.firestore
     val currentUser = userViewModel.loggedInUser?.userEmail
@@ -71,9 +75,10 @@ fun UserPackagePurchased(
 
     LaunchedEffect(key1 = true) {
         purchassedTripViewModel.readPTTrip(db) { purchasedTrips ->
-            val filteredPT = purchasedTrips.filter { purchasedTrip ->
-                purchasedTrip.userEmail == currentUser
+            val filteredPT = purchasedTrips.filter {
+                it.userEmail == currentUser
             }
+//            Log.d("Check","$currentUser purchases ${filteredPT.size} + ${filteredPT}" )
             pTState.value = filteredPT
             val tripIds = filteredPT.map { it.tripId }.toSet()
 
@@ -82,37 +87,42 @@ fun UserPackagePurchased(
                     it.tripId in tripIds
                 }
                 tripListStatePT.value = filteredTrips
+                Log.d("UserPackagePurchased", "Trips loaded: ${filteredTrips.size}")
 
             }
         }
     }
-    Column (modifier = Modifier
-        .fillMaxSize()
-    ){
-        ReuseComponents.TopBar(title = title, navController = navController)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Column {
+
+            ReuseComponents.TopBar(title = title, navController = navController)
 
 //        Text(text = "Hi")
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-        ) {
-            items(tripListStatePT.value){ trip ->
-//                val tripFromPT = Trip
-                PTripListItem(
-                    trip = trip,
-                    navController = navController,
-                    tripViewModel = tripViewModel
-                ) {
-
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(16.dp),
+            ) {
+                items(tripListStatePT.value) { trip ->
+                    PTripListItem(
+                        trip = trip,
+                        navController = navController,
+                        tripViewModel = tripViewModel
+                    )
+                }
+                item {
+                    Text("hi")
                 }
             }
+//                Spacer(modifier = Modifier.weight(1f))
+                ReuseComponents.NavBar(text = title, navController = navController)
+
         }
-
-        Spacer(modifier = Modifier.weight(1f))
-        ReuseComponents.NavBar(text = title, navController = navController)
     }
-
 }
 
 @Composable
@@ -120,11 +130,11 @@ fun PTripListItem(
     trip: Trip,
     navController: NavController,
     tripViewModel: TripViewModel,
-    onRefresh: () -> Unit
+    onRefresh: () -> Unit ={}
 ) {
     val painter: Painter = rememberAsyncImagePainter(model = Uri.parse(trip.tripUri))
 
-    val showDialog = remember { mutableStateOf(false) }
+//    val showDialog = remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier

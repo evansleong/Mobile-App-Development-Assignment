@@ -239,7 +239,7 @@ class TripFirebase {
                 }
         }
     }
-    
+
     fun addPurchasedTrip(
         db: FirebaseFirestore,
         context: Context,
