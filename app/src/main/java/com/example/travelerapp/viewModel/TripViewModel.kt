@@ -102,13 +102,13 @@ class TripViewModel : ViewModel() {
         database.readMultipleTripFromFirestore(db, tripId, callback)
     }
 
-    fun addPurchasedTrip(
-        db: FirebaseFirestore,
-        context: Context,
-        tripId: String,
-        agencyUsername: String,
-        noPax: Int,
-    ){
-        database.addPurchasedTrip(db, context, tripId, agencyUsername, noPax)
-    }
+//    fun addPurchasedTrip(
+//        db: FirebaseFirestore,
+//        context: Context,
+//        tripId: String,
+//        agencyUsername: String,
+//        noPax: Int,
+//    ){
+//        database.addPurchasedTrip(db, context, tripId, agencyUsername, noPax)
+//    }
 }

@@ -53,6 +53,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.compose.rememberNavController
 import com.example.travelerapp.data.Trip
+import com.example.travelerapp.viewModel.PurchassedTripViewModel
 import com.example.travelerapp.viewModel.TransactionViewModel
 import com.example.travelerapp.viewModel.TripViewModel
 import com.example.travelerapp.viewModel.WalletViewModel
@@ -67,7 +68,8 @@ fun PaymentScreen(
     context: Context,
     tripViewModel: TripViewModel,
     walletViewModel: WalletViewModel,
-    transactionViewModel: TransactionViewModel
+    transactionViewModel: TransactionViewModel,
+    purchassedTripViewModel: PurchassedTripViewModel
 ) {
     Column(
         modifier = Modifier
@@ -280,7 +282,8 @@ fun PaymentScreen(
                                                 transactionViewModel.createTx(db, context, "Payment", amount.toString(), description, user_id = it, trip_id = tripState.value?.tripId){ id ->
                                                     dbHandler.createTransaction(id, "Reload", amount.toString(), description, user_id = it, trip_id = tripState.value?.tripId)
                                                 }
-                                                tripViewModel.addPurchasedTrip(db, context, tripState.value?.tripId.toString(), tripState.value?.agencyUsername.toString(), tripViewModel.numPax)
+//                                                tripViewModel.addPurchasedTrip(db, context, tripState.value?.tripId.toString(), tripState.value?.agencyUsername.toString(), tripViewModel.numPax)
+//                                                purchassedTripViewModel.addPTTrip(db, context, tripState.value?.tripId.toString(), tripState.value?.agencyUsername.toString(), tripViewModel.numPax)
                                             }
                                             tripState.value?.let {
                                                 tripViewModel.updateAvailable(db, it.isAvailable, tripViewModel.numPax.toInt(), it.tripId) {
@@ -330,6 +333,7 @@ fun PaymentScreenPreview(){
         context = LocalContext.current,
         tripViewModel = TripViewModel(),
         walletViewModel = WalletViewModel(),
-        transactionViewModel = TransactionViewModel()
+        transactionViewModel = TransactionViewModel(),
+        purchassedTripViewModel = PurchassedTripViewModel()
     )
 }

@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.travelerapp.data.Trip
 import com.example.travelerapp.viewModel.AgencyViewModel
+import com.example.travelerapp.viewModel.PurchassedTripViewModel
 import com.example.travelerapp.viewModel.ReviewViewModel
 import com.example.travelerapp.viewModel.TransactionViewModel
 import com.example.travelerapp.viewModel.TripViewModel
@@ -25,6 +26,7 @@ fun SetUpNavGraph(
     val walletViewModel: WalletViewModel = viewModel()
     val reviewViewModel: ReviewViewModel = viewModel()
     val transactionViewModel: TransactionViewModel = viewModel()
+    val purchasedTripViewModel: PurchassedTripViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -84,7 +86,7 @@ fun SetUpNavGraph(
         composable(
             route = Screen.Payment.route
         ){
-            PaymentScreen(navController, context = LocalContext.current, tripViewModel, walletViewModel, transactionViewModel)
+            PaymentScreen(navController, context = LocalContext.current, tripViewModel, walletViewModel, transactionViewModel,purchasedTripViewModel)
         }
         composable(
             route = Screen.Wallet.route
@@ -149,7 +151,7 @@ fun SetUpNavGraph(
         composable(
             route = Screen.UserPackagePurchased.route
         ){
-            UserPackagePurchased(navController,userViewModel,tripViewModel)
+            UserPackagePurchased(navController, context = LocalContext.current,userViewModel,tripViewModel,purchasedTripViewModel)
         }
     }
 }

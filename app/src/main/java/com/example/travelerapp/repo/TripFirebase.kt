@@ -231,29 +231,29 @@ class TripFirebase {
         }
     }
 
-    fun addPurchasedTrip(
-        db: FirebaseFirestore,
-        context: Context,
-        tripId: String,
-        agencyUsername: String,
-        noPax: Int,
-    ) {
-        val tripData = hashMapOf(
-            "tripId" to tripId,
-            "agencyUsername" to agencyUsername,
-            "noPax" to noPax
-        )
-
-        db.collection("purchasedTrips")
-            .add(tripData)
-            .addOnSuccessListener {
-                Log.d("Firestore", "Document added to purchasedTrips with ID: $it.id")
-                Toast.makeText(context, "PurchasedTrips added to Firestore with ID: $it.id", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener { e ->
-                Log.e("Firestore", "Error adding document", e)
-                Toast.makeText(context, "Error adding purchasedTrips to Firestore", Toast.LENGTH_SHORT).show()
-            }
-    }
+//    fun addPurchasedTrip(
+//        db: FirebaseFirestore,
+//        context: Context,
+//        tripId: String,
+//        agencyUsername: String,
+//        noPax: Int,
+//    ) {
+//        val tripData = hashMapOf(
+//            "tripId" to tripId,
+//            "agencyUsername" to agencyUsername,
+//            "noPax" to noPax
+//        )
+//
+//        db.collection("purchasedTrips")
+//            .add(tripData)
+//            .addOnSuccessListener {
+//                Log.d("Firestore", "Document added to purchasedTrips with ID: $it.id")
+//                Toast.makeText(context, "PurchasedTrips added to Firestore with ID: $it.id", Toast.LENGTH_SHORT).show()
+//            }
+//            .addOnFailureListener { e ->
+//                Log.e("Firestore", "Error adding document", e)
+//                Toast.makeText(context, "Error adding purchasedTrips to Firestore", Toast.LENGTH_SHORT).show()
+//            }
+//    }
 }
 
