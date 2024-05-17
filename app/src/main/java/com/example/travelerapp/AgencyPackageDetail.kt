@@ -44,6 +44,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.travelerapp.data.Trip
+import com.example.travelerapp.ui.theme.CusFont3
 import com.example.travelerapp.viewModel.TripViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
@@ -120,7 +121,8 @@ fun AgencyPackageDetail(
                                 Text(
                                     text = "${trip.tripLength} - RM${String.format("%.2f", trip.tripFees)}/pax",
                                     fontSize = 20.sp,
-                                    fontWeight = FontWeight.ExtraBold
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontFamily = CusFont3
                                 )
 
                                 Spacer(modifier = Modifier.height(10.dp))

@@ -51,6 +51,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.DpOffset
 import androidx.navigation.NavController
@@ -250,6 +251,7 @@ object ReuseComponents {
                     text = title,
                     color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.weight(1f),
+                    fontWeight = FontWeight.ExtraBold
                 )
                 if (!isAtSettingPage) {
                     IconButton(

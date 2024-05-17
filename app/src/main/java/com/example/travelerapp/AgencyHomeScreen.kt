@@ -19,9 +19,11 @@ import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -29,6 +31,7 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
@@ -69,6 +72,7 @@ import coil.request.ImageRequest
 import com.example.travelerapp.data.PieChartInput
 import com.example.travelerapp.data.Test
 import com.example.travelerapp.data.Trip
+import com.example.travelerapp.ui.theme.CusFont3
 import com.example.travelerapp.ui.theme.blueGray
 import com.example.travelerapp.ui.theme.brightBlue
 import com.example.travelerapp.ui.theme.gray
@@ -95,9 +99,9 @@ fun AgencyHomeScreen(
     val isLoggedIn = remember { mutableStateOf(true) }
     val loggedInAgency = viewModel.loggedInAgency
 
+    val top3TripsState = remember { mutableStateOf<List<Trip>>(emptyList()) }
     val tripListState = remember { mutableStateOf<List<Trip>>(emptyList()) }
     val totalUsersState = remember { mutableStateOf(0) }
-    val pieChartDataState = remember { mutableStateOf<List<PieChartInput>>(emptyList()) }
 
     val purchasedTripsState = remember { mutableStateOf<List<Trip>>(emptyList()) }
 
@@ -112,6 +116,12 @@ fun AgencyHomeScreen(
 
         tripViewModel.readPurchasedTrips(db, loggedInAgency?.agencyUsername ?: "") { totalUsers ->
             totalUsersState.value = totalUsers
+        }
+
+        tripViewModel.readTripsWithBookingCount(db, loggedInAgency?.agencyUsername ?: "") { trips ->
+            tripListState.value = trips
+            val sortedTrips = trips.sortedByDescending { it.noOfUserBooked }
+            top3TripsState.value = sortedTrips.take(3)
         }
 
 //        tripViewModel.readPurchasedTripsForPieChart(db, loggedInAgency?.agencyUsername ?: "") { pieChartData ->
@@ -151,7 +161,7 @@ fun AgencyHomeScreen(
             Text(
                 text = "Today",
                 modifier = Modifier.padding(bottom = 4.dp, start = 15.dp),
-                fontSize = 14.sp
+                fontSize = 14.sp,
             )
             Text(
                 text = currentDate,
@@ -159,26 +169,53 @@ fun AgencyHomeScreen(
                 fontSize = 18.sp // Larger font size for "current date" text
             )
 
-//            PieChart(
+            Spacer(modifier = Modifier.height(30.dp))
+
+
+            // Top 3 most booked trips
+            Text(
+                text = "Top 3 Most Booked Trips",
+                modifier = Modifier.padding(bottom = 8.dp, start = 15.dp),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = CusFont3
+            )
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(horizontal = 8.dp)
+            ) {
+                if (top3TripsState.value.isEmpty()) {
+                    item {
+                        Text(
+                            text = "No trips available...",
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                } else {
+                    itemsIndexed(top3TripsState.value) { index, trip ->
+                        AgencyHomeTop3Item(
+                            trip = trip,
+                            navController = navController,
+                            tripViewModel = tripViewModel,
+                            rank = index + 1 // Pass the rank (1, 2, or 3)
+                        )
+                    }
+                }
+            }
+
+//            Text(
+//                text = " Pkgs booked: ${totalUsersState.value}",
 //                modifier = Modifier
-//                    .size(150.dp),
-//                input = pieChartDataState.value,
-//                centerText = "${pieChartDataState.value.sumOf { it.value }} persons were asked"
+//                    .padding(bottom = 4.dp, start = 10.dp),
+//                color = Color.DarkGray,
+//                fontWeight = FontWeight.Bold,
+//                fontSize = 25.sp
 //            )
 
-            Text(
-                text = " Pkgs booked: ${totalUsersState.value}",
-                modifier = Modifier
-                    .padding(bottom = 4.dp, start = 10.dp),
-                color = Color.Red,
-                fontWeight = FontWeight.Bold,
-                fontSize = 25.sp
-            )
-
             // Divider below the "pkgs booked" text
-            Divider(
-                modifier = Modifier.padding(bottom = 5.dp)
-            )
+//            Divider(
+//                modifier = Modifier.padding(bottom = 5.dp)
+//            )
 
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -189,7 +226,8 @@ fun AgencyHomeScreen(
                     text = "Your travel package list",
                     modifier = Modifier.padding(start = 15.dp),
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.ExtraBold
+                    fontWeight = FontWeight.ExtraBold,
+                    fontFamily = CusFont3
                 )
 
                 // Navigate to Package List button
@@ -266,13 +304,20 @@ fun AgencyHomeTripItem(
     navController: NavController,
     tripViewModel: TripViewModel,
 ) {
-    val painter =
-        rememberAsyncImagePainter(ImageRequest.Builder
-            (LocalContext.current).data(data = trip.tripUri).apply(block = fun ImageRequest.Builder.() {
-            crossfade(true)
-            placeholder(R.drawable.loading)
-        }).build()
-        )
+//    val painter =
+//        rememberAsyncImagePainter(ImageRequest.Builder
+//            (LocalContext.current).data(data = trip.tripUri).apply(block = fun ImageRequest.Builder.() {
+//            crossfade(true)
+//            placeholder(R.drawable.loading)
+//        }).build()
+//        )
+    val imageUrl = trip.tripUri
+    val painter = rememberAsyncImagePainter(
+        ImageRequest.Builder(LocalContext.current)
+            .data(trip.tripUri.takeIf { it.isNotEmpty() })
+            .crossfade(true)
+            .build()
+    )
 
     Card(
         modifier = Modifier
@@ -295,6 +340,96 @@ fun AgencyHomeTripItem(
                     navController.navigate(route = Screen.AgencyPackageDetail.route)
                 }
         ) {
+            if (imageUrl.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .height(100.dp)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                Image(
+                    painter = painter,
+                    contentDescription = trip.tripName,
+                    modifier = Modifier
+                        .height(100.dp)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            }
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = trip.tripName,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = trip.tripLength,
+                    fontSize = 13.sp,
+                    fontFamily = CusFont3
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalCoilApi::class)
+@Composable
+fun AgencyHomeTop3Item(
+    trip: Trip,
+    navController: NavController,
+    tripViewModel: TripViewModel,
+    rank: Int
+) {
+    val painter =
+        rememberAsyncImagePainter(ImageRequest.Builder
+            (LocalContext.current).data(data = trip.tripUri).apply(block = fun ImageRequest.Builder.() {
+            crossfade(true)
+            placeholder(R.drawable.loading)
+        }).build()
+        )
+
+    // Determine the border color based on the rank
+    val borderColor = when(rank) {
+        1 -> Color(0xFFFFD700) // Gold
+        2 -> Color(0xFFC0C0C0) // Silver
+        3 -> Color(0xFFCD7F32) // Bronze
+        else -> Color.Transparent // No border for other items or if rank is null
+    }
+
+    Card(
+        modifier = Modifier
+            .padding(15.dp)
+            .width(200.dp)
+            .border(
+                width = 4.dp,
+                color = borderColor,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .clickable {
+                tripViewModel.selectedTripId = trip.tripId
+                navController.navigate(route = Screen.AgencyPackageDetail.route)
+            },
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 23.dp
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(8.dp)
+                .width(200.dp)
+                .clickable {
+                    tripViewModel.selectedTripId = trip.tripId
+                    navController.navigate(route = Screen.AgencyPackageDetail.route)
+                }
+        ) {
             Image(
                 painter = painter,
                 contentDescription = trip.tripName,
@@ -304,15 +439,63 @@ fun AgencyHomeTripItem(
                     .clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop,
             )
+
+            // Add logos for top 3 trips
+            when (rank) {
+                1 -> {
+                    Text(
+                        text = "Top1",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .background(Color(0xFFFFD700)) // Gold background color
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .align(Alignment.Start)
+                    )
+                }
+                2 -> {
+                    Text(
+                        text = "Top2",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .background(Color(0xFFC0C0C0)) // Silver background color
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .align(Alignment.Start)
+                    )
+                }
+                3 -> {
+                    Text(
+                        text = "Top3",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .background(Color(0xFFCD7F32)) // Bronze background color
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .align(Alignment.Start)
+                    )
+                }
+            }
+
             Column(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 5.dp)
             ) {
                 Text(
                     text = trip.tripName,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = trip.tripLength
+                    text = "No of user booked: ${trip.noOfUserBooked}",
+                    fontSize = 13.sp,
+                    fontFamily = CusFont3
                 )
             }
         }
@@ -320,212 +503,6 @@ fun AgencyHomeTripItem(
 }
 
 
-
-//@Composable
-//fun PieChart(
-//    modifier: Modifier = Modifier,
-//    radius:Float = 175f,
-//    innerRadius:Float = 90f,
-//    transparentWidth:Float = 50f,
-//    input:List<PieChartInput>,
-//    centerText:String = ""
-//) {
-//    var circleCenter by remember {
-//        mutableStateOf(Offset.Zero)
-//    }
-//
-//    var inputList by remember {
-//        mutableStateOf(input)
-//    }
-//    var isCenterTapped by remember {
-//        mutableStateOf(false)
-//    }
-//
-//    Box(
-//        modifier = modifier,
-//        contentAlignment = Alignment.Center
-//    ){
-//        Canvas(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .pointerInput(true) {
-//                    detectTapGestures(
-//                        onTap = { offset ->
-//                            val tapAngleInDegrees = (-atan2(
-//                                x = circleCenter.y - offset.y,
-//                                y = circleCenter.x - offset.x
-//                            ) * (180f / PI).toFloat() - 90f).mod(360f)
-//                            val centerClicked = if (tapAngleInDegrees < 90) {
-//                                offset.x < circleCenter.x + innerRadius && offset.y < circleCenter.y + innerRadius
-//                            } else if (tapAngleInDegrees < 180) {
-//                                offset.x > circleCenter.x - innerRadius && offset.y < circleCenter.y + innerRadius
-//                            } else if (tapAngleInDegrees < 270) {
-//                                offset.x > circleCenter.x - innerRadius && offset.y > circleCenter.y - innerRadius
-//                            } else {
-//                                offset.x < circleCenter.x + innerRadius && offset.y > circleCenter.y - innerRadius
-//                            }
-//
-//                            if (centerClicked) {
-//                                inputList = inputList.map {
-//                                    it.copy(isTapped = !isCenterTapped)
-//                                }
-//                                isCenterTapped = !isCenterTapped
-//                            } else {
-//                                val anglePerValue = 360f / input.sumOf {
-//                                    it.value
-//                                }
-//                                var currAngle = 0f
-//                                inputList.forEach { pieChartInput ->
-//
-//                                    currAngle += pieChartInput.value * anglePerValue
-//                                    if (tapAngleInDegrees < currAngle) {
-//                                        val description = pieChartInput.description
-//                                        inputList = inputList.map {
-//                                            if (description == it.description) {
-//                                                it.copy(isTapped = !it.isTapped)
-//                                            } else {
-//                                                it.copy(isTapped = false)
-//                                            }
-//                                        }
-//                                        return@detectTapGestures
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    )
-//                }
-//        ){
-//            val width = size.width
-//            val height = size.height
-//            circleCenter = Offset(x= width/2f,y= height/2f)
-//
-//            val totalValue = input.sumOf {
-//                it.value
-//            }
-//            val anglePerValue = 360f/totalValue
-//            var currentStartAngle = 0f
-//
-//            inputList.forEach { pieChartInput ->
-//                val scale = if(pieChartInput.isTapped) 1.1f else 1.0f
-//                val angleToDraw = pieChartInput.value * anglePerValue
-//                scale(scale){
-//                    drawArc(
-//                        color = pieChartInput.color,
-//                        startAngle = currentStartAngle,
-//                        sweepAngle = angleToDraw,
-//                        useCenter = true,
-//                        size = Size(
-//                            width = radius*2f,
-//                            height = radius*2f
-//                        ),
-//                        topLeft = Offset(
-//                            (width-radius*2f)/2f,
-//                            (height - radius*2f)/2f
-//                        )
-//                    )
-//                    currentStartAngle += angleToDraw
-//                }
-//                var rotateAngle = currentStartAngle-angleToDraw/2f-90f
-//                var factor = 1f
-//                if(rotateAngle>90f){
-//                    rotateAngle = (rotateAngle+180).mod(360f)
-//                    factor = -0.92f
-//                }
-//
-//                val percentage = (pieChartInput.value/totalValue.toFloat()*100).toInt()
-//
-//                drawContext.canvas.nativeCanvas.apply {
-//                    if(percentage>3){
-//                        rotate(rotateAngle){
-//                            drawText(
-//                                "$percentage %",
-//                                circleCenter.x,
-//                                circleCenter.y+(radius-(radius-innerRadius)/2f)*factor,
-//                                Paint().apply {
-//                                    textSize = 13.sp.toPx()
-//                                    textAlign = Paint.Align.CENTER
-//                                    color = white.toArgb()
-//                                }
-//                            )
-//                        }
-//                    }
-//                }
-//                if(pieChartInput.isTapped){
-//                    val tabRotation = currentStartAngle - angleToDraw - 90f
-//                    rotate(tabRotation){
-//                        drawRoundRect(
-//                            topLeft = circleCenter,
-//                            size = Size(12f,radius*1.2f),
-//                            color = gray,
-//                            cornerRadius = CornerRadius(15f,15f)
-//                        )
-//                    }
-//                    rotate(tabRotation+angleToDraw){
-//                        drawRoundRect(
-//                            topLeft = circleCenter,
-//                            size = Size(12f,radius*1.2f),
-//                            color = gray,
-//                            cornerRadius = CornerRadius(15f,15f)
-//                        )
-//                    }
-//                    rotate(rotateAngle){
-//                        drawContext.canvas.nativeCanvas.apply {
-//                            drawText(
-//                                "${pieChartInput.description}: ${pieChartInput.value}",
-//                                circleCenter.x,
-//                                circleCenter.y + radius*1.3f*factor,
-//                                Paint().apply {
-//                                    textSize = 22.sp.toPx()
-//                                    textAlign = Paint.Align.CENTER
-//                                    color = white.toArgb()
-//                                    isFakeBoldText = true
-//                                }
-//                            )
-//                        }
-//                    }
-//                }
-//            }
-//
-//            if(inputList.first().isTapped){
-//                rotate(-90f){
-//                    drawRoundRect(
-//                        topLeft = circleCenter,
-//                        size = Size(12f,radius*1.2f),
-//                        color = gray,
-//                        cornerRadius = CornerRadius(15f,15f)
-//                    )
-//                }
-//            }
-//            drawContext.canvas.nativeCanvas.apply {
-//                drawCircle(
-//                    circleCenter.x,
-//                    circleCenter.y,
-//                    innerRadius,
-//                    Paint().apply {
-//                        color = white.copy(alpha = 0.6f).toArgb()
-//                        setShadowLayer(10f,0f,0f, gray.toArgb())
-//                    }
-//                )
-//            }
-//
-//            drawCircle(
-//                color = white.copy(0.2f),
-//                radius = innerRadius+transparentWidth/2f
-//            )
-//
-//        }
-//        Text(
-//            centerText,
-//            modifier = Modifier
-//                .width(Dp(innerRadius / 1.5f))
-//                .padding(25.dp),
-//            fontWeight = FontWeight.SemiBold,
-//            fontSize = 17.sp,
-//            textAlign = TextAlign.Center
-//        )
-//
-//    }
-//}
 
 @Preview
 @Composable

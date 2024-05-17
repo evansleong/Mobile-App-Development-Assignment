@@ -64,6 +64,9 @@ fun AgencySignUpScreen(
     val agencyPassword = remember {
         mutableStateOf(TextFieldValue())
     }
+    val agencyConfirmPassword = remember {
+        mutableStateOf(TextFieldValue())
+    }
     val agreedToTerms = remember {
         mutableStateOf(false)
     }
@@ -74,9 +77,26 @@ fun AgencySignUpScreen(
         mutableStateOf(false)
     }
 
+    val isEmailFormatCorrect = remember { mutableStateOf(false) }
+    val isPasswordFormatCorrect = remember { mutableStateOf(false) }
+    val isPasswordMatched = remember { mutableStateOf(false) }
+
     // Call validation functions from ViewModel
     val isValidEmail = viewModel.isValidEmail(agencyEmail.value.text)
     val isValidPassword = viewModel.isValidPassword(agencyPassword.value.text)
+    val isValidConfirmPassword = viewModel.isConfirmPasswordMatch(agencyPassword.value.text, agencyConfirmPassword.value.text)
+
+    isEmailFormatCorrect.value = isValidEmail
+    isPasswordFormatCorrect.value = isValidPassword
+    isPasswordMatched.value = isValidConfirmPassword
+
+    val emailGuideMessage = if (isEmailFormatCorrect.value) "Email format is correct" else "Invalid email format"
+    val passwordGuideMessage = if (isPasswordFormatCorrect.value) "Password format is correct" else "Password must contain 8 characters with \n at least 1 uppercase, lowercase, numeric & special character"
+    val confirmPasswordGuideMessage = if (isPasswordMatched.value) "Password matches" else "Password is not matches"
+
+
+    val emailRegexPattern = viewModel.getEmailRegexPattern()
+    val passwordRegexPattern = viewModel.getPasswordRegexPattern()
 
     val agencyUsers = remember { mutableStateOf(emptyList<AgencyUser>()) }
 
@@ -96,7 +116,7 @@ fun AgencySignUpScreen(
         Box(
             modifier = Modifier
                 .width(350.dp)
-                .height(600.dp)
+                .height(750.dp)
                 .background(Color.LightGray, RoundedCornerShape(16.dp))
         ) {
             Column(
@@ -107,13 +127,7 @@ fun AgencySignUpScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    modifier = Modifier.clickable {
-                        navController.navigate(route = Screen.Home.route) {
-                            popUpTo(Screen.Home.route) {
-                                inclusive = true
-                            }
-                        }
-                    },
+                    modifier = Modifier,
                     text = "Agency Sign Up",
                     fontSize = 40.sp,
                     fontWeight = FontWeight.Bold
@@ -157,6 +171,13 @@ fun AgencySignUpScreen(
                     shape = RoundedCornerShape(20.dp),
                     isError = !isValidEmail
                 )
+                // Display guide messages next to email and password fields
+                Text(
+                    text = emailGuideMessage,
+                    color = if (isEmailFormatCorrect.value) Color.Blue else Color.Red,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
 
                 Spacer(modifier = Modifier.height(15.dp))
 
@@ -168,6 +189,7 @@ fun AgencySignUpScreen(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 var passwordVisible by rememberSaveable { mutableStateOf(false) }
+                var confirmPasswordVisible by rememberSaveable { mutableStateOf(false) }
                 TextField(
                     value = agencyPassword.value,
                     onValueChange = { agencyPassword.value = it },
@@ -189,8 +211,54 @@ fun AgencySignUpScreen(
                     },
                     isError = !isValidPassword
                 )
+                Text(
+                    text = passwordGuideMessage,
+                    color = if (isPasswordFormatCorrect.value) Color.Blue else Color.Red,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
 
                 Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    text = "Confirm Password",
+                    modifier = Modifier.align(Alignment.Start)
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                TextField(
+                    value = agencyConfirmPassword.value,
+                    onValueChange = { agencyConfirmPassword.value = it },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    visualTransformation = PasswordVisualTransformation(),
+                    shape = RoundedCornerShape(20.dp),
+                    singleLine = true,
+                    trailingIcon = {
+                        val image = if (confirmPasswordVisible)
+                            R.drawable.visibility
+                        else R.drawable.visibility_off
+
+                        // Please provide localized description for accessibility services
+                        val description = if (confirmPasswordVisible) "Hide password" else "Show password"
+                        IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                            Icon(imageVector = ImageVector.vectorResource(id = image), description)
+                        }
+                    },
+                    isError = !isValidConfirmPassword
+                )
+
+                Text(
+                    text = confirmPasswordGuideMessage,
+                    color = if (isPasswordMatched.value) Color.Blue else Color.Red,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
 
                 Column() {
                     Row(
@@ -207,17 +275,20 @@ fun AgencySignUpScreen(
                     }
                 }
 
+
                 ReuseComponents.CustomButton(
                     text = "Sign Up",
                     onClick = {
                         if (viewModel.areFieldsNotEmpty(
                                 agencyUsername.value.text,
                                 agencyEmail.value.text,
-                                agencyPassword.value.text
+                                agencyPassword.value.text,
+                                agencyConfirmPassword.value.text
                             ) && isSignUpEnabled
                         ) {
                             if (viewModel.isUsernameAvailable(agencyUsername.value.text, agencyUsers.value) &&
-                                viewModel.isEmailAvailable(agencyEmail.value.text, agencyUsers.value)
+                                viewModel.isEmailAvailable(agencyEmail.value.text, agencyUsers.value) &&
+                                viewModel.isConfirmPasswordMatch(agencyPassword.value.text, agencyConfirmPassword.value.text)
                             ) {
                                 viewModel.addAgency(
                                     context = context,

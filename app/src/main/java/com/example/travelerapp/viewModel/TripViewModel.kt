@@ -118,6 +118,10 @@ class TripViewModel : ViewModel() {
         database.readPurchasedTrips(db, agencyUsername, callback)
     }
 
+    fun readTripsWithBookingCount(db: FirebaseFirestore, agencyUsername: String, onTripsRead: (List<Trip>) -> Unit) {
+        database.readTripsWithBookingCounts(db, agencyUsername, onTripsRead)
+    }
+
 //    fun readPurchasedTripsForPieChart(db: FirebaseFirestore, agencyUsername: String, callback: (List<PieChartInput>) -> Unit) {
 //        database.readPurchasedTripsForPieChart(db, agencyUsername,callback)
 //    }

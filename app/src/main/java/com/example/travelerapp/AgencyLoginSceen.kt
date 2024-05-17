@@ -65,7 +65,12 @@ fun AgencyLoginScreen(
     val checked = remember {
         mutableStateOf(false)
     }
-    val rememberMeChecked = remember { mutableStateOf(false) }
+//    val rememberMeChecked = remember { mutableStateOf(false) }
+    var rememberMeChecked by rememberSaveable { mutableStateOf(viewModel.getLoginDetails(context) != null) }
+
+    fun clearSavedLoginDetails() {
+        viewModel.clearSavedLoginDetails(context)
+    }
 
     val agencyUsers = remember { mutableStateOf(emptyList<AgencyUser>()) }
 
@@ -200,8 +205,12 @@ fun AgencyLoginScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Checkbox(
-                            checked = rememberMeChecked.value,
-                            onCheckedChange = { isChecked -> rememberMeChecked.value = isChecked },
+                            checked = rememberMeChecked,
+                            onCheckedChange = { isChecked ->
+                                rememberMeChecked = isChecked
+                                if (!isChecked) {
+                                    clearSavedLoginDetails()
+                                } },
                             colors = CheckboxDefaults.colors(checkedColor = Color.Green)
                         )
                         Text("Remember me")
@@ -218,7 +227,7 @@ fun AgencyLoginScreen(
 
                         if (loginSuccessful != null) {
                             viewModel.loggedInAgency = loginSuccessful
-                            if (rememberMeChecked.value) {
+                            if (rememberMeChecked) {
                                 viewModel.saveLoginDetails(context, email, password)
                             }
                             Toast.makeText(context, "Login Up Successful", Toast.LENGTH_SHORT)

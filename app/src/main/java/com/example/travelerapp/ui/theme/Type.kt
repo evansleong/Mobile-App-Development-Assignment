@@ -23,6 +23,10 @@ val CusFont2 = FontFamily(
     Font(R.font.alegreya_sans_medium)
 )
 
+val CusFont3 = FontFamily(
+    Font(R.font.roboto_bold)
+)
+
 // Set of Material typography styles to start with
 val Typography = Typography(
     bodyLarge = TextStyle(

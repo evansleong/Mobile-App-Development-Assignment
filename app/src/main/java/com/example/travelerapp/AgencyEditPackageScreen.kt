@@ -59,6 +59,8 @@ import com.example.travelerapp.data.Trip
 import com.example.travelerapp.viewModel.TripViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,7 +81,6 @@ fun AgencyEditPackageScreen(
     }
 
     val tripPackageDeptDate = rememberDatePickerState()
-
     val tripPackageRetDate = rememberDatePickerState()
 
     val deptDateMillisToLocalDate = tripPackageDeptDate.selectedDateMillis?.let {
@@ -100,6 +101,8 @@ fun AgencyEditPackageScreen(
 
     var selectedOptions by remember { mutableStateOf(trip.options.toMutableSet()) }
 
+    var isInputValid by remember { mutableStateOf(false) }
+
 
     LaunchedEffect(selectedPackage) {
         tripViewModel.readSingleTrip(db, selectedPackage.toString()) { trip ->
@@ -109,9 +112,10 @@ fun AgencyEditPackageScreen(
 
     LaunchedEffect(trip) {
         selectedOptions = trip.options.toMutableSet()
+
     }
 
-    fun calculateTripLength(departureMillis: Long?, returnMillis: Long?): String {
+    fun calculateTripLength(departureMillis: Long?, returnMillis: Long?,existingTripLength: String): String {
         if (departureMillis != null && returnMillis != null) {
             val departureDate = DateUtils().convertMillisToLocalDate(departureMillis)
             val returnDate = DateUtils().convertMillisToLocalDate(returnMillis)
@@ -119,7 +123,7 @@ fun AgencyEditPackageScreen(
             val nights = if (days > 1) days - 1 else 0
             return if (days < 2) "1 DAY TRIP" else "$days DAYS $nights NIGHTS"
         }
-        return "invalid"  // Default to "invalid" if dates are not selected
+        return existingTripLength // Default to "invalid" if dates are not selected
     }
 
 
@@ -131,10 +135,36 @@ fun AgencyEditPackageScreen(
         var editedTripDesc by remember { mutableStateOf(trip.tripDesc) }
         var editedDepartureDate by remember { mutableStateOf(trip.depDate) }
         var editedReturnDate by remember { mutableStateOf(trip.retDate) }
-        var editedTripLength by remember { mutableStateOf(calculateTripLength(tripPackageDeptDate.selectedDateMillis, tripPackageRetDate.selectedDateMillis)) }
+        var readTripLength by remember { mutableStateOf(trip.tripLength) }
+        var editedTripLength by remember { mutableStateOf(calculateTripLength(tripPackageDeptDate.selectedDateMillis, tripPackageRetDate.selectedDateMillis, readTripLength)) }
 //        val editedTripLength = remember { mutableStateOf(calculateTripLength(tripPackageDeptDate.selectedDateMillis, tripPackageRetDate.selectedDateMillis)) }
         var editedOptions by remember { mutableStateOf(trip.options.joinToString(separator = "\n")) }
         var readOldImageUri by remember { mutableStateOf(trip.tripUri) }
+
+        LaunchedEffect(tripPackageDeptDate.selectedDateMillis, tripPackageRetDate.selectedDateMillis) {
+            editedTripLength = calculateTripLength(
+                tripPackageDeptDate.selectedDateMillis,
+                tripPackageRetDate.selectedDateMillis,
+                readTripLength
+            )
+        }
+
+        fun validateInputFields() {
+            isInputValid = (
+                    editedTripName.isNotBlank() &&
+                            editedTripDesc.isNotBlank() &&
+                            editedTripFees > 0 &&
+                            editedTripDeposit > 0 &&
+                            editedDepartureDate.isNotBlank() &&
+                            editedReturnDate.isNotBlank() &&
+                            selectedOptions.isNotEmpty()
+                    )
+        }
+
+        LaunchedEffect(editedTripName, editedTripDesc, editedTripFees, editedTripDeposit,
+            editedDepartureDate, editedReturnDate, selectedOptions) {
+            validateInputFields()
+        }
 
         fun handleImageUpload(context: Context, imageUri: Uri?) {
             tripViewModel.uploadImage(
@@ -157,6 +187,14 @@ fun AgencyEditPackageScreen(
 
         fun pickImage(imagePicker: ActivityResultLauncher<String>) {
             imagePicker.launch("image/*")
+        }
+
+        LaunchedEffect(tripPackageDeptDate.selectedDateMillis, tripPackageRetDate.selectedDateMillis) {
+            editedTripLength = calculateTripLength(
+                tripPackageDeptDate.selectedDateMillis,
+                tripPackageRetDate.selectedDateMillis,
+                readTripLength
+            )
         }
 
         Column(
@@ -188,9 +226,7 @@ fun AgencyEditPackageScreen(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .padding(8.dp)
-                    ) {
-                        Icon(Icons.Default.Clear, contentDescription = "Cancel")
-                    }
+                    ) {}
                 }
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -207,7 +243,7 @@ fun AgencyEditPackageScreen(
                         Text(text = "Trip Name", fontWeight = FontWeight.Bold)
                         EditableStringFieldWithButton(
                             text = editedTripName,
-                            onTextChanged = { editedTripName = it }
+                            onTextChanged = { editedTripName = it },
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                     }
@@ -248,7 +284,8 @@ fun AgencyEditPackageScreen(
                                 editedDepartureDate = newDate
                                 editedTripLength = calculateTripLength(
                                     tripPackageDeptDate.selectedDateMillis,
-                                    tripPackageRetDate.selectedDateMillis
+                                    tripPackageRetDate.selectedDateMillis,
+                                    readTripLength
                                 )
                             },
                             datePickerState = tripPackageDeptDate,
@@ -288,7 +325,13 @@ fun AgencyEditPackageScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                         val allOptions = listOf("Included breakfast", "Free Parking", "Travel Insurance", "Tipping and Taxes", "Full Board Meals", "Airport Transport")
                         allOptions.forEach { option ->
-                            OptionsCheckbox(option, selectedOptions, trip)
+                            OptionsCheckbox(option, selectedOptions, trip, onOptionCheckedChange = {isChecked ->
+                                if (isChecked) {
+                                    selectedOptions.add(option)
+                                } else {
+                                    selectedOptions.remove(option)
+                                }
+                            })
                         }
                         Spacer(modifier = Modifier.height(20.dp))
                     }
@@ -301,6 +344,9 @@ fun AgencyEditPackageScreen(
                                     selectedOptions = trip.options.toMutableSet() // Keep previous options
                                 }
 
+                                validateInputFields()
+
+                                if (isInputValid) {
                                 tripViewModel.editTrip(
                                     context = navController.context,
                                     db = Firebase.firestore,
@@ -315,7 +361,9 @@ fun AgencyEditPackageScreen(
                                     newOptions = selectedOptions.toList(),
                                 )
                                 navController.popBackStack()
-                            },
+                            } else {
+                                Toast.makeText(context, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
+                            }                            }
                         )
                     }
                 }
@@ -329,6 +377,8 @@ fun EditableStringFieldWithButton(
     text: String,
     onTextChanged: (String) -> Unit
 ) {
+    var showError by remember { mutableStateOf(false) }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
@@ -336,11 +386,22 @@ fun EditableStringFieldWithButton(
         Spacer(modifier = Modifier.width(8.dp))
         TextField(
             value = text,
-            onValueChange = { onTextChanged(it) },
+            onValueChange = {
+                onTextChanged(it)
+                showError = it.isBlank()},
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier.weight(1f)
         )
         Spacer(modifier = Modifier.width(8.dp))
+    }
+
+    // Show error message if input is empty
+    if (showError) {
+        Text(
+            text = "Cannot be blank",
+            color = Color.Red,
+            modifier = Modifier.padding(start = 8.dp)
+        )
     }
 }
 
@@ -349,6 +410,9 @@ fun EditableDoubleFieldWithButton(
     value: Double,
     onValueChanged: (Double) -> Unit
 ) {
+    var showError by remember { mutableStateOf(false) }
+    var text by remember { mutableStateOf(value.toString()) }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
@@ -356,9 +420,14 @@ fun EditableDoubleFieldWithButton(
         Spacer(modifier = Modifier.width(8.dp))
         TextField(
             value = value.toString(),
-            onValueChange = { text ->
-                // Handle parsing the text to Double and update the value
-                onValueChanged(text.toDoubleOrNull() ?: value)
+            onValueChange = {
+                text = it
+                val newValue = it.toDoubleOrNull()
+                if (newValue != null) {
+                    onValueChanged(newValue)
+                } else {
+                    showError = true // Show error if parsing fails or input is empty
+                }
             },
             modifier = Modifier.weight(1f),
             shape = RoundedCornerShape(20.dp),
@@ -367,6 +436,14 @@ fun EditableDoubleFieldWithButton(
             )
         )
         Spacer(modifier = Modifier.width(8.dp))
+    }
+    // Show error message if parsing fails or input is empty
+    if (showError || text.isBlank()) {
+        Text(
+            text = "Invalid number",
+            color = Color.Red,
+            modifier = Modifier.padding(start = 8.dp)
+        )
     }
 }
 
@@ -449,10 +526,11 @@ fun EditableDateFieldWithButton(
 
 
 @Composable
-fun OptionsCheckbox(option: String, selectedOptions: MutableSet<String>, trip: Trip) {
-    var isChecked by remember { mutableStateOf(option in selectedOptions || option in trip.options) }
+fun OptionsCheckbox(option: String, selectedOptions: MutableSet<String>, trip: Trip, onOptionCheckedChange: (Boolean) -> Unit) {
+    var isChecked by remember { mutableStateOf(option in selectedOptions) }
 
     LaunchedEffect(selectedOptions) {
+        selectedOptions += trip.options
         isChecked = option in selectedOptions || option in trip.options
     }
 
@@ -466,17 +544,38 @@ fun OptionsCheckbox(option: String, selectedOptions: MutableSet<String>, trip: T
         Spacer(modifier = Modifier.width(8.dp))
         androidx.compose.material3.Checkbox(
             checked = isChecked,
+//            onCheckedChange = { newCheckedState ->
+//                isChecked = newCheckedState
+//                if (newCheckedState) {
+//                    selectedOptions += option // Add the option to the selected set
+//                    selectedOptions.addAll(trip.options)
+//                } else {
+//                    selectedOptions.remove(option) // Remove the option from the selected set
+//                }
+//                onOptionCheckedChange()
+//            }
             onCheckedChange = { newCheckedState ->
                 isChecked = newCheckedState
                 if (newCheckedState) {
                     selectedOptions += option // Add the option to the selected set
                 } else {
-                    selectedOptions -= option // Remove the option from the selected set
+                    selectedOptions.remove(option) // Remove the option from the selected set
                 }
+                onOptionCheckedChange(newCheckedState)
             }
         )
     }
     Divider()
+}
+
+fun parseDateFromString(dateString: String): LocalDate? {
+    val formatter = DateTimeFormatter.ofPattern("EEEE, dd MMMM, yyyy")
+    return try {
+        LocalDate.parse(dateString, formatter)
+    } catch (e: Exception) {
+        // Handle parsing error if needed
+        null
+    }
 }
 
 

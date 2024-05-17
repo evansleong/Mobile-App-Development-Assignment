@@ -89,6 +89,15 @@ class AgencyViewModel : ViewModel() {
         editor.apply()
     }
 
+    fun clearSavedLoginDetails(context: Context) {
+        val sharedPreferences: SharedPreferences = context.getSharedPreferences("agency_prefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.remove("email")
+        editor.remove("password")
+        editor.putBoolean("isLoggedIn", false)
+        editor.apply()
+    }
+
     fun getLoginDetails(context: Context): Pair<String, String>? {
         val sharedPreferences: SharedPreferences = context.getSharedPreferences("agency_prefs", Context.MODE_PRIVATE)
         val email = sharedPreferences.getString("email", null)
@@ -120,12 +129,24 @@ class AgencyViewModel : ViewModel() {
     // Function to validate password format
     fun isValidPassword(password: String): Boolean {
         // Password must contain at least 1 uppercase, 1 lowercase, and be at least 8 characters long
-        val passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}\$"
+        val passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#\$%^&*()-_=+\\\\|\\[{\\]};:'\",<.>/?]).{8,}\$"
         return password.matches(passwordRegex.toRegex())
     }
 
+    fun isConfirmPasswordMatch(password: String, confirmPassword: String): Boolean {
+        return password == confirmPassword
+    }
+
     // Function to ensure all fields are not empty
-    fun areFieldsNotEmpty(username: String, email: String, password: String): Boolean {
-        return username.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty()
+    fun areFieldsNotEmpty(username: String, email: String, password: String, confirmPassword: String): Boolean {
+        return username.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty()
+    }
+
+    fun getEmailRegexPattern(): String {
+        return "^[A-Za-z](.*)([@]{1})(.{1,})(\\.)(.{1,})"
+    }
+
+    fun getPasswordRegexPattern(): String {
+        return "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}\$"
     }
 }

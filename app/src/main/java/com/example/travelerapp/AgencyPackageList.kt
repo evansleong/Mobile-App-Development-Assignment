@@ -51,6 +51,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.travelerapp.data.Trip
+import com.example.travelerapp.ui.theme.CusFont3
 import com.example.travelerapp.viewModel.AgencyViewModel
 import com.example.travelerapp.viewModel.TripViewModel
 import com.google.firebase.Firebase
@@ -211,11 +212,13 @@ fun TripItem(
                     )
                     Text(
                         text = trip.tripLength,
-                        fontSize = 15.sp
+                        fontSize = 12.sp,
+                        fontFamily = CusFont3
                     )
                     Text(
                         text = "No. of booked user: ${trip.noOfUserBooked}/${trip.noOfUserBooked+trip.isAvailable}",
-                        fontSize = 15.sp
+                        fontSize = 13.sp,
+                        fontFamily = CusFont3
                     )
                 }
                 IconButton(

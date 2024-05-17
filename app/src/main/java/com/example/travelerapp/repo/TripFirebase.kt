@@ -239,6 +239,7 @@ class TripFirebase {
                 }
         }
     }
+
     
     fun addPurchasedTrip(
         db: FirebaseFirestore,
@@ -285,6 +286,21 @@ class TripFirebase {
             .addOnFailureListener { e ->
                 Log.e("Firestore", "Error getting purchasedTrips: ${e.message}", e)
                 callback(0) // If there's an error, pass 0 as the total number of passengers
+            }
+    }
+
+    fun readTripsWithBookingCounts(db: FirebaseFirestore, agencyUsername: String, onTripsRead: (List<Trip>) -> Unit) {
+        db.collection("trips")
+            .whereEqualTo("agencyUsername", agencyUsername)
+            .get()
+            .addOnSuccessListener { documents ->
+                val trips = documents.map { document ->
+                    document.toObject(Trip::class.java)
+                }
+                onTripsRead(trips)
+            }
+            .addOnFailureListener { exception ->
+                Log.w("TripViewModel", "Error getting documents: ", exception)
             }
     }
 
