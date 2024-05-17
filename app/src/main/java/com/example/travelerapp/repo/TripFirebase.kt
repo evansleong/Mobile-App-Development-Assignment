@@ -239,35 +239,7 @@ class TripFirebase {
                 }
         }
     }
-
-//    fun readPurchasedTripsForPieChart(db: FirebaseFirestore, agencyUsername: String, onResult: (List<PieChartInput>) -> Unit) {
-//        db.collection("purchasedTrips")
-//            .whereEqualTo("agencyUsername", agencyUsername)
-//            .get()
-//            .addOnSuccessListener { documents ->
-//                val tripPaxMap = mutableMapOf<String, Int>()
-//                for (document in documents) {
-//                    val tripId = document.getString("tripId") ?: continue
-//                    val noOfPax = document.getLong("noOfPax")?.toInt() ?: continue
-//                    tripPaxMap[tripId] = tripPaxMap.getOrDefault(tripId, 0) + noOfPax
-//                }
-//                val pieChartInputList = tripPaxMap.map { (tripId, noOfPax) ->
-//                    PieChartInput(
-//                        color = getRandomColor(),  // Define this method to get a color for each trip
-//                        value = noOfPax,
-//                        description = tripId
-//                    )
-//                }
-//                onResult(pieChartInputList)
-//            }
-//    }
-//
-//    // Implement a method to generate random or predefined colors
-//    private fun getRandomColor(): androidx.compose.ui.graphics.Color {
-//        val colors = listOf(brightBlue, purple, blueGray, redOrange, green, orange)
-//        return colors.random()
-//    }
-
+    
     fun addPurchasedTrip(
         db: FirebaseFirestore,
         context: Context,
