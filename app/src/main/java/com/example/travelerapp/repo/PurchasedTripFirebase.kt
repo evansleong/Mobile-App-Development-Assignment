@@ -9,29 +9,26 @@ import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.toObjects
 
 class PurchasedTripFirebase {
-
     fun addPTDataToFirestore(
         context: Context,
-        db:FirebaseFirestore,
-        agencyUsername:String,
-        noPax:Int,
-        tripId:String,
-        userEmail:String
+        db: FirebaseFirestore,
+        agencyUsername: String,
+        noPax: Int,
+        tripId: String,
+        userId: String
     ){
         val ptData = hashMapOf(
             "agencyUsername" to agencyUsername,
             "noPax" to noPax,
             "tripId" to tripId,
-            "userEmail" to userEmail
+            "userId" to userId
         )
 
         db.collection("purchasedTrips")
-            .document(agencyUsername)
-            .set(ptData)
+            .add(ptData)
             .addOnSuccessListener {
-                Log.d("Firestore","Document added $agencyUsername , $tripId bought by $userEmail")
-                Toast.makeText(context,
-                    "$agencyUsername successfully purchased $tripId",Toast.LENGTH_SHORT).show()
+                Log.d("Firestore","Document added $agencyUsername , $tripId bought by $userId")
+                Toast.makeText(context, "$agencyUsername successfully purchased $tripId",Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener { e ->
                 Log.e("Firestore","error adding document",e)
