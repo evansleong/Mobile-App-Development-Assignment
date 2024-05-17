@@ -28,6 +28,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +43,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -59,25 +61,51 @@ import com.google.firebase.Firebase
 fun LoginScreen(
     navController: NavController,
     context: Context,
-    viewModel: UserViewModel,
+    userViewModel: UserViewModel,
     walletViewModel: WalletViewModel
 ) {
 //    val lsContext: Context = this
     val db = Firebase.firestore
-    val checked = remember { mutableStateOf(false) }
+
     val logInEmail = remember {
-        mutableStateOf("")
+        mutableStateOf(TextFieldValue())
     }
 
     val logInPw = remember {
-        mutableStateOf("")
+        mutableStateOf(TextFieldValue())
+    }
+
+    var rememberMeChecked by rememberSaveable { mutableStateOf(userViewModel.getLoginDetails(context) != null) }
+
+    fun clearSavedLoginDetails() {
+        userViewModel.clearSavedLoginDetails(context)
     }
 
     val users = remember {
         mutableStateOf((emptyList<User>()))
     }
 
-    viewModel.readUData(db) { userList ->
+    // Check if the user is already logged in
+    LaunchedEffect(Unit) {
+        val loginDetails = userViewModel.getLoginDetails(context)
+        if (loginDetails != null) {
+            val (email, password) = loginDetails
+            logInEmail.value = TextFieldValue(email)
+            logInPw.value = TextFieldValue(password)
+            val loginSuccessful = userViewModel.checkULoginCred(email, password, users.value)
+            if (loginSuccessful != null) {
+                userViewModel.loggedInUser = loginSuccessful
+                navController.navigate(Screen.Home.route) {
+                    popUpTo(Screen.Login.route) {
+                        inclusive = true
+                    }
+                }
+            }
+        }
+    }
+
+
+    userViewModel.readUData(db) { userList ->
         users.value = userList
     }
 
@@ -142,9 +170,9 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 TextField(
-                    value = logInEmail.value,
+                    value = logInEmail.value.text,
                     onValueChange = {
-                        logInEmail.value = it
+                        logInEmail.value = logInEmail.value.copy(text = it)
                     },
                     shape = RoundedCornerShape(16.dp),
                     label = { BasicText(text = "Email") },
@@ -164,9 +192,9 @@ fun LoginScreen(
 
                 var passwordVisible by rememberSaveable { mutableStateOf(false) }
                 TextField(
-                    value = logInPw.value,
+                    value = logInPw.value.text,
                     onValueChange = {
-                        logInPw.value = it
+                        logInPw.value = logInPw.value.copy(text = it)
                     },
                     shape = RoundedCornerShape(16.dp),
                     label = { BasicText(text = "Password") },
@@ -196,21 +224,12 @@ fun LoginScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Checkbox(
-                            checked = checked.value,
-                            onCheckedChange = { isChecked -> checked.value = isChecked },
-                            colors = CheckboxDefaults.colors(checkedColor = Color.Green)
-                        )
-                        Text("I would like to receive your newsletter and other promotional information")
-                    }
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Checkbox(
-                            checked = checked.value,
-                            onCheckedChange = { isChecked -> checked.value = isChecked },
+                            checked = rememberMeChecked,
+                            onCheckedChange = { isChecked ->
+                                rememberMeChecked = isChecked
+                                if (!isChecked) {
+                                    clearSavedLoginDetails()
+                                } },
                             colors = CheckboxDefaults.colors(checkedColor = Color.Green)
                         )
                         Text("Remember me")
@@ -220,15 +239,18 @@ fun LoginScreen(
                 ReuseComponents.CustomButton(
                     text = "Login",
                     onClick = {
-                        val email = logInEmail.value
-                        val password = logInPw.value
-                        val loginSuccessful = viewModel.checkULoginCred(email, password, users.value)
+                        val email = logInEmail.value.text
+                        val password = logInPw.value.text
+                        val loginSuccessful = userViewModel.checkULoginCred(email, password, users.value)
 
 
                         if (loginSuccessful != null) {
-                            viewModel.loggedInUser = loginSuccessful
+                            userViewModel.loggedInUser = loginSuccessful
+                            if (rememberMeChecked) {
+                                userViewModel.saveLoginDetails(context, email, password)
+                            }
 
-                            val wallet = walletViewModel.checkWallet(viewModel.loggedInUser!!.userId, walletList.value)
+                            val wallet = walletViewModel.checkWallet(userViewModel.loggedInUser!!.userId, walletList.value)
 
                             if (wallet != null){
                                 walletViewModel.userWallet = wallet
@@ -308,7 +330,7 @@ fun LoginScreenPreview(){
     LoginScreen(
         navController = rememberNavController(),
         context = LocalContext.current,
-        viewModel = UserViewModel(),
+        userViewModel = UserViewModel(),
         walletViewModel = WalletViewModel()
     )
 }
