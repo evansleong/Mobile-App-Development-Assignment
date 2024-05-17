@@ -176,7 +176,7 @@ fun AgencySignUpScreen(
                     text = emailGuideMessage,
                     color = if (isEmailFormatCorrect.value) Color.Blue else Color.Red,
                     fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 4.dp)
+                    modifier = Modifier.padding(top = 4.dp, end = 200.dp)
                 )
 
                 Spacer(modifier = Modifier.height(15.dp))

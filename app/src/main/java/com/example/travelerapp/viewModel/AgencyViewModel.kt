@@ -51,6 +51,10 @@ class AgencyViewModel : ViewModel() {
         )
     }
 
+    fun updateProfilePictureUri(newUri: String) {
+        loggedInAgency?.agencyPicture = newUri
+    }
+
     fun uploadImage(context: Context, imageUri: Uri?, onSuccess: (String) -> Unit, onFailure: (Exception) -> Unit) {
         if (imageUri != null) {
             val storageRef = Firebase.storage.reference
@@ -61,7 +65,9 @@ class AgencyViewModel : ViewModel() {
                 // Image uploaded successfully
                 imageRef.downloadUrl.addOnSuccessListener { uri ->
                     // Get the download URL
-                    onSuccess(uri.toString())
+                    val downloadUrl = uri.toString()
+                    updateProfilePictureUri(downloadUrl) // Update the loggedInAgency
+                    onSuccess(downloadUrl)
                 }.addOnFailureListener { exception ->
                     onFailure(exception)
                 }

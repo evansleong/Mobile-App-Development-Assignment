@@ -5,5 +5,5 @@ data class AgencyUser(
     val agencyUsername: String = "",
     val agencyEmail: String = "",
     val agencyPassword: String = "",
-    val agencyPicture: String = "",
+    var agencyPicture: String = "",
 )

@@ -119,7 +119,7 @@ fun AgencySettingScreen(
     }
 
     LaunchedEffect(loggedInAgency) {
-        loggedInAgency?.agencyPicture?.let {
+        viewModel.loggedInAgency?.agencyPicture?.let {
             changeImgUri = Uri.parse(it)
         }
     }
@@ -131,7 +131,8 @@ fun AgencySettingScreen(
             context = context,
             imageUri = imageUri,
             onSuccess = { downloadUrl ->
-                changeImgUri = Uri.parse(downloadUrl)
+                viewModel.updateProfilePictureUri(downloadUrl)
+//                changeImgUri = Uri.parse(downloadUrl)
 //                readOldImageUri = downloadUrl
             },
             onFailure = { exception ->
@@ -143,6 +144,7 @@ fun AgencySettingScreen(
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
+        changeImgUri = uri
         handleImageUpload(context, uri)
     }
 
@@ -204,8 +206,8 @@ fun AgencySettingScreen(
                                     painter = rememberAsyncImagePainter(changeImgUri),
                                     contentDescription = null,
                                     modifier = Modifier
-                                        .size(64.dp)
-                                        .clip(CircleShape),
+                                        .size(86.dp)
+                                        .clip(RoundedCornerShape(20)),
                                     contentScale = ContentScale.Crop
                                 )
                             } else {
@@ -237,13 +239,13 @@ fun AgencySettingScreen(
                                     .clickable { pickImage(imagePicker) }
                             ) {
                                 Text("Your Photo",
-                                    modifier = Modifier.padding(bottom = 12.dp, top = 8.dp),
+                                    modifier = Modifier.padding(start = 20.dp, bottom = 12.dp, top = 14.dp),
                                     style = TextStyle(fontSize = 18.sp)
                                 )
 
                                 Text(text = "Adding a profile picture makes\nyour profile more personalized.",
                                     modifier = Modifier
-                                        .padding(bottom = 0.dp),
+                                        .padding(start = 20.dp, bottom = 0.dp),
                                     style = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.Light, color = Color(0xff959595)))
                             }
                         }
@@ -391,8 +393,6 @@ fun AgencySettingScreen(
             }
 
         }
-
-        ReuseComponents.NavBar(text = title, navController = navController)
     }
     if(darkTheme.value){
         Toast.makeText(context,"Dark Theme Applied",Toast.LENGTH_SHORT).show()
