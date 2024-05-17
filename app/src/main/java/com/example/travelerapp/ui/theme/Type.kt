@@ -19,10 +19,14 @@ val CusFont1 = FontFamily(
     Font(R.font.playfair_display_black_italic,FontWeight.Black, FontStyle.Italic),
 )
 
+val CusFont2 = FontFamily(
+    Font(R.font.archivo_black)
+)
+
 // Set of Material typography styles to start with
 val Typography = Typography(
     bodyLarge = TextStyle(
-        fontFamily = CusFont1,
+        fontFamily = CusFont2,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         lineHeight = 24.sp,
@@ -30,14 +34,14 @@ val Typography = Typography(
     ),
 
     titleLarge = TextStyle(
-        fontFamily = CusFont1,
+        fontFamily = CusFont2,
         fontWeight = FontWeight.Normal,
         fontSize = 22.sp,
         lineHeight = 28.sp,
         letterSpacing = 0.sp
     ),
     labelSmall = TextStyle(
-        fontFamily = CusFont1,
+        fontFamily = CusFont2,
         fontWeight = FontWeight.Medium,
         fontSize = 11.sp,
         lineHeight = 16.sp,

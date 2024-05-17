@@ -170,12 +170,15 @@ object ReuseComponents {
     }
 
     @Composable
-    fun TopBar(title: String,
-               navController: NavController,
-               showBackButton: Boolean = false,
-               showLogoutButton: Boolean = false,
-               isAtSettingPage: Boolean = false,
-               onLogout: (() -> Unit)? = null) {
+    fun TopBar(
+        title: String,
+        navController: NavController,
+        showBackButton: Boolean = false,
+        showLogoutButton: Boolean = false,
+        isAtSettingPage: Boolean = false,
+        isAgencySide: Boolean = false, // New parameter to indicate if on agency side
+        onLogout: (() -> Unit)? = null
+    ) {
         var expanded by remember { mutableStateOf(false) }
 
         val items = mutableListOf("Profile", "Settings")
@@ -183,7 +186,6 @@ object ReuseComponents {
         if (showLogoutButton) {
             items.add("Logout")
         }
-
 
         Surface(
             color = MaterialTheme.colorScheme.background,
@@ -213,9 +215,15 @@ object ReuseComponents {
                     color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.weight(1f),
                 )
-                if(!isAtSettingPage) {
+                if (!isAtSettingPage) {
                     IconButton(
-                        onClick = { navController.navigate(route = Screen.Settings.route) }
+                        onClick = {
+                            if (isAgencySide) {
+                                navController.navigate(route = Screen.AgencySetting.route)
+                            } else {
+                                navController.navigate(route = Screen.Settings.route)
+                            }
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Default.Settings,
@@ -248,9 +256,13 @@ object ReuseComponents {
                                             navController.navigate(route = Screen.Profile.route)
                                         }
 
-//                                    "Settings" -> {
-//                                        navController.navigate(route = Screen.Settings.route)
-//                                    }
+                                        "Settings" -> {
+                                            if (isAgencySide) {
+                                                navController.navigate(route = Screen.AgencySetting.route)
+                                            } else {
+                                                navController.navigate(route = Screen.Settings.route)
+                                            }
+                                        }
 
                                         "Logout" -> {
                                             onLogout?.invoke()
@@ -266,6 +278,7 @@ object ReuseComponents {
             }
         }
     }
+
 
     @Composable
     fun AgencyNavBar(text: String, navController: NavController) {

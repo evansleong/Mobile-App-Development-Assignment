@@ -230,30 +230,54 @@ class TripFirebase {
                 }
         }
     }
+    
+    fun addPurchasedTrip(
+        db: FirebaseFirestore,
+        context: Context,
+        tripId: String,
+        agencyUsername: String,
+        noPax: Int,
+    ) {
+        val tripData = hashMapOf(
+            "tripId" to tripId,
+            "agencyUsername" to agencyUsername,
+            "noPax" to noPax
+        )
 
-//    fun addPurchasedTrip(
-//        db: FirebaseFirestore,
-//        context: Context,
-//        tripId: String,
-//        agencyUsername: String,
-//        noPax: Int,
-//    ) {
-//        val tripData = hashMapOf(
-//            "tripId" to tripId,
-//            "agencyUsername" to agencyUsername,
-//            "noPax" to noPax
-//        )
-//
-//        db.collection("purchasedTrips")
-//            .add(tripData)
-//            .addOnSuccessListener {
-//                Log.d("Firestore", "Document added to purchasedTrips with ID: $it.id")
-//                Toast.makeText(context, "PurchasedTrips added to Firestore with ID: $it.id", Toast.LENGTH_SHORT).show()
-//            }
-//            .addOnFailureListener { e ->
-//                Log.e("Firestore", "Error adding document", e)
-//                Toast.makeText(context, "Error adding purchasedTrips to Firestore", Toast.LENGTH_SHORT).show()
-//            }
-//    }
+        db.collection("purchasedTrips")
+            .add(tripData)
+            .addOnSuccessListener {
+                Log.d("Firestore", "Document added to purchasedTrips with ID: $it.id")
+                Toast.makeText(context, "PurchasedTrips added to Firestore with ID: $it.id", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Error adding document", e)
+                Toast.makeText(context, "Error adding purchasedTrips to Firestore", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    // Function to read the total number of purchased trips
+    fun readPurchasedTrips(
+        db: FirebaseFirestore,
+        agencyUsername: String,
+        callback: (Int) -> Unit
+    ) {
+        db.collection("purchasedTrips")
+            .whereEqualTo("agencyUsername", agencyUsername)
+            .get()
+            .addOnSuccessListener { documents ->
+                var totalNoPax = 0 // Initialize the total number of passengers
+                for (document in documents) {
+                    val noPax = document.getLong("noPax")?.toInt() ?: 0
+                    totalNoPax += noPax // Add the number of passengers to the total
+                }
+                callback(totalNoPax) // Pass the total number of passengers to the callback function
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Error getting purchasedTrips: ${e.message}", e)
+                callback(0) // If there's an error, pass 0 as the total number of passengers
+            }
+    }
+
 }
 

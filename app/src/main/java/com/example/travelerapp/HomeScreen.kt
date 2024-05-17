@@ -83,7 +83,15 @@ fun HomeScreen(
             .fillMaxSize()
     ) {
         val title = "Home"
-        ReuseComponents.TopBar(title = title, navController)
+        ReuseComponents.TopBar(title = title, navController,
+            showLogoutButton = true,
+            onLogout = {
+                navController.navigate(route = Screen.UserOrAdmin.route) {
+                    popUpTo(Screen.UserOrAdmin.route) {
+                        inclusive = true
+                    }
+                }
+            })
 
         Column(
             modifier = Modifier

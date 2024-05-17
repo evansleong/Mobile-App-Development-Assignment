@@ -220,7 +220,8 @@ fun AgencySignUpScreen(
                                     agencyId = agencyId,
                                     agencyUsername = agencyUsername.value.text,
                                     agencyEmail = agencyEmail.value.text,
-                                    agencyPassword = agencyPassword.value.text
+                                    agencyPassword = agencyPassword.value.text,
+                                    agencyPicture = null
                                 )
                                 showToast.value = true
                                 agreedToTerms.value = false
