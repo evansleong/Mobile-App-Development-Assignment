@@ -116,7 +116,7 @@ fun WalletScreen(
                         Text(
                             text = "MYR${wallet.available}",
                             color = Color.White,
-                            fontSize = 32.sp,
+                            fontSize = 29.sp,
                             fontWeight = FontWeight.ExtraBold,
                             modifier = Modifier
                                 .padding(horizontal = 16.dp)

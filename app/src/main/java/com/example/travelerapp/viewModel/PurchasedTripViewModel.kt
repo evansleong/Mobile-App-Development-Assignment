@@ -6,9 +6,10 @@ import com.example.travelerapp.data.PurchasedTrip
 import com.example.travelerapp.repo.PurchasedTripFirebase
 import com.google.firebase.firestore.FirebaseFirestore
 
-class PurchassedTripViewModel:ViewModel() {
+class PurchasedTripViewModel:ViewModel() {
     var ptTripId: String? = null
-    var ptUserEmail: String? = null
+    var ptUserId: String? = null
+    var numPax: Int = 0
     private val database = PurchasedTripFirebase()
 
     fun addPTTrip(context: Context,
@@ -16,14 +17,14 @@ class PurchassedTripViewModel:ViewModel() {
                   agencyUsername:String,
                   noPax: Int,
                   tripId: String,
-                  userEmail:String){
+                  userId:String){
         database.addPTDataToFirestore(
             context = context,
             db=db,
             agencyUsername = agencyUsername,
             noPax = noPax,
             tripId = tripId,
-            userEmail = userEmail
+            userId = userId
         )
     }
 

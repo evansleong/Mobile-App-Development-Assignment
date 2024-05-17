@@ -93,7 +93,8 @@ fun ReviewScreen(
         transactionViewModel.readTxs(db) { lists ->
             val filteredId = lists.filter { tx ->
                 user?.userId == tx.user_id && tx.trip_id != "null"
-            }
+            }.distinctBy { it.trip_id }
+
             // Update the tripListState with the fetched trips
             tripIds.value = filteredId.map { it.trip_id }
         }
@@ -173,17 +174,6 @@ fun ReviewItem(review: Review, reviewViewModel: ReviewViewModel, navController: 
         val currentDate = Date(review.created_at)
         val dateFormat = SimpleDateFormat("HH:mm dd MMMM yyyy", Locale.getDefault())
         val formattedDate = dateFormat.format(currentDate)
-//        val utcDateTime = remember {
-//            val instant = Instant.ofEpochMilli(review.created_at)
-//            LocalDateTime.ofInstant(instant, ZoneOffset.UTC)
-//        }
-//        val formattedDate = remember {
-//            val formatter = DateTimeFormatter.ofPattern("HH:mm dd MMMM yyyy")
-//            utcDateTime.format(formatter)
-//        }
-//        val date = Date(review.created_at * 1000)
-//        val sdf = SimpleDateFormat("MMMM dd, yyyy EEE", Locale.getDefault())
-//        val formattedDate = sdf.format(date)
         Text(
             text = formattedDate,
             fontSize = 12.sp,

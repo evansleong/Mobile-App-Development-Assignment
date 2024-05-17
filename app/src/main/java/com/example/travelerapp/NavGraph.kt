@@ -8,7 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.travelerapp.data.Trip
 import com.example.travelerapp.viewModel.AgencyViewModel
-import com.example.travelerapp.viewModel.PurchassedTripViewModel
+import com.example.travelerapp.viewModel.PurchasedTripViewModel
 import com.example.travelerapp.viewModel.ReviewViewModel
 import com.example.travelerapp.viewModel.TransactionViewModel
 import com.example.travelerapp.viewModel.TripViewModel
@@ -26,7 +26,7 @@ fun SetUpNavGraph(
     val walletViewModel: WalletViewModel = viewModel()
     val reviewViewModel: ReviewViewModel = viewModel()
     val transactionViewModel: TransactionViewModel = viewModel()
-    val purchasedTripViewModel: PurchassedTripViewModel = viewModel()
+    val purchasedTripViewModel: PurchasedTripViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -82,6 +82,16 @@ fun SetUpNavGraph(
             route = Screen.UserBookingTripScreen.route
         ){
             UserBookingTripScreen(navController, context = LocalContext.current , tripViewModel)
+        }
+        composable(
+            route = Screen.UserPackagePurchased.route
+        ){
+            UserPackagePurchased(navController, context = LocalContext.current,userViewModel,tripViewModel,purchasedTripViewModel)
+        }
+        composable(
+            route = Screen.UserPackageDetails.route
+        ){
+            UserPurchasedPackageDetail(navController, context = LocalContext.current, tripViewModel, purchasedTripViewModel)
         }
         composable(
             route = Screen.Payment.route
@@ -156,11 +166,6 @@ fun SetUpNavGraph(
                 context = LocalContext.current,
                 viewModel = agencyViewModel
             )
-        }
-        composable(
-            route = Screen.UserPackagePurchased.route
-        ){
-            UserPackagePurchased(navController, context = LocalContext.current,userViewModel,tripViewModel,purchasedTripViewModel)
         }
     }
 }

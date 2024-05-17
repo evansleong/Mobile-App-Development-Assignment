@@ -12,6 +12,8 @@ sealed class Screen(val route: String) {
     object UserDisplayPackageList: Screen(route = "user_display_package_list_screen")
     object UserViewTrip: Screen(route = "user_view_trip_screen")
     object UserBookingTripScreen: Screen(route = "user_booking_trip_screen")
+    object UserPackagePurchased: Screen(route = "user_package_purchased")
+    object UserPackageDetails: Screen(route = "user_package_details")
     object Payment: Screen(route = "payment_screen")
     object Wallet: Screen(route = "wallet_screen")
     object Transaction: Screen(route = "transaction_screen")
@@ -26,5 +28,4 @@ sealed class Screen(val route: String) {
     object AgencyPackageDetail: Screen(route = "agency_package_detail_screen")
     object AgencyEditPackage: Screen(route = "agency_edit_package_screen")
     object AgencySetting: Screen(route = "agency_setting_screen")
-    object UserPackagePurchased: Screen(route = "user_package_purchased")
 }
