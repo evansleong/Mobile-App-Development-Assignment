@@ -18,7 +18,9 @@ import com.example.travelerapp.viewModel.UserViewModel
 @Composable
 fun SetUpNavGraph(
     navController: NavHostController,
-    dbHandler: DBHandler
+    dbHandler: DBHandler,
+    darkTheme: Boolean,
+    onDarkThemeChanged:(Boolean)->Unit
 ) {
     val agencyViewModel: AgencyViewModel = viewModel()
     val tripViewModel: TripViewModel = viewModel()
@@ -121,7 +123,7 @@ fun SetUpNavGraph(
         composable(
             route = Screen.Settings.route
         ) {
-            SettingsScreen(navController,context = LocalContext.current)
+            SettingsScreen(navController,context = LocalContext.current,darkTheme = darkTheme,onDarkThemeChanged = onDarkThemeChanged)
         }
         composable(
             route = Screen.AgencyLogin.route

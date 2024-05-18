@@ -52,7 +52,7 @@ private val LightColorScheme = lightColorScheme(
 //Color(0xFF43b3fb)
 @Composable
 fun TravelerAppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean,
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit

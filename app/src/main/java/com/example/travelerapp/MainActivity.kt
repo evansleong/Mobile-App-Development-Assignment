@@ -5,12 +5,16 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,9 +36,17 @@ class MainActivity : ComponentActivity() {
         val appContext:Context = this
         val mainDbHandler =DBHandler(appContext)
         setContent {
-            TravelerAppTheme {
+            var dark = remember {
+                mutableStateOf(false)
+            }
+            TravelerAppTheme(darkTheme = dark.value) {
                 navController = rememberNavController()
-                SetUpNavGraph(navController = navController, dbHandler = mainDbHandler)
+                SetUpNavGraph(
+                    navController = navController,
+                    dbHandler = mainDbHandler,
+                    darkTheme = dark.value,
+                    onDarkThemeChanged = {dark.value = !dark.value}
+                    )
 
             }
         }

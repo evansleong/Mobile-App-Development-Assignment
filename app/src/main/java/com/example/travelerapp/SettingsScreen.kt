@@ -63,7 +63,9 @@ import androidx.navigation.compose.rememberNavController
 @Composable
 fun SettingsScreen(
     navController: NavController,
-    context: Context
+    context: Context,
+    darkTheme: Boolean,
+    onDarkThemeChanged: (Boolean) ->Unit
 ) {
     val changeName = remember {
         mutableStateOf(TextFieldValue())
@@ -212,7 +214,8 @@ fun SettingsScreen(
                         )
 
                         Switch(checked = darkTheme.value,
-                            onCheckedChange = {darkTheme.value = it})
+                            onCheckedChange = {onDarkThemeChanged(it)}
+                        )
                     }
 
                     Text(
@@ -282,8 +285,8 @@ fun SettingsScreen(
 
         ReuseComponents.NavBar(text = title, navController = navController)
     }
-    if(darkTheme.value){
-        Toast.makeText(context,"Dark Theme Applied",Toast.LENGTH_SHORT).show()
+    if(darkTheme.value!=darkTheme.value){
+        Toast.makeText(context,"Dark Theme ${darkTheme.value}",Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -292,6 +295,8 @@ fun SettingsScreen(
 fun SettingsPreview(){
     SettingsScreen(
         navController = rememberNavController(),
-        context = LocalContext.current
+        context = LocalContext.current,
+        darkTheme = false,
+        onDarkThemeChanged = {}
     )
 }
