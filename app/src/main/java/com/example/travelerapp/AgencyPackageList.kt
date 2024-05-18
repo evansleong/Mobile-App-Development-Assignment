@@ -1,6 +1,7 @@
 package com.example.travelerapp
 
 import ReuseComponents
+import ReuseComponents.bounceClick
 import android.app.Activity
 import android.content.Context
 import android.net.Uri
@@ -96,6 +97,14 @@ fun AgencyPackageList(
                 navController,
                 showBackButton = true,
                 isAgencySide = true,
+                showLogoutButton = true,
+                onLogout = {
+                    navController.navigate(route = Screen.UserOrAdmin.route) {
+                        popUpTo(Screen.UserOrAdmin.route) {
+                            inclusive = true
+                        }
+                    }
+                }
             )
         },
         bottomBar = {
@@ -133,6 +142,17 @@ fun AgencyPackageList(
                     .fillMaxSize()
                     .padding(contentPadding)
             ) {
+                item {
+                    Text(
+                        text = "Click To View Your Package",
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                            .padding(top = 8.dp, bottom = 20.dp)
+                    )
+                }
+
                 items(tripListState.value) { trip ->
                     TripItem(
                         trip = trip,

@@ -28,11 +28,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -243,17 +247,25 @@ fun AgencyLoginScreen(
                     }
                 )
 
+                val annotatedString = buildAnnotatedString {
+                    append("Don't have an account yet? ")
+                    pushStringAnnotation(tag = "SIGNUP", annotation = "Sign up now")
+                    withStyle(style = SpanStyle(color = Color.Blue, fontSize = 14.sp, fontWeight = FontWeight.Bold, textDecoration = TextDecoration.Underline)) {
+                        append("Sign up now")
+                    }
+                    pop()
+                }
+
                 Text(
-                    text = "Don't have an account yet? Sign up now",
-                    color = Color.Blue,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
+                    text = annotatedString,
                     modifier = Modifier
                         .padding(top = 16.dp)
                         .clickable {
-                            navController.navigate(Screen.AgencySignup.route) {
-                                popUpTo(Screen.Signup.route) {
-                                    inclusive = true
+                            annotatedString.getStringAnnotations(tag = "SIGNUP", start = 0, end = annotatedString.length).firstOrNull()?.let { _ ->
+                                navController.navigate(Screen.AgencySignup.route) {
+                                    popUpTo(Screen.Signup.route) {
+                                        inclusive = true
+                                    }
                                 }
                             }
                         }
@@ -263,6 +275,7 @@ fun AgencyLoginScreen(
                     color = Color.Blue,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
+                    textDecoration = TextDecoration.Underline,
                     modifier = Modifier
                         .padding(top = 16.dp)
                         .clickable {

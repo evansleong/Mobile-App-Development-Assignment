@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -35,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -77,7 +79,18 @@ fun AgencyPackageDetail(
 
         Scaffold(
             topBar = {
-                ReuseComponents.TopBar(title = trip.tripName, navController, showBackButton = true)
+                ReuseComponents.TopBar(
+                    title = trip.tripName,
+                    navController,
+                    showBackButton = true,
+                    showLogoutButton = true,
+                    onLogout = {
+                        navController.navigate(route = Screen.UserOrAdmin.route) {
+                            popUpTo(Screen.UserOrAdmin.route) {
+                                inclusive = true
+                            }
+                        }
+                    })
             }
         ) { contentPadding ->
             Box(
@@ -96,23 +109,51 @@ fun AgencyPackageDetail(
                             contentDescription = trip.tripUri,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .aspectRatio(16f / 9f)
+                                .aspectRatio(16f / 9f),
+                            contentScale = ContentScale.Crop
                         )
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
-                        Text(
-                            text = trip.tripName,
-                            fontSize = 30.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Card(
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color(0xFF5DB075), //Card background color
+                                contentColor = Color.White  //Card content color,e.g.text
+                            ),
+                            elevation = CardDefaults.cardElevation(
+                                defaultElevation = 10.dp
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(14.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = trip.tripName,
+                                    fontSize = 30.sp,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+
+                                Text(
+                                    text = "${trip.depDate} to ${trip.retDate}",
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Light,
+                                    fontFamily = CusFont3
+                                )
+                            }
+                        }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Card(
                             modifier = Modifier
                                 .height(350.dp)
-                                .width(350.dp),
+                                .fillMaxWidth(),
                             shape = RoundedCornerShape(16.dp)
                         ) {
                             Column(
@@ -122,6 +163,15 @@ fun AgencyPackageDetail(
                                     text = "${trip.tripLength} - RM${String.format("%.2f", trip.tripFees)}/pax",
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.ExtraBold,
+                                    fontFamily = CusFont3
+                                )
+
+                                Spacer(modifier = Modifier.height(10.dp))
+
+                                Text(
+                                    text = "Deposit : RM${String.format("%.2f", trip.tripDeposit)}",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold,
                                     fontFamily = CusFont3
                                 )
 

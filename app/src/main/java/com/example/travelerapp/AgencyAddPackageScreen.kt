@@ -322,12 +322,20 @@ fun AgencyAddPackageScreen(
     ) {
         var dbHandler: DBHandler = DBHandler(context)
 
-        val title = "Add Package"
+        val title = "Add New Travel Package - [ ${tripPackageName.value.text} ]"
         ReuseComponents.TopBar(
             title = title,
             navController,
             showBackButton = true,
+            showLogoutButton = true,
             isAgencySide = true,
+            onLogout = {
+                navController.navigate(route = Screen.UserOrAdmin.route) {
+                    popUpTo(Screen.UserOrAdmin.route) {
+                        inclusive = true
+                    }
+                }
+            }
         )
 
         Box(
@@ -778,11 +786,11 @@ fun AgencyAddPackageScreen(
                                             context = context,
                                             db = db,
                                             tripId = tripId,
-                                            tripPackageName = tripPackageName.value.text,
+                                            tripPackageName = tripPackageName.value.text.uppercase(),
                                             tripLength = tripLength.value,
                                             tripPackageFees = tripPackageFees.value.text.toDouble(),
                                             tripPackageDeposit = tripPackageDeposit.value.text.toDouble(),
-                                            tripPackageDesc = tripPackageDesc.value.text,
+                                            tripPackageDesc = tripPackageDesc.value.text.uppercase(),
                                             tripPackageDeptDate = deptDateToString,
                                             tripPackageRetDate = retDateToString,
                                             uploadedImageUri = uploadedImageUri?.toString(),
@@ -794,11 +802,11 @@ fun AgencyAddPackageScreen(
                                             onSuccess = {
                                                 dbHandler.addNewTrip(
                                                     tripId,
-                                                    tripPackageName.value.text,
+                                                    tripPackageName.value.text.uppercase(),
                                                     tripLength.value,
                                                     tripPackageFees.value.text.toDouble(),
                                                     tripPackageDeposit.value.text.toDouble(),
-                                                    tripPackageDesc.value.text,
+                                                    tripPackageDesc.value.text.uppercase(),
                                                     deptDateToString,
                                                     retDateToString,
                                                     uploadedImageUri?.toString(),

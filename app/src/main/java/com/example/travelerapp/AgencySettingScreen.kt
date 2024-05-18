@@ -165,7 +165,19 @@ fun AgencySettingScreen(
             .fillMaxSize()
     ) {
         val title = "Settings"
-        ReuseComponents.TopBar(title = title, navController, showBackButton = true,isAtSettingPage = true)
+        ReuseComponents.TopBar(
+            title = title,
+            navController,
+            showBackButton = true,
+            isAtSettingPage = true,
+            showLogoutButton = true,
+            onLogout = {
+                navController.navigate(route = Screen.UserOrAdmin.route) {
+                    popUpTo(Screen.UserOrAdmin.route) {
+                        inclusive = true
+                    }
+                }
+            })
 
         LazyColumn(
             modifier = Modifier
