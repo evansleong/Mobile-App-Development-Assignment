@@ -218,7 +218,7 @@ object ReuseComponents {
     ) {
         var expanded by remember { mutableStateOf(false) }
 
-        val items = mutableListOf("Profile", "Settings")
+        val items = mutableListOf("Settings")
 
         if (showLogoutButton) {
             items.add("Logout")
@@ -290,10 +290,6 @@ object ReuseComponents {
                                     expanded = false
                                     // Depending on the option selected, perform some action
                                     when (it) {
-                                        "Profile" -> {
-                                            navController.navigate(route = Screen.Profile.route)
-                                        }
-
                                         "Settings" -> {
                                             if (isAgencySide) {
                                                 navController.navigate(route = Screen.AgencySetting.route)

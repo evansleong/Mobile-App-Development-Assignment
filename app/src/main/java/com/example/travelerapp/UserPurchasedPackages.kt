@@ -94,7 +94,7 @@ fun UserPackagePurchased(
             .fillMaxSize()
     ) {
         Column {
-            ReuseComponents.TopBar(title = title, navController = navController)
+            ReuseComponents.TopBar(title = title, navController = navController, showBackButton = true)
 
             Text(
                 text = "Purchased Trip",

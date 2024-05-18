@@ -94,7 +94,8 @@ fun AgencyPackageList(
             ReuseComponents.TopBar(
                 title = "Travel Package Management",
                 navController,
-                showBackButton = true
+                showBackButton = true,
+                isAgencySide = true,
             )
         },
         bottomBar = {

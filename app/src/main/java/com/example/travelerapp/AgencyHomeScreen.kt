@@ -155,6 +155,19 @@ fun AgencyHomeScreen(
                 .fillMaxSize()
                 .padding(contentPadding)
         ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(40f / 9f)
+                ) {
+                    Image(
+                        painter = rememberAsyncImagePainter(R.drawable.traveler_banner),
+                        contentDescription = "Today's Photo",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
             val currentDate = remember {
                 SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(Date())
             }

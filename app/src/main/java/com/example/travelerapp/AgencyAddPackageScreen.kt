@@ -12,7 +12,19 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -42,7 +54,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -50,11 +61,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
@@ -63,8 +71,10 @@ import com.example.travelerapp.viewModel.AgencyViewModel
 import com.example.travelerapp.viewModel.TripViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.util.UUID
+
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalCoilApi::class)
 @Composable
@@ -74,6 +84,8 @@ fun AgencyAddPackageScreen(
     viewModel: AgencyViewModel,
     tripViewModel: TripViewModel
 ) {
+    val currentDate = LocalDate.now()
+
     val loggedInAgency = viewModel.loggedInAgency
 
     val db = Firebase.firestore
@@ -263,12 +275,20 @@ fun AgencyAddPackageScreen(
             isValid = false
             Toast.makeText(context, "Please select valid departure date", Toast.LENGTH_SHORT).show()
         }
+        else if (deptDateMillisToLocalDate.isBefore(currentDate)) {
+            isValid = false
+            Toast.makeText(context, "Cannot select date earlier then TODAY", Toast.LENGTH_SHORT).show()
+        }
 
         // Return Date validation
-        if (retDateMillisToLocalDate == null) {
+        if (retDateMillisToLocalDate == null ) {
             isValid = false
             Toast.makeText(context, "Please select valid return date", Toast.LENGTH_SHORT).show()
-        } else if (deptDateMillisToLocalDate != null && retDateMillisToLocalDate != null) {
+        } else if (retDateMillisToLocalDate.isBefore(currentDate)) {
+            isValid = false
+            Toast.makeText(context, "Cannot select date earlier then TODAY", Toast.LENGTH_SHORT).show()
+        }
+        else if (deptDateMillisToLocalDate != null && retDateMillisToLocalDate != null) {
             if (retDateMillisToLocalDate < deptDateMillisToLocalDate) {
                 isValid = false
                 Toast.makeText(context, "Return date cannot be earlier than departure date", Toast.LENGTH_SHORT).show()
@@ -306,7 +326,8 @@ fun AgencyAddPackageScreen(
         ReuseComponents.TopBar(
             title = title,
             navController,
-            showBackButton = true
+            showBackButton = true,
+            isAgencySide = true,
         )
 
         Box(
