@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -168,6 +169,7 @@ fun UserPurchasedPackageDetail(
                                 text = "No. of booked user : ",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 16.sp,
+                                color = MaterialTheme.colorScheme.onBackground
                             )
                             TextField(
                                 value = numPax.toString(),
@@ -176,8 +178,10 @@ fun UserPurchasedPackageDetail(
                                 colors = TextFieldDefaults.colors(
                                     focusedContainerColor = Color.Transparent,
                                     unfocusedContainerColor = Color.Transparent,
-                                    focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White,
+//                                    focusedTextColor = Color.White,
+//                                    unfocusedTextColor = Color.White,
+                                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                                    unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
                                     focusedIndicatorColor = Color.Transparent,
                                     unfocusedIndicatorColor = Color.Transparent
                                 ),

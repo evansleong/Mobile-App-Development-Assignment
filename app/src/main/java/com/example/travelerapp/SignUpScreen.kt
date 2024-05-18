@@ -35,6 +35,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -74,6 +75,11 @@ fun SignUpScreen(
         mutableStateOf(emptyList<User>())
     }
 
+    val pwTyped = remember {
+        mutableStateOf(false)
+    }
+
+
     viewModel.readUData(db){ userList -> userSU.value = userList }
 
     Column(
@@ -86,7 +92,7 @@ fun SignUpScreen(
         Box(
             modifier = Modifier
                 .width(350.dp)
-                .height(600.dp)
+                .height(800.dp)
                 .background(Color.LightGray, RoundedCornerShape(16.dp))
         ) {
             Column(
@@ -127,6 +133,15 @@ fun SignUpScreen(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
+                val uNameValid: Boolean = viewModel.isUNameAv(username.value.text, userSU.value)
+                if (username.value.text != "") {
+                    Text(
+                        text = if (!uNameValid) "username is unavailable" else "",
+                        color = if (uNameValid) Color.Blue else Color.Red,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(15.dp))
 
@@ -146,6 +161,15 @@ fun SignUpScreen(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     modifier = Modifier.fillMaxWidth()
                 )
+                val emailIsValid: Boolean = viewModel.isUEmailV(email.value.text)
+                if (email.value.text != "") {
+                    Text(
+                        text = if (emailIsValid) "" else "Please enter a valid Email",
+                        color = if (uNameValid) Color.Blue else Color.Red,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(15.dp))
 
@@ -159,7 +183,10 @@ fun SignUpScreen(
                 var passwordVisible by rememberSaveable { mutableStateOf(false) }
                 TextField(
                     value = password.value,
-                    onValueChange = { password.value = it },
+                    onValueChange = {
+                        password.value = it
+                        pwTyped.value = true
+                                    },
                     shape = RoundedCornerShape(16.dp),
                     label = { BasicText(text = "Password") },
                     singleLine = true,
@@ -181,7 +208,78 @@ fun SignUpScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
+                val pwValid: Boolean = viewModel.isUPwV(password.value.text)
+                if (password.value.text != "") {
+                    Text(
+                        text = if (pwValid) "" else "Password must contain at least 1 uppercase, lowercase, number, and only 8 characters",
+                        color = if (pwValid) Color.Blue else Color.Red,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 4.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+
+                    if (password.value.text != "" &&pwTyped.value) {
+                        Text(
+                            text = "Confirm Password",
+                            modifier = Modifier.align(Alignment.Start),
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        val checkPw = remember {
+                            mutableStateOf(TextFieldValue())
+                        }
+                        var passwordVisible2 by rememberSaveable { mutableStateOf(false) }
+                        TextField(
+                            value = checkPw.value,
+                            onValueChange = { checkPw.value = it },
+                            shape = RoundedCornerShape(16.dp),
+                            label = { BasicText(text = "Password") },
+                            singleLine = true,
+                            visualTransformation = if (passwordVisible2) VisualTransformation.None else PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Password,
+                            ),
+                            trailingIcon = {
+                                val image = if (passwordVisible2)
+                                    R.drawable.visibility
+                                else R.drawable.visibility_off
+
+                                // Please provide localized description for accessibility services
+                                val description =
+                                    if (passwordVisible2) "Hide password" else "Show password"
+                                IconButton(onClick = { passwordVisible2 = !passwordVisible2 }) {
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(id = image),
+                                        description
+                                    )
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        val tempPw = password.value.text
+
+
+                        if (checkPw.value.text != "") {
+                            if (checkPw.value.text != tempPw) {
+                                Text(
+                                    text = "Both Passwords Do Not Match",
+                                    color = Color.Red,
+                                    fontSize = 12.sp,
+                                    modifier = Modifier.padding(top = 4.dp),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }
+
+
+                Spacer(modifier = Modifier.height(15.dp))
 
                 Column() {
                     Row(
