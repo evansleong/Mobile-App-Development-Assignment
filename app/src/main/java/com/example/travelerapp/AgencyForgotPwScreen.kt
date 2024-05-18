@@ -108,7 +108,7 @@ fun AgencyForgotPwScreen(
                 Spacer(modifier = Modifier.height(15.dp))
 
                 Text(
-                    text = "Answer to Security Question",
+                    text = "What was your favourite food as child ?",
                     modifier = Modifier.align(Alignment.Start),
                 )
 

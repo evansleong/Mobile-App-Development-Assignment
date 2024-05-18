@@ -28,7 +28,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePickerState
@@ -36,7 +38,9 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
@@ -50,12 +54,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.travelerapp.data.Trip
+import com.example.travelerapp.ui.theme.CusFont3
 import com.example.travelerapp.viewModel.TripViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
@@ -79,6 +85,8 @@ fun AgencyEditPackageScreen(
     var editedImageUri by remember {
         mutableStateOf<Uri?>(null)
     }
+
+    var showConfirmDialog by remember { mutableStateOf(false) }
 
     val tripPackageDeptDate = rememberDatePickerState()
     val tripPackageRetDate = rememberDatePickerState()
@@ -113,6 +121,14 @@ fun AgencyEditPackageScreen(
     LaunchedEffect(trip) {
         selectedOptions = trip.options.toMutableSet()
 
+    }
+
+    fun showConfirmationDialog() {
+        showConfirmDialog = true
+    }
+
+    fun handleSaveButtonClick() {
+            showConfirmationDialog()
     }
 
     fun calculateTripLength(departureMillis: Long?, returnMillis: Long?,existingTripLength: String): String {
@@ -203,7 +219,18 @@ fun AgencyEditPackageScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             val title = "Edit ${trip.tripName}"
-            ReuseComponents.TopBar(title = title, navController, showBackButton = true)
+            ReuseComponents.TopBar(
+                title = title,
+                navController,
+                showBackButton = true,
+                showLogoutButton = true,
+                onLogout = {
+                navController.navigate(route = Screen.UserOrAdmin.route) {
+                    popUpTo(Screen.UserOrAdmin.route) {
+                        inclusive = true
+                    }
+                }
+            })
 
             Box(
                 modifier = Modifier
@@ -239,6 +266,15 @@ fun AgencyEditPackageScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()
                 ) {
+                    item {
+                        Text(text = "Trip Name", fontWeight = FontWeight.Bold)
+                        EditableStringFieldWithButton(
+                            text = editedTripName,
+                            onTextChanged = { editedTripName = it },
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+
                     item {
                         Text(text = "Trip Name", fontWeight = FontWeight.Bold)
                         EditableStringFieldWithButton(
@@ -347,24 +383,70 @@ fun AgencyEditPackageScreen(
                                 validateInputFields()
 
                                 if (isInputValid) {
-                                tripViewModel.editTrip(
-                                    context = navController.context,
-                                    db = Firebase.firestore,
-                                    tripId = trip.tripId,
-                                    newTripUri = editedImageUri?.toString() ?: trip.tripUri,
-                                    newTripName = editedTripName,
-                                    newTripLength = editedTripLength,
-                                    newTripFees = editedTripFees,
-                                    newTripDesc = editedTripDesc,
-                                    newDeptDate = editedDepartureDate,
-                                    newRetDate = editedReturnDate,
-                                    newOptions = selectedOptions.toList(),
-                                )
-                                navController.popBackStack()
+                                    handleSaveButtonClick()
                             } else {
                                 Toast.makeText(context, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
                             }                            }
                         )
+                    }
+
+                    item {
+                        // Confirmation Dialog
+                        if (showConfirmDialog) {
+                            AlertDialog(
+                                onDismissRequest = { showConfirmDialog = false },
+                                title = {
+                                    Text("Confirm Save")
+                                },
+                                text = {
+                                    Text("Are you sure you want to edit this trip package?")
+                                },
+                                confirmButton = {
+                                    TextButton(
+                                        onClick = {
+                                            tripViewModel.editTrip(
+                                                context = navController.context,
+                                                db = Firebase.firestore,
+                                                tripId = trip.tripId,
+                                                newTripUri = editedImageUri?.toString() ?: trip.tripUri,
+                                                newTripName = editedTripName.uppercase(),
+                                                newTripLength = editedTripLength,
+                                                newTripFees = editedTripFees,
+                                                newTripDeposit = editedTripDeposit,
+                                                newTripDesc = editedTripDesc.uppercase(),
+                                                newDeptDate = editedDepartureDate,
+                                                newRetDate = editedReturnDate,
+                                                newOptions = selectedOptions.toList(),
+                                            )
+                                            navController.popBackStack()
+                                            Toast.makeText(
+                                                context,
+                                                "Trip Edited",
+                                                Toast.LENGTH_SHORT
+                                            )
+                                                .show()
+                                            showConfirmDialog = false
+                                            navController.popBackStack()
+                                        },
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = MaterialTheme.colorScheme.primary
+                                        )
+                                    ) {
+                                        Text("Edit")
+                                    }
+                                },
+                                dismissButton = {
+                                    TextButton(
+                                        onClick = { showConfirmDialog = false },
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = MaterialTheme.colorScheme.primary
+                                        )
+                                    ) {
+                                        Text("Cancel")
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -411,7 +493,7 @@ fun EditableDoubleFieldWithButton(
     onValueChanged: (Double) -> Unit
 ) {
     var showError by remember { mutableStateOf(false) }
-    var text by remember { mutableStateOf(value.toString()) }
+    var text by remember { mutableStateOf(String.format("%.2f", value)) }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -419,17 +501,19 @@ fun EditableDoubleFieldWithButton(
     ) {
         Spacer(modifier = Modifier.width(8.dp))
         TextField(
-            value = value.toString(),
+            value = text,
             onValueChange = {
                 text = it
                 val newValue = it.toDoubleOrNull()
                 if (newValue != null) {
                     onValueChanged(newValue)
+                    showError = false
                 } else {
                     showError = true // Show error if parsing fails or input is empty
                 }
             },
             modifier = Modifier.weight(1f),
+            textStyle = TextStyle(fontFamily = CusFont3),
             shape = RoundedCornerShape(20.dp),
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Number

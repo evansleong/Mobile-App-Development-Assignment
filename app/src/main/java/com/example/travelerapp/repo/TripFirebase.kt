@@ -79,6 +79,7 @@ class TripFirebase {
         newTripName: String,
         newTripLength: String,
         newTripFees: Double,
+        newTripDeposit: Double,
         newTripDesc: String,
         newDeptDate: String,
         newRetDate: String,
@@ -91,6 +92,7 @@ class TripFirebase {
             "tripName" to newTripName,
             "tripLength" to newTripLength,
             "tripFees" to newTripFees,
+            "tripDeposit" to newTripDeposit,
             "tripDesc" to newTripDesc,
             "depDate" to newDeptDate,
             "retDate" to newRetDate,
@@ -101,11 +103,11 @@ class TripFirebase {
             .update(newData)
             .addOnSuccessListener {
                 Log.d("Firestore", "Trip edited successfully")
-                Toast.makeText(context, "Trip edited successfully", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(context, "Trip edited successfully", Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener { e ->
                 Log.e("Firestore", "Error editing trip: ${e.message}", e)
-                Toast.makeText(context, "Error editing trip", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(context, "Error editing trip", Toast.LENGTH_SHORT).show()
             }
     }
 

@@ -2,6 +2,7 @@ package com.example.travelerapp
 
 import ReuseComponents.TopBar
 import android.graphics.Paint
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.items
@@ -39,11 +40,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
@@ -85,6 +89,7 @@ import com.example.travelerapp.viewModel.AgencyViewModel
 import com.example.travelerapp.viewModel.TripViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.launch
 import kotlin.math.PI
 import kotlin.math.atan2
 
@@ -104,6 +109,17 @@ fun AgencyHomeScreen(
     val totalUsersState = remember { mutableStateOf(0) }
 
     val purchasedTripsState = remember { mutableStateOf<List<Trip>>(emptyList()) }
+
+    // Intercept the back button press to prevent navigating back
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+
+    // Intercept the back button press to prevent navigating back and show a Snackbar
+    BackHandler {
+        coroutineScope.launch {
+            snackbarHostState.showSnackbar("Cannot log out by pressing the back button")
+        }
+    }
 
     LaunchedEffect(key1 = true) {
         tripViewModel.readTrip(db) { trips ->
@@ -126,13 +142,10 @@ fun AgencyHomeScreen(
             val sortedTrips = trips.sortedByDescending { it.noOfUserBooked }
             top3TripsState.value = sortedTrips.take(3)
         }
-
-//        tripViewModel.readPurchasedTripsForPieChart(db, loggedInAgency?.agencyUsername ?: "") { pieChartData ->
-//            pieChartDataState.value = pieChartData
-//        }
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopBar(
                 title = "Welcome, ${loggedInAgency?.agencyUsername}",
@@ -165,7 +178,7 @@ fun AgencyHomeScreen(
                 ) {
                     Image(
                         painter = rememberAsyncImagePainter(R.drawable.traveler_banner),
-                        contentDescription = "Today's Photo",
+                        contentDescription = "Traveler banner",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
@@ -176,11 +189,13 @@ fun AgencyHomeScreen(
             }
             Text(
                 text = "Today",
+                fontFamily = CusFont3,
                 modifier = Modifier.padding(bottom = 4.dp, start = 15.dp),
                 fontSize = 14.sp,
             )
             Text(
                 text = currentDate,
+                fontFamily = CusFont3,
                 modifier = Modifier.padding(bottom = 4.dp, start = 15.dp),
                 fontSize = 18.sp // Larger font size for "current date" text
             )
@@ -193,39 +208,57 @@ fun AgencyHomeScreen(
                 text = "Top 3 Most Booked Trips",
                 modifier = Modifier.padding(bottom = 8.dp, start = 15.dp),
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.ExtraBold,
                 fontFamily = CusFont3
             )
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(horizontal = 8.dp)
+
+            // User travel package list slider
+            Box(
+                modifier = Modifier
+                    .padding(vertical = 16.dp)
             ) {
-                if (top3TripsState.value.isEmpty()) {
-                    item {
-                        Text(
-                            text = "No trips available...",
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
-                } else {
-                    itemsIndexed(top3TripsState.value) { index, trip ->
-                        if (trip.noOfUserBooked > 0) {
-                            AgencyHomeTop3Item(
-                                trip = trip,
-                                navController = navController,
-                                tripViewModel = tripViewModel,
-                                rank = index + 1 // Pass the rank (1, 2, or 3)
-                            )
-                        }
-                        else {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = 10.dp
+                    )
+                ) {
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(horizontal = 8.dp)
+                    ) {
+                        if (top3TripsState.value.isEmpty()) {
+                            item {
                                 Text(
                                     text = "No trips available...",
-                                    modifier = Modifier.padding(16.dp)
+                                    modifier = Modifier
+                                        .padding(vertical = 50.dp, horizontal = 90.dp)
                                 )
+                            }
+                        } else {
+                            itemsIndexed(top3TripsState.value) { index, trip ->
+                                if (trip.noOfUserBooked > 0) {
+                                    AgencyHomeTop3Item(
+                                        trip = trip,
+                                        navController = navController,
+                                        tripViewModel = tripViewModel,
+                                        rank = index + 1 // Pass the rank (1, 2, or 3)
+                                    )
+                                } else {
+                                    Text(
+                                        text = "",
+                                        modifier = Modifier.padding(16.dp)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(30.dp))
 
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -338,7 +371,7 @@ fun AgencyHomeTripItem(
                 navController.navigate(route = Screen.AgencyPackageDetail.route)
             },
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 50.dp
+            defaultElevation = 23.dp
         )
     ) {
         Column(
