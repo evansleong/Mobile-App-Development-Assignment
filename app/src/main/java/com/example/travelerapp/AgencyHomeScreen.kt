@@ -108,17 +108,20 @@ fun AgencyHomeScreen(
     LaunchedEffect(key1 = true) {
         tripViewModel.readTrip(db) { trips ->
             val filteredTrips = trips.filter { trip ->
-                trip.agencyUsername == loggedInAgency?.agencyUsername
+                trip.agencyId == loggedInAgency?.agencyId
             }
             // Update the tripListState with the fetched trips
             tripListState.value = filteredTrips
         }
 
-        tripViewModel.readPurchasedTrips(db, loggedInAgency?.agencyUsername ?: "") { totalUsers ->
+        tripViewModel.readPurchasedTrips(db, loggedInAgency?.agencyId ?: "",
+            loggedInAgency?.agencyId ?: ""
+        ) { totalUsers ->
             totalUsersState.value = totalUsers
         }
 
-        tripViewModel.readTripsWithBookingCount(db, loggedInAgency?.agencyUsername ?: "") { trips ->
+        tripViewModel.readTripsWithBookingCount(db, loggedInAgency?.agencyUsername ?: "",
+            loggedInAgency?.agencyId ?: "") { trips ->
             tripListState.value = trips
             val sortedTrips = trips.sortedByDescending { it.noOfUserBooked }
             top3TripsState.value = sortedTrips.take(3)
@@ -206,29 +209,23 @@ fun AgencyHomeScreen(
                     }
                 } else {
                     itemsIndexed(top3TripsState.value) { index, trip ->
-                        AgencyHomeTop3Item(
-                            trip = trip,
-                            navController = navController,
-                            tripViewModel = tripViewModel,
-                            rank = index + 1 // Pass the rank (1, 2, or 3)
-                        )
+                        if (trip.noOfUserBooked > 0) {
+                            AgencyHomeTop3Item(
+                                trip = trip,
+                                navController = navController,
+                                tripViewModel = tripViewModel,
+                                rank = index + 1 // Pass the rank (1, 2, or 3)
+                            )
+                        }
+                        else {
+                                Text(
+                                    text = "No trips available...",
+                                    modifier = Modifier.padding(16.dp)
+                                )
+                        }
                     }
                 }
             }
-
-//            Text(
-//                text = " Pkgs booked: ${totalUsersState.value}",
-//                modifier = Modifier
-//                    .padding(bottom = 4.dp, start = 10.dp),
-//                color = Color.DarkGray,
-//                fontWeight = FontWeight.Bold,
-//                fontSize = 25.sp
-//            )
-
-            // Divider below the "pkgs booked" text
-//            Divider(
-//                modifier = Modifier.padding(bottom = 5.dp)
-//            )
 
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -236,7 +233,7 @@ fun AgencyHomeScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "Your travel package list",
+                    text = "Your Travel Package List",
                     modifier = Modifier.padding(start = 15.dp),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.ExtraBold,

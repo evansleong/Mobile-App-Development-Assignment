@@ -82,7 +82,7 @@ fun AgencyPackageList(
     LaunchedEffect(key1 = refreshTrigger) {
         tripViewModel.readTrip(db) { trips ->
             val filteredTrips = trips.filter { trip ->
-                trip.agencyUsername == loggedInAgency?.agencyUsername
+                trip.agencyId == loggedInAgency?.agencyId
             }
             tripListState.value = filteredTrips
             noPackages.value = filteredTrips.isEmpty()

@@ -31,7 +31,8 @@ class TripFirebase {
         isAvailable: Int,
         noOfUserBooked: Int,
         agencyUsername: String,
-        onSuccess: () -> Unit
+        onSuccess: () -> Unit,
+        agencyId: String
 //    isChecked: Boolean
     ) {
 
@@ -49,6 +50,7 @@ class TripFirebase {
             "isAvailable" to isAvailable,
             "noOfUserBooked" to noOfUserBooked,
             "agencyUsername" to agencyUsername,
+            "agencyId" to agencyId
         )
 
         db.collection("trips")
@@ -245,11 +247,13 @@ class TripFirebase {
         context: Context,
         tripId: String,
         agencyUsername: String,
+        agencyId: String,
         noPax: Int,
     ) {
         val tripData = hashMapOf(
             "tripId" to tripId,
             "agencyUsername" to agencyUsername,
+            "agencyId" to agencyId,
             "noPax" to noPax
         )
 
@@ -269,10 +273,11 @@ class TripFirebase {
     fun readPurchasedTrips(
         db: FirebaseFirestore,
         agencyUsername: String,
+        agencyId: String,
         callback: (Int) -> Unit
     ) {
         db.collection("purchasedTrips")
-            .whereEqualTo("agencyUsername", agencyUsername)
+            .whereEqualTo("agencyId", agencyId)
             .get()
             .addOnSuccessListener { documents ->
                 var totalNoPax = 0 // Initialize the total number of passengers
@@ -288,9 +293,9 @@ class TripFirebase {
             }
     }
 
-    fun readTripsWithBookingCounts(db: FirebaseFirestore, agencyUsername: String, onTripsRead: (List<Trip>) -> Unit) {
+    fun readTripsWithBookingCounts(db: FirebaseFirestore, agencyUsername: String, agencyId: String, onTripsRead: (List<Trip>) -> Unit) {
         db.collection("trips")
-            .whereEqualTo("agencyUsername", agencyUsername)
+            .whereEqualTo("agencyId", agencyId)
             .get()
             .addOnSuccessListener { documents ->
                 val trips = documents.map { document ->

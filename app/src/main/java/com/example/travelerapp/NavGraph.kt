@@ -134,6 +134,15 @@ fun SetUpNavGraph(
             AgencySignUpScreen(navController, context = LocalContext.current, viewModel = agencyViewModel)
         }
         composable(
+            route = Screen.AgencyForgotPw.route
+        ) {
+            AgencyForgotPwScreen(
+                navController,
+                context = LocalContext.current,
+                viewModel = agencyViewModel
+            )
+        }
+        composable(
             route = Screen.AgencyHome.route
         ){
             AgencyHomeScreen(navController, viewModel = agencyViewModel, tripViewModel = tripViewModel)

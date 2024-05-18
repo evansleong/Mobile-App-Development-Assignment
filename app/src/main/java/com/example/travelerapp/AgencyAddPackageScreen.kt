@@ -790,6 +790,7 @@ fun AgencyAddPackageScreen(
                                             isAvailable = tripAvailable.value.text.toInt(),
                                             noOfUserBooked = 0,
                                             agencyUsername = loggedInAgency?.agencyUsername ?: "user",
+                                            agencyId = loggedInAgency?.agencyId ?: "agencyId",
                                             onSuccess = {
                                                 dbHandler.addNewTrip(
                                                     tripId,

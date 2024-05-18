@@ -15,7 +15,7 @@ class TripViewModel : ViewModel() {
     var selectedTripId: String? = null
     var numPax: Int = 0
     private val database = TripFirebase()
-    fun addTrip(context: Context, db: FirebaseFirestore, tripId: String, tripPackageName: String, tripLength: String, tripPackageFees: Double, tripPackageDeposit: Double, tripPackageDesc: String, tripPackageDeptDate: String, tripPackageRetDate: String, uploadedImageUri: String?, selectedOption: List<String>, isAvailable: Int, noOfUserBooked: Int, agencyUsername: String, onSuccess: () -> Unit){
+    fun addTrip(context: Context, db: FirebaseFirestore, tripId: String, tripPackageName: String, tripLength: String, tripPackageFees: Double, tripPackageDeposit: Double, tripPackageDesc: String, tripPackageDeptDate: String, tripPackageRetDate: String, uploadedImageUri: String?, selectedOption: List<String>, isAvailable: Int, noOfUserBooked: Int, agencyUsername: String, onSuccess: () -> Unit, agencyId: String){
         database.addDataToFirestore(
             context = context,
             db = db,
@@ -32,6 +32,7 @@ class TripViewModel : ViewModel() {
             isAvailable = isAvailable,
             noOfUserBooked = noOfUserBooked,
             agencyUsername = agencyUsername,
+            agencyId = agencyId,
             onSuccess = onSuccess
         )
     }
@@ -109,17 +110,18 @@ class TripViewModel : ViewModel() {
         context: Context,
         tripId: String,
         agencyUsername: String,
+        agencyId: String,
         noPax: Int,
     ){
-        database.addPurchasedTrip(db, context, tripId, agencyUsername, noPax)
+        database.addPurchasedTrip(db, context, tripId, agencyUsername, agencyId, noPax)
     }
 
-    fun readPurchasedTrips(db: FirebaseFirestore, agencyUsername: String, callback: (Int) -> Unit) {
-        database.readPurchasedTrips(db, agencyUsername, callback)
+    fun readPurchasedTrips(db: FirebaseFirestore, agencyUsername: String, agencyId: String, callback: (Int) -> Unit) {
+        database.readPurchasedTrips(db, agencyUsername, agencyId, callback)
     }
 
-    fun readTripsWithBookingCount(db: FirebaseFirestore, agencyUsername: String, onTripsRead: (List<Trip>) -> Unit) {
-        database.readTripsWithBookingCounts(db, agencyUsername, onTripsRead)
+    fun readTripsWithBookingCount(db: FirebaseFirestore, agencyUsername: String, agencyId: String, onTripsRead: (List<Trip>) -> Unit) {
+        database.readTripsWithBookingCounts(db, agencyUsername, agencyId, onTripsRead)
     }
 
 //    fun readPurchasedTripsForPieChart(db: FirebaseFirestore, agencyUsername: String, callback: (List<PieChartInput>) -> Unit) {

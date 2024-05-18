@@ -11,6 +11,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
@@ -55,6 +57,8 @@ fun AgencySignUpScreen(
 
     val agencyId = UUID.randomUUID().toString().substring(0, 4)
 
+    val showSecurityQuestionDialog = remember { mutableStateOf(false) }
+
     val agencyUsername = remember {
         mutableStateOf(TextFieldValue())
     }
@@ -67,6 +71,8 @@ fun AgencySignUpScreen(
     val agencyConfirmPassword = remember {
         mutableStateOf(TextFieldValue())
     }
+    var securityQuestion = remember { mutableStateOf(TextFieldValue()) }
+
     val agreedToTerms = remember {
         mutableStateOf(false)
     }
@@ -91,7 +97,7 @@ fun AgencySignUpScreen(
     isPasswordMatched.value = isValidConfirmPassword
 
     val emailGuideMessage = if (isEmailFormatCorrect.value) "Email format is correct" else "Invalid email format"
-    val passwordGuideMessage = if (isPasswordFormatCorrect.value) "Password format is correct" else "Password must contain 8 characters with \n at least 1 uppercase, lowercase, numeric & special character"
+    val passwordGuideMessage = if (isPasswordFormatCorrect.value) "Password format is correct" else "Password must contain 8 characters with \n at least 1 uppercase, lowercase & numeric character"
     val confirmPasswordGuideMessage = if (isPasswordMatched.value) "Password matches" else "Password is not matches"
 
 
@@ -176,7 +182,7 @@ fun AgencySignUpScreen(
                     text = emailGuideMessage,
                     color = if (isEmailFormatCorrect.value) Color.Blue else Color.Red,
                     fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 4.dp, end = 200.dp)
+                    modifier = Modifier.padding(top = 4.dp)
                 )
 
                 Spacer(modifier = Modifier.height(15.dp))
@@ -269,7 +275,7 @@ fun AgencySignUpScreen(
                         Checkbox(
                             checked = agreedToTerms.value,
                             onCheckedChange = { isChecked -> agreedToTerms.value = isChecked },
-                            colors = CheckboxDefaults.colors(checkedColor = if (agreedToTerms.value) Color.Green else Color.Red) // Change Checkbox color based on agreement
+                            colors = CheckboxDefaults.colors(checkedColor = if (agreedToTerms.value) Color(0xFF5DB075) else Color.Red) // Change Checkbox color based on agreement
                         )
                         Text("I had read and agreed the Term and Privacy")
                     }
@@ -290,17 +296,16 @@ fun AgencySignUpScreen(
                                 viewModel.isEmailAvailable(agencyEmail.value.text, agencyUsers.value) &&
                                 viewModel.isConfirmPasswordMatch(agencyPassword.value.text, agencyConfirmPassword.value.text)
                             ) {
-                                viewModel.addAgency(
-                                    context = context,
-                                    db = db,
-                                    agencyId = agencyId,
-                                    agencyUsername = agencyUsername.value.text,
-                                    agencyEmail = agencyEmail.value.text,
-                                    agencyPassword = agencyPassword.value.text,
-                                    agencyPicture = null
-                                )
-                                showToast.value = true
-                                agreedToTerms.value = false
+//                                viewModel.addAgency(
+//                                    context = context,
+//                                    db = db,
+//                                    agencyId = agencyId,
+//                                    agencyUsername = agencyUsername.value.text,
+//                                    agencyEmail = agencyEmail.value.text,
+//                                    agencyPassword = agencyPassword.value.text,
+//                                    agencyPicture = null
+//                                )
+                                showSecurityQuestionDialog.value = true
                             } else {
                                 Toast.makeText(
                                     context,
@@ -318,14 +323,58 @@ fun AgencySignUpScreen(
                     }
                 )
 
-                // Show toast message after successful signup
+                if (showSecurityQuestionDialog.value) {
+                    AlertDialog(
+                        onDismissRequest = {},
+                        title = { Text("Security Question : What was your favourite food as child ?") },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    if (securityQuestion.value.text.isNotBlank()) {
+                                        viewModel.addAgency(
+                                            context = context,
+                                            db = db,
+                                            agencyId = agencyId,
+                                            agencyUsername = agencyUsername.value.text,
+                                            agencyEmail = agencyEmail.value.text,
+                                            agencyPassword = agencyPassword.value.text,
+                                            agencyPicture = null,
+                                            agencySecureQst = securityQuestion.value.text
+                                        )
+                                        showToast.value = true
+                                        agreedToTerms.value = false
+                                        navController.navigate(Screen.AgencyLogin.route) {
+                                            popUpTo(Screen.AgencyLogin.route) {
+                                                inclusive = true
+                                            }
+                                        }
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            "Security question cannot be empty",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
+                            ) {
+                                Text("Confirm")
+                            }
+                        },
+                        text = {
+                            TextField(
+                                value = securityQuestion.value,
+                                onValueChange = { securityQuestion.value = it },
+                                label = { Text("Enter your security question") },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    )
+                }
+
                 if (showToast.value) {
                     Toast.makeText(context, "Sign Up Successful", Toast.LENGTH_SHORT).show()
-                    navController.navigate(Screen.AgencyLogin.route) {
-                        popUpTo(Screen.AgencyLogin.route) {
-                            inclusive = true
-                        }
-                    }
+                    showSecurityQuestionDialog.value = true
                 }
 
                 Text(
@@ -336,7 +385,6 @@ fun AgencySignUpScreen(
                     modifier = Modifier
                         .padding(top = 16.dp)
                         .clickable {
-                            // Navigate to the signup screen
                             navController.navigate(Screen.AgencyLogin.route) {
                                 popUpTo(Screen.AgencyLogin.route) {
                                     inclusive = true
@@ -346,6 +394,52 @@ fun AgencySignUpScreen(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun SecurityQuestionDialog(
+    showDialog: Boolean,
+    onDismiss: () -> Unit,
+    onSecurityQuestionEntered: (String) -> Unit,
+    navController: NavController,
+) {
+    if (showDialog) {
+        var securityQuestion by remember { mutableStateOf(TextFieldValue()) }
+
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text("Set Security Question") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onDismiss()
+                        onSecurityQuestionEntered(securityQuestion.text)
+                        navController.navigate(Screen.AgencyLogin.route) {
+                            popUpTo(Screen.AgencyLogin.route) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                ) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                Button(onClick = onDismiss) {
+                    Text("Cancel")
+                }
+            },
+            text = {
+                TextField(
+                    value = securityQuestion,
+                    onValueChange = { securityQuestion = it },
+                    label = { Text("Enter your security question") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        )
     }
 }
 

@@ -211,7 +211,7 @@ fun AgencyLoginScreen(
                                 if (!isChecked) {
                                     clearSavedLoginDetails()
                                 } },
-                            colors = CheckboxDefaults.colors(checkedColor = Color.Green)
+                            colors = CheckboxDefaults.colors(checkedColor = Color(0xFF5DB075))
                         )
                         Text("Remember me")
                     }
@@ -252,6 +252,21 @@ fun AgencyLoginScreen(
                         .padding(top = 16.dp)
                         .clickable {
                             navController.navigate(Screen.AgencySignup.route) {
+                                popUpTo(Screen.Signup.route) {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                )
+                Text(
+                    text = "Forgot Password?",
+                    color = Color.Blue,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .clickable {
+                            navController.navigate(Screen.AgencyForgotPw.route) {
                                 popUpTo(Screen.Signup.route) {
                                     inclusive = true
                                 }

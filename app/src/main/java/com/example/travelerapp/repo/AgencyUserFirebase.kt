@@ -16,6 +16,7 @@
             agencyEmail: String,
             agencyPassword: String,
             agencyPicture: String?,
+            agencySecureQst: String
         ) {
 
             val agencyData = hashMapOf(
@@ -23,7 +24,8 @@
                 "agencyUsername" to agencyUsername,
                 "agencyEmail" to agencyEmail,
                 "agencyPassword" to agencyPassword,
-                "agencyPicture" to agencyPicture
+                "agencyPicture" to agencyPicture,
+                "agencySecureQst" to agencySecureQst
             )
 
             db.collection("agencyUser")
@@ -94,6 +96,22 @@
                 }
                 .addOnFailureListener { e ->
                     Log.e("Firestore", "Error getting document: ${e.message}", e)
+                    callback(null)
+                }
+        }
+
+        fun readSingleAgencyByEmail(db: FirebaseFirestore, email: String, callback: (AgencyUser?) -> Unit) {
+            db.collection("agencies").whereEqualTo("agencyEmail", email).get()
+                .addOnSuccessListener { result ->
+                    if (result.documents.isNotEmpty()) {
+                        val agencyUser = result.documents[0].toObject(AgencyUser::class.java)
+                        callback(agencyUser)
+                    } else {
+                        callback(null)
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("FirestoreError", "Error reading agency by email", e)
                     callback(null)
                 }
         }

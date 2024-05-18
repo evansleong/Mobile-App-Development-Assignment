@@ -317,9 +317,9 @@ object ReuseComponents {
     @Composable
     fun AgencyNavBar(text: String, navController: NavController) {
         Surface(
-            color = Color.White,
+            color = MaterialTheme.colorScheme.background,
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth(),
         ) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -327,8 +327,8 @@ object ReuseComponents {
                     .fillMaxWidth()
                     .padding(horizontal = 100.dp, vertical = 16.dp)
             ) {
-                val agencyHomeColor = if (text == "AgencyHome") Color.Blue else Color.Black
-                val agencyPackageColor = if (text == "AgencyPackage") Color.Blue else Color.Black
+                val agencyHomeColor = if (text == "AgencyHome") Color.Blue else MaterialTheme.colorScheme.onBackground
+                val agencyPackageColor = if (text == "AgencyPackage") Color.Blue else MaterialTheme.colorScheme.onBackground
 
                 Icon(
                     painter = painterResource(R.drawable.home),

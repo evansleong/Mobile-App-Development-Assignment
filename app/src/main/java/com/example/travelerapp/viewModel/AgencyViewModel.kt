@@ -15,7 +15,7 @@ class AgencyViewModel : ViewModel() {
     var loggedInAgency: AgencyUser? = null
     private val database = AgencyUserFirebase()
 
-    fun addAgency(context: Context, db: FirebaseFirestore, agencyId: String, agencyUsername: String, agencyEmail: String, agencyPassword: String, agencyPicture: String?){
+    fun addAgency(context: Context, db: FirebaseFirestore, agencyId: String, agencyUsername: String, agencyEmail: String, agencyPassword: String, agencyPicture: String?, agencySecureQst: String){
         database.addDataToFirestore(
             context = context,
             db = db,
@@ -23,7 +23,8 @@ class AgencyViewModel : ViewModel() {
             agencyUsername = agencyUsername,
             agencyEmail = agencyEmail,
             agencyPassword = agencyPassword,
-            agencyPicture = agencyPicture
+            agencyPicture = agencyPicture,
+            agencySecureQst = agencySecureQst
         )
     }
 
@@ -31,6 +32,14 @@ class AgencyViewModel : ViewModel() {
         database.readAgencyDataFromFirestore(
             db = db,
             callback = callback
+        )
+    }
+
+    fun readSingleAgencyByEmail(db: FirebaseFirestore, agencyEmail: String, callback: (AgencyUser?) -> Unit) {
+        database.readSingleAgencyByEmail(
+            db = db,
+            callback = callback,
+            email = agencyEmail
         )
     }
 
@@ -84,6 +93,15 @@ class AgencyViewModel : ViewModel() {
     ): AgencyUser? {
         // Check if there is any user with the provided email and password
         return agencyUsers.find { it.agencyEmail == email && it.agencyPassword == password }
+    }
+
+    fun checkSecureCredentials(
+        email: String,
+        secureQst: String,
+        agencyUsers: List<AgencyUser>
+    ): AgencyUser? {
+        // Check if there is any user with the provided email and password
+        return agencyUsers.find { it.agencyEmail == email && it.agencySecureQst == secureQst }
     }
 
     fun saveLoginDetails(context: Context, email: String, password: String) {
@@ -140,7 +158,7 @@ class AgencyViewModel : ViewModel() {
     }
 
     fun isConfirmPasswordMatch(password: String, confirmPassword: String): Boolean {
-        return password == confirmPassword
+        return password.isNotBlank() && confirmPassword.isNotBlank() && password == confirmPassword
     }
 
     // Function to ensure all fields are not empty
