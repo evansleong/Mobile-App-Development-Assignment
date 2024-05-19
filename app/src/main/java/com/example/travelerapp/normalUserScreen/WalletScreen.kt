@@ -143,24 +143,25 @@ fun WalletScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.background)
                 .weight(0.8f)
         ){
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(vertical = 16.dp)
+                    .background(MaterialTheme.colorScheme.background)
             ) {
                 stickyHeader {
                     Text(
                         text = "History",
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
                             .padding(bottom = 8.dp)
-                            .background(Color.White),
+                            .background(MaterialTheme.colorScheme.background),
                     )
                 }
                 if (transactionList.value.isEmpty()) {
@@ -182,10 +183,11 @@ fun WalletScreen(
                         val formattedDate = dateFormat.format(currentDate)
                         Card(
                             colors = CardDefaults.cardColors(
-                                containerColor = Color.White,
+                                containerColor = MaterialTheme.colorScheme.background,
                             ),
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .background(MaterialTheme.colorScheme.background)
                                 .padding(vertical = 4.dp)
                                 .clip(RoundedCornerShape(8.dp))
                                 .clickable {
@@ -201,21 +203,25 @@ fun WalletScreen(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(vertical = 8.dp)
+                                    .background(MaterialTheme.colorScheme.background)
                             ) {
                                 Row(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(horizontal = 16.dp)
+                                        .background(MaterialTheme.colorScheme.background)
                                 ){
                                     Column {
                                         Text(
-                                            text = formattedDate
+                                            text = formattedDate,
+                                            color = MaterialTheme.colorScheme.onBackground
                                         )
                                         Text(
                                             text = transaction.remarks,
                                             fontSize = 20.sp,
                                             fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onBackground
                                         )
                                         Text(
                                             text = transaction.description,

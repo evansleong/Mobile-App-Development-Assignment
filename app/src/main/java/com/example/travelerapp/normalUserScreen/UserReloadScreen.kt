@@ -65,6 +65,7 @@ fun ReloadScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
     ) {
         val maxWords = 30
         val title = "Wallet"
@@ -109,7 +110,7 @@ fun ReloadScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = Color.White)
+                .background(MaterialTheme.colorScheme.background)
                 .weight(0.8f)
                 .padding(top = 32.dp)
                 .padding(horizontal = 16.dp)
@@ -211,7 +212,8 @@ fun ReloadScreen(
                     text = "Description",
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
-                        .padding(top = 8.dp)
+                        .padding(top = 8.dp),
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 TextField(
                     value = description,
@@ -223,7 +225,7 @@ fun ReloadScreen(
                         .padding(horizontal = 16.dp)
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
-                        .background(color = Color(0xFFE1E1E1)),
+                        .background(color = MaterialTheme.colorScheme.surface),
                     label = { Text(text = "What's the transaction for?", color = Color.Black.copy(alpha = 0.32f), fontWeight = FontWeight.Light) },
                     singleLine = true,
                     colors = TextFieldDefaults.colors(
