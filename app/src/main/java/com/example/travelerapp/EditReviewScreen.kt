@@ -34,6 +34,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -129,6 +130,7 @@ fun EditReviewScreen(
     var expanded by remember { mutableStateOf(false) }
     var selectedOption by remember { mutableStateOf("") }
     var isImageUploadInProgress by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
 
     fun handleImageUpload(context: Context, imageUri: Uri?) {
         isImageUploadInProgress = true
@@ -429,6 +431,68 @@ fun EditReviewScreen(
                                 textAlign = TextAlign.Center,
                                 fontSize = 16.sp,
                                 color = Color.White
+                            )
+                        }
+                    }
+                }
+            }
+
+            item {
+                Surface(
+                    color = Color.Transparent,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Row(horizontalArrangement = Arrangement.Center) {
+                        if (review != null) {
+                            Button(
+                                onClick = {
+                                    showDialog = true
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    contentColor = Color.Black,
+                                    containerColor = Color.Red
+                                ),
+                                shape = RoundedCornerShape(32.dp),
+                                contentPadding = PaddingValues(vertical = 4.dp, horizontal = 100.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()) {
+                                Text(
+                                    text = "Delete",
+                                    textAlign = TextAlign.Center,
+                                    fontSize = 16.sp,
+                                    color = Color.White
+                                )
+                            }
+                        }
+                        if (showDialog) {
+                            AlertDialog(
+                                onDismissRequest = { showDialog = false },
+                                title = { Text("Confirm Deletion") },
+                                text = { Text("Are you sure you want to delete this item?") },
+                                confirmButton = {
+                                    Button(
+                                        onClick = {
+                                            // Perform the delete action
+                                            reviewViewModel.deleteReview(
+                                                db,
+                                                review?.id.toString(),
+                                                onSuccess = { navController.navigate(Screen.Review.route) },
+                                                onFailure = {})
+                                            showDialog = false
+                                            // Add your delete logic here
+                                        }
+                                    ) {
+                                        Text("Yes")
+                                    }
+                                },
+                                dismissButton = {
+                                    Button(
+                                        onClick = { showDialog = false }
+                                    ) {
+                                        Text("No")
+                                    }
+                                }
                             )
                         }
                     }

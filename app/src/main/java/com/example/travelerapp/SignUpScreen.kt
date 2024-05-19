@@ -4,11 +4,14 @@ import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -60,9 +63,11 @@ fun SignUpScreen(
     walletViewModel: WalletViewModel
 ) {
     val db = Firebase.firestore
-    var username = remember { mutableStateOf(TextFieldValue()) }
-    var email = remember { mutableStateOf(TextFieldValue()) }
-    var password = remember { mutableStateOf(TextFieldValue()) }
+    val username = remember { mutableStateOf(TextFieldValue()) }
+    val email = remember { mutableStateOf(TextFieldValue()) }
+    val password = remember { mutableStateOf(TextFieldValue()) }
+    val confPassword = remember { mutableStateOf(TextFieldValue()) }
+    val secureQst = remember { mutableStateOf("") }
     val checked = remember { mutableStateOf(false) }
     val showToast = remember { mutableStateOf(false) }
 
@@ -70,6 +75,7 @@ fun SignUpScreen(
     val vPw = viewModel.isUPwV(password.value.text)
 
     val vSignUp = vEmail && vPw && checked.value
+
 
     val userSU = remember {
         mutableStateOf(emptyList<User>())
@@ -82,6 +88,24 @@ fun SignUpScreen(
 
     viewModel.readUData(db){ userList -> userSU.value = userList }
 
+    val isEmailFormatCorrect = remember { mutableStateOf(false) }
+    val isPasswordFormatCorrect = remember { mutableStateOf(false) }
+    val isPasswordMatched = remember { mutableStateOf(false) }
+
+    // Call validation functions from ViewModel
+    val isValidEmail = viewModel.isUEmailV(email.value.text)
+    val isValidPassword = viewModel.isUPwV(password.value.text)
+    val isValidConfirmPassword = viewModel.isConfirmPasswordMatch(password.value.text, confPassword.value.text)
+
+    isEmailFormatCorrect.value = isValidEmail
+    isPasswordFormatCorrect.value = isValidPassword
+    isPasswordMatched.value = isValidConfirmPassword
+
+    val emailGuideMessage = if (isEmailFormatCorrect.value) "Email format is correct" else "Invalid email format"
+    val passwordGuideMessage = if (isPasswordFormatCorrect.value) "Password format is correct" else "Password must contain 8 characters with \n at least 1 uppercase, lowercase & numeric character"
+    val confirmPasswordGuideMessage = if (isPasswordMatched.value) "Password matches" else "Password is not matches"
+
+    val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -91,9 +115,9 @@ fun SignUpScreen(
     ) {
         Box(
             modifier = Modifier
-                .width(350.dp)
-                .height(800.dp)
+                .fillMaxSize()
                 .background(Color.LightGray, RoundedCornerShape(16.dp))
+                .verticalScroll(scrollState)
         ) {
             Column(
                 modifier = Modifier
@@ -133,17 +157,8 @@ fun SignUpScreen(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
-                val uNameValid: Boolean = viewModel.isUNameAv(username.value.text, userSU.value)
-                if (username.value.text != "") {
-                    Text(
-                        text = if (!uNameValid) "username is unavailable" else "",
-                        color = if (uNameValid) Color.Blue else Color.Red,
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
 
-                Spacer(modifier = Modifier.height(15.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 Text(
                     text = "Email",
@@ -159,19 +174,18 @@ fun SignUpScreen(
                     label = { BasicText(text = "Email") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = !isValidEmail
                 )
-                val emailIsValid: Boolean = viewModel.isUEmailV(email.value.text)
-                if (email.value.text != "") {
-                    Text(
-                        text = if (emailIsValid) "" else "Please enter a valid Email",
-                        color = if (uNameValid) Color.Blue else Color.Red,
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
 
-                Spacer(modifier = Modifier.height(15.dp))
+                Text(
+                    text = emailGuideMessage,
+                    color = if (isEmailFormatCorrect.value) Color.Blue else Color.Red,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
 
                 Text(
                     text = "Password",
@@ -181,6 +195,7 @@ fun SignUpScreen(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 var passwordVisible by rememberSaveable { mutableStateOf(false) }
+                var confPasswordVisible by rememberSaveable { mutableStateOf(false) }
                 TextField(
                     value = password.value,
                     onValueChange = {
@@ -205,81 +220,96 @@ fun SignUpScreen(
                             Icon(imageVector = ImageVector.vectorResource(id = image), description)
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = !isValidPassword
                 )
 
-                val pwValid: Boolean = viewModel.isUPwV(password.value.text)
-                if (password.value.text != "") {
-                    Text(
-                        text = if (pwValid) "" else "Password must contain at least 1 uppercase, lowercase, number, and only 8 characters",
-                        color = if (pwValid) Color.Blue else Color.Red,
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(top = 4.dp),
-                        textAlign = TextAlign.Center
-                    )
-                }
+                Text(
+                    text = passwordGuideMessage,
+                    color = if (isPasswordFormatCorrect.value) Color.Blue else Color.Red,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
 
+                Spacer(modifier = Modifier.height(10.dp))
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "Confirm Password",
+                    modifier = Modifier.align(Alignment.Start)
+                )
 
+                Spacer(modifier = Modifier.height(10.dp))
 
-                    if (password.value.text != "" &&pwTyped.value) {
-                        Text(
-                            text = "Confirm Password",
-                            modifier = Modifier.align(Alignment.Start),
-                        )
+                TextField(
+                    value = confPassword.value,
+                    onValueChange = {
+                        confPassword.value = it
+                        pwTyped.value = true
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    label = { BasicText(text = "Password") },
+                    singleLine = true,
+                    visualTransformation = if (confPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                    ),
+                    trailingIcon = {
+                        val image = if (confPasswordVisible)
+                            R.drawable.visibility
+                        else R.drawable.visibility_off
 
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        val checkPw = remember {
-                            mutableStateOf(TextFieldValue())
+                        // Please provide localized description for accessibility services
+                        val description = if (confPasswordVisible) "Hide password" else "Show password"
+                        IconButton(onClick = { confPasswordVisible = !confPasswordVisible }) {
+                            Icon(imageVector = ImageVector.vectorResource(id = image), description)
                         }
-                        var passwordVisible2 by rememberSaveable { mutableStateOf(false) }
-                        TextField(
-                            value = checkPw.value,
-                            onValueChange = { checkPw.value = it },
-                            shape = RoundedCornerShape(16.dp),
-                            label = { BasicText(text = "Password") },
-                            singleLine = true,
-                            visualTransformation = if (passwordVisible2) VisualTransformation.None else PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Password,
-                            ),
-                            trailingIcon = {
-                                val image = if (passwordVisible2)
-                                    R.drawable.visibility
-                                else R.drawable.visibility_off
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = !isValidConfirmPassword
+                )
 
-                                // Please provide localized description for accessibility services
-                                val description =
-                                    if (passwordVisible2) "Hide password" else "Show password"
-                                IconButton(onClick = { passwordVisible2 = !passwordVisible2 }) {
-                                    Icon(
-                                        imageVector = ImageVector.vectorResource(id = image),
-                                        description
-                                    )
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        val tempPw = password.value.text
+                Text(
+                    text = confirmPasswordGuideMessage,
+                    color = if (isPasswordMatched.value) Color.Blue else Color.Red,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
 
+                Spacer(modifier = Modifier.height(10.dp))
 
-                        if (checkPw.value.text != "") {
-                            if (checkPw.value.text != tempPw) {
-                                Text(
-                                    text = "Both Passwords Do Not Match",
-                                    color = Color.Red,
-                                    fontSize = 12.sp,
-                                    modifier = Modifier.padding(top = 4.dp),
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
-                    }
+                Text(
+                    text = "Security Question: ",
+                    modifier = Modifier.align(Alignment.Start)
+                )
+                Text(
+                    text = "What was your favourite food as child ?",
+                    modifier = Modifier.align(Alignment.Start),
+                )
 
+                Spacer(modifier = Modifier.height(10.dp))
 
-                Spacer(modifier = Modifier.height(15.dp))
+                TextField(
+                    value = secureQst.value,
+                    onValueChange = {
+                        secureQst.value = it
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    label = { BasicText(text = "Enter Your Answer Here") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                Text(
+                    text = if (secureQst.value != "") "Valid Input" else "This Field Cannot be empty!",
+                    color = if (secureQst.value != "") Color.Blue else Color.Red,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
 
                 Column() {
                     Row(
@@ -299,22 +329,30 @@ fun SignUpScreen(
                 ReuseComponents.CustomButton(
                     text = "Sign Up",
                     onClick = {
-//                        navController.navigate(Screen.Home.route) {
-//                                                popUpTo(Screen.Home.route) {
-//                                                    inclusive = true
-//                                                }
-//                                            }
                         if(checked.value) {
                             if (vSignUp) {
-                                if(viewModel.isUNameAv(username.value.text,userSU.value) &&
-                                    viewModel.isEmailAv(email.value.text,userSU.value)){
+                                if ( viewModel.isUNameAv(username.value.text,userSU.value) &&
+                                    viewModel.isEmailAv(email.value.text,userSU.value) &&
+                                    viewModel.isConfirmPasswordMatch(password.value.text, confPassword.value.text)
+                                    ){
+//                                if ( viewModel.isUNameAv(username.value.text,userSU.value) ){
+//                                    Toast.makeText(context, "A", Toast.LENGTH_SHORT).show()
+//                                    if(viewModel.isEmailAv(email.value.text,userSU.value)) {
+//                                        Toast.makeText(context, "B", Toast.LENGTH_SHORT).show()
+//                                        if(viewModel.isConfirmPasswordMatch(password.value.text, confPassword.value.text)){
+//                                            Toast.makeText(context, "C", Toast.LENGTH_SHORT).show()
+//
+//                                        }
+//                                    }
+//                                }
                                 viewModel.addUser(
                                     context = context,
                                     db = db,
                                     userName = username.value.text,
                                     userEmail = email.value.text,
-                                    userPw = password.value.text
-                                ){
+                                    userPw = password.value.text,
+                                    userSecureQst = secureQst.value,
+                                ) {
                                     walletViewModel.createWallet(db, context, it) {wallet_id ->
                                         val dbHandler: DBHandler = DBHandler(context)
                                         dbHandler.createWallet(wallet_id, it)
@@ -322,16 +360,6 @@ fun SignUpScreen(
                                 }
                                 showToast.value = true
                                 checked.value = false
-//                                auth.createUserWithEmailAndPassword(email, password)
-//                                    .addOnCompleteListener { task ->
-//                                        if (task.isSuccessful) {
-//                                            // User created successfully
-//                                            navController.navigate(Screen.AddPIN.route) {
-//                                                popUpTo(Screen.AddPIN.route) {
-//                                                    inclusive = true
-//                                                }
-//                                            }
-//                                        }
                                     }else{
                                         Toast.makeText(context,"Username or Email has been used, please enter a different one",Toast.LENGTH_SHORT).show()
                                 }

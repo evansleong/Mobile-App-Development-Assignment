@@ -56,6 +56,21 @@ fun SetUpNavGraph(
             SignUpScreen(navController, context = LocalContext.current, dbHandler, userViewModel, walletViewModel)
         }
         composable(
+            route = Screen.UserForgotPw.route
+        ){
+            UserForgotPwScreen(navController, context = LocalContext.current, userViewModel)
+        }
+        composable(
+            route = Screen.UserChangePw.route
+        ){
+            UserChangePwScreen(navController, context = LocalContext.current, userViewModel)
+        }
+        composable(
+            route = Screen.UserChangeUsername.route
+        ){
+            UserChangeUsernameScreen(navController, context = LocalContext.current, userViewModel)
+        }
+        composable(
             route = Screen.AddPIN.route
         ){
             AddPINScreen(navController, context = LocalContext.current, walletViewModel)
@@ -123,7 +138,7 @@ fun SetUpNavGraph(
         composable(
             route = Screen.Settings.route
         ) {
-            SettingsScreen(navController,context = LocalContext.current,darkTheme = darkTheme,onDarkThemeChanged = onDarkThemeChanged)
+            SettingsScreen(navController,context = LocalContext.current,darkTheme = darkTheme,onDarkThemeChanged = onDarkThemeChanged, userViewModel)
         }
         composable(
             route = Screen.AgencyLogin.route

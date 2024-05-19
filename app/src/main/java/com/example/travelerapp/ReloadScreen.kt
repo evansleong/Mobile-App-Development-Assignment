@@ -24,6 +24,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -130,7 +131,12 @@ fun ReloadScreen(
                     value = amountInput,
                     onValueChange = {
                         val newValue = it.filter { char -> char.isDigit() }
-                        amountInput = newValue
+                        if (newValue.length < 6) {
+                            amountInput = newValue
+                        } else {
+                            Toast.makeText(context, "You've reached the maximum input limit. Only 5 digits are allowed.", Toast.LENGTH_SHORT).show()
+                        }
+
                     },
                     modifier = Modifier
                         .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -205,7 +211,9 @@ fun ReloadScreen(
             Column {
                 Text(
                     text = "Description",
-                    modifier = Modifier.padding(horizontal = 16.dp).padding(top = 8.dp)
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 8.dp)
                 )
                 TextField(
                     value = description,

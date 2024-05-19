@@ -239,9 +239,9 @@ fun AgencySignUpScreen(
                     modifier = Modifier
                         .fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    visualTransformation = PasswordVisualTransformation(),
                     shape = RoundedCornerShape(20.dp),
                     singleLine = true,
+                    visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         val image = if (confirmPasswordVisible)
                             R.drawable.visibility
@@ -249,7 +249,7 @@ fun AgencySignUpScreen(
 
                         // Please provide localized description for accessibility services
                         val description = if (confirmPasswordVisible) "Hide password" else "Show password"
-                        IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                        IconButton (onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                             Icon(imageVector = ImageVector.vectorResource(id = image), description)
                         }
                     },

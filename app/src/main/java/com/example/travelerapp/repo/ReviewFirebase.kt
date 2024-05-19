@@ -118,4 +118,21 @@ class ReviewFirebase {
                 callback(null)
             }
     }
+
+    fun deleteReviewFromFirestore(
+        db: FirebaseFirestore,
+        reviewId: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        db.collection("reviews")
+            .document(reviewId)
+            .delete()
+            .addOnSuccessListener {
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                onFailure(e)
+            }
+    }
 }

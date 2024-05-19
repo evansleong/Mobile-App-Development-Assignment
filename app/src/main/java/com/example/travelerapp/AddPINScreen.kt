@@ -79,7 +79,7 @@ fun AddPINScreen(
             OutlinedTextField(
                 value = pin1,
                 onValueChange = {
-                    if (it.length <= 6) {
+                    if (it.length <= 6 && it.all { char -> char.isDigit() }) {
                         pin1 = it
                     }
                 },
@@ -101,7 +101,7 @@ fun AddPINScreen(
             OutlinedTextField(
                 value = pin2,
                 onValueChange = {
-                    if (it.length <= 6) {
+                    if (it.length <= 6 && it.all { char -> char.isDigit() }) {
                         pin2 = it
                     }
                 },
@@ -117,19 +117,23 @@ fun AddPINScreen(
                 text = "Confirm",
                 onClick = {
                     if (pin1.isNotEmpty() && pin2.isNotEmpty()) {
-                        if (pin1 == pin2) {
-                            walletViewModel.updatePin(db, context, pin2){
-                                dbHandler.updateWalletPin(pin2, it)
-                            }
-                            Toast.makeText(context, "Welcome to Traveller Apps", Toast.LENGTH_SHORT)
-                                .show()
-                            navController.navigate(Screen.Home.route) {
-                                popUpTo(Screen.Home.route) {
-                                    inclusive = false
-                                }
-                            }
+                        if(pin1.length > 6) {
+                            Toast.makeText(context, "PIN must be exactly 6 digit", Toast.LENGTH_SHORT).show()
                         } else {
-                            Toast.makeText(context, "PINs do not match", Toast.LENGTH_SHORT).show()
+                            if (pin1 == pin2) {
+                                walletViewModel.updatePin(db, context, pin2){
+                                    dbHandler.updateWalletPin(pin2, it)
+                                }
+                                Toast.makeText(context, "Welcome to Traveller Apps", Toast.LENGTH_SHORT)
+                                    .show()
+                                navController.navigate(Screen.Home.route) {
+                                    popUpTo(Screen.Home.route) {
+                                        inclusive = false
+                                    }
+                                }
+                            } else {
+                                Toast.makeText(context, "PINs do not match", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     } else {
                         Toast.makeText(context, "PIN field cannot be empty", Toast.LENGTH_SHORT).show()

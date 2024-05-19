@@ -5,6 +5,7 @@ import android.util.Log
 import android.widget.Toast
 import com.example.travelerapp.data.User
 import com.google.firebase.firestore.FirebaseFirestore
+import java.lang.reflect.InvocationTargetException
 
 class NormalUserFirebase {
     fun addUDatatoFirestore(
@@ -13,6 +14,7 @@ class NormalUserFirebase {
         userName: String,
         userEmail: String,
         userPw: String,
+        userSecureQst: String,
         userImgUri: String?,
         callback: (String) -> Unit
     ) {
@@ -21,6 +23,7 @@ class NormalUserFirebase {
             "userName" to userName,
             "userEmail" to userEmail,
             "userPw" to userPw,
+            "userSecureQst" to userSecureQst,
             "userUri" to userImgUri
         )
 
@@ -61,7 +64,6 @@ class NormalUserFirebase {
 //            }
 //    }
 
-
     fun readUserDataFromFirestore(db: FirebaseFirestore, callback: (List<User>) -> Unit) {
         db.collection("User")
             .get()
@@ -72,6 +74,8 @@ class NormalUserFirebase {
                         val user: User = document.toObject(User::class.java)
                         user.userId = document.id
                         users.add(user)
+                    } catch (e: InvocationTargetException) {
+                        Log.e("Firestore", "InvocationTargetException: ${e.targetException.message}", e.targetException)
                     } catch (e: Exception) {
                         Log.e("Firestore", "Error converting doc to User: ${e.message}")
                     }
@@ -83,21 +87,49 @@ class NormalUserFirebase {
             }
     }
 
-    //check if email is used or not
-    fun checkULoginCred(
-        email: String,
-        password: String,
-        users: List<User>
-    ): User? {
-        return users.find { it.userEmail == email && it.userPw == password }
+    fun editUserProfilePicture(
+        context: Context,
+        db: FirebaseFirestore,
+        userId: String,
+        newUserPicture: String,
+    ) {
+        val agencyRef = db.collection("User").document(userId)
+
+        val newData = hashMapOf<String, Any>(
+            "userUri" to newUserPicture,
+        )
+
+        agencyRef
+            .update(newData)
+            .addOnSuccessListener {
+                Log.d("Firestore", "UserData edited successfully")
+                Toast.makeText(context, "UserData edited successfully", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Error editing UserData: ${e.message}", e)
+                Toast.makeText(context, "Error editing UserData", Toast.LENGTH_SHORT).show()
+            }
     }
 
-    //check if username is used or not
-    fun isUNameAv(uname: String, users: List<User>): Boolean {
-        return users.none { it.userName == uname }
-    }
+    fun changeUserData(
+        context: Context,
+        db: FirebaseFirestore,
+        userId: String,
+        newUsername: String,
+        newUserPw: String,
+    ){
+        val newUData = hashMapOf<String, Any?>(
+            "userPw" to newUserPw
+        )
 
-    fun isEmailAv(email: String, users: List<User>): Boolean {
-        return users.none { it.userEmail == email }
+        db.collection("User").document(userId)
+            .update(newUData)
+            .addOnSuccessListener {
+                Log.d("Firestore","User Data Updated")
+                Toast.makeText(context,"User Data Updated",Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(context, "Error occur in fetching document, $e", Toast.LENGTH_LONG).show()
+            }
     }
 }

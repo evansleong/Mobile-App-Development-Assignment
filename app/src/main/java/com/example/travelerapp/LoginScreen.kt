@@ -45,6 +45,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -87,6 +88,10 @@ fun LoginScreen(
 
     // Check if the user is already logged in
     LaunchedEffect(Unit) {
+        userViewModel.readUData(db) { userList ->
+        users.value = userList
+        }
+
         val loginDetails = userViewModel.getLoginDetails(context)
         if (loginDetails != null) {
             val (email, password) = loginDetails
@@ -105,9 +110,7 @@ fun LoginScreen(
     }
 
 
-    userViewModel.readUData(db) { userList ->
-        users.value = userList
-    }
+
 
     val walletList = remember { mutableStateOf(emptyList<Wallet>()) }
 
@@ -257,15 +260,15 @@ fun LoginScreen(
                                 if(wallet.walletPin != "null"){
                                     Toast.makeText(context, "Login Up Successful", Toast.LENGTH_SHORT).show()
                                     navController.navigate(Screen.Home.route) {
-                                        popUpTo(Screen.Home.route) {
-                                            inclusive = true
+                                        popUpTo(Screen.Login.route) {
+                                            inclusive = false
                                         }
                                     }
                                 }else{
                                     Toast.makeText(context, "Add Pin", Toast.LENGTH_SHORT).show()
                                     navController.navigate(Screen.AddPIN.route) {
                                         popUpTo(Screen.AddPIN.route) {
-                                            inclusive = true
+                                            inclusive = false
                                         }
                                     }
                                 }
@@ -311,6 +314,22 @@ fun LoginScreen(
                         .clickable {
                             // Navigate to the signup screen
                             navController.navigate(Screen.Signup.route) {
+                                popUpTo(Screen.Signup.route) {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                )
+                Text(
+                    text = "Forgot Password?",
+                    color = Color.Blue,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    textDecoration = TextDecoration.Underline,
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .clickable {
+                            navController.navigate(Screen.UserForgotPw.route) {
                                 popUpTo(Screen.Signup.route) {
                                     inclusive = true
                                 }

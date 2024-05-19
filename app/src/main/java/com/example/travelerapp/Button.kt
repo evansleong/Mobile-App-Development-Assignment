@@ -257,9 +257,17 @@ object ReuseComponents {
                     IconButton(
                         onClick = {
                             if (isAgencySide) {
-                                navController.navigate(route = Screen.AgencySetting.route)
+                                navController.navigate(route = Screen.AgencySetting.route) {
+                                    popUpTo(route = Screen.AgencyHome.route) {
+                                        inclusive = true
+                                    }
+                                }
                             } else {
-                                navController.navigate(route = Screen.Settings.route)
+                                navController.navigate(route = Screen.Settings.route) {
+                                    popUpTo(route = Screen.Home.route){
+                                        inclusive = true
+                                    }
+                                }
                             }
                         }
                     ) {
@@ -292,9 +300,17 @@ object ReuseComponents {
                                     when (it) {
                                         "Settings" -> {
                                             if (isAgencySide) {
-                                                navController.navigate(route = Screen.AgencySetting.route)
+                                                navController.navigate(route = Screen.AgencySetting.route) {
+                                                    popUpTo(route = Screen.AgencyHome.route) {
+                                                        inclusive = true
+                                                    }
+                                                }
                                             } else {
-                                                navController.navigate(route = Screen.Settings.route)
+                                                navController.navigate(route = Screen.Settings.route) {
+                                                    popUpTo(route = Screen.Home.route){
+                                                        inclusive = true
+                                                    }
+                                                }
                                             }
                                         }
 

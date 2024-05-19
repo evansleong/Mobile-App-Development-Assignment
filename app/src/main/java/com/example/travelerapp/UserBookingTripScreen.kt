@@ -197,7 +197,11 @@ fun UserBookingTripScreen(
                                     value = numPax,
                                     onValueChange = {
                                         val newValue = it.filter { char -> char.isDigit() }
-                                        numPax = newValue
+                                        if (newValue.length < 6) {
+                                            numPax = newValue
+                                        } else {
+                                            Toast.makeText(context, "You've reached the maximum input limit. Only 5 digits are allowed.", Toast.LENGTH_SHORT).show()
+                                        }
                                     },
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                     colors = TextFieldDefaults.colors(

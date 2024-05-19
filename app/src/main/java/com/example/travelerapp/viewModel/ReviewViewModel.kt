@@ -64,4 +64,13 @@ class ReviewViewModel : ViewModel() {
             }
 //        }
     }
+
+    fun deleteReview(db: FirebaseFirestore, reviewId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit){
+        database.deleteReviewFromFirestore(
+            db = db,
+            reviewId = reviewId,
+            onSuccess = onSuccess,
+            onFailure = onFailure
+        )
+    }
 }
