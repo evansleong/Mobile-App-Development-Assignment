@@ -58,6 +58,7 @@ import androidx.navigation.NavController
 import com.example.travelerapp.R
 import com.example.travelerapp.Screen
 import com.example.travelerapp.ui.theme.CusFont1
+import com.example.travelerapp.ui.theme.CusFont2
 import java.util.Calendar
 
 
@@ -103,7 +104,7 @@ object ReuseComponents {
                 .fillMaxWidth()
                 .bounceClick()
         ) {
-            Text(text, style = TextStyle(fontFamily = CusFont1))
+            Text(text, style = TextStyle(fontFamily = CusFont2))
         }
     }
 
@@ -258,15 +259,11 @@ object ReuseComponents {
                         onClick = {
                             if (isAgencySide) {
                                 navController.navigate(route = Screen.AgencySetting.route) {
-                                    popUpTo(route = Screen.AgencyHome.route) {
-                                        inclusive = true
-                                    }
+                                    popUpTo(route = Screen.AgencyHome.route)
                                 }
                             } else {
                                 navController.navigate(route = Screen.Settings.route) {
-                                    popUpTo(route = Screen.Home.route){
-                                        inclusive = true
-                                    }
+                                    popUpTo(route = Screen.Home.route)
                                 }
                             }
                         }

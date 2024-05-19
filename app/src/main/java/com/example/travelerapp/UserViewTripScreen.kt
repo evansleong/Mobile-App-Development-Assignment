@@ -40,6 +40,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.travelerapp.data.Trip
+import com.example.travelerapp.ui.theme.CusFont3
 import com.example.travelerapp.viewModel.TripViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
@@ -106,9 +107,10 @@ fun UserViewTripScreen(
                             modifier = Modifier.padding(16.dp)
                         ) {
                             Text(
-                                text = "${trip.tripLength} - RM${trip.tripFees}/pax",
+                                text = "${trip.tripLength} - RM${String.format("%.2f", trip.tripFees)}/pax",
                                 fontSize = 20.sp,
-                                fontWeight = FontWeight.ExtraBold
+                                fontWeight = FontWeight.ExtraBold,
+                                fontFamily = CusFont3
                             )
 
                             Spacer(modifier = Modifier.height(10.dp))
@@ -151,7 +153,8 @@ fun UserViewTripScreen(
                             Text(
                                 text = "Available: ${trip.isAvailable}",
                                 fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = CusFont3
                             )
 
                             Column (

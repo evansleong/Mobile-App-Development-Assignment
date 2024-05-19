@@ -44,6 +44,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.compose.rememberNavController
 import com.example.travelerapp.data.Trip
+import com.example.travelerapp.ui.theme.CusFont3
 import com.example.travelerapp.viewModel.PurchasedTripViewModel
 import com.example.travelerapp.viewModel.TransactionViewModel
 import com.example.travelerapp.viewModel.TripViewModel
@@ -116,6 +117,7 @@ fun PaymentScreen(
                         text = "${tripState.value?.tripLength} ${tripState.value?.tripName}",
                         color = Color.White,
                         fontSize = 24.sp,
+                        fontFamily = CusFont3,
                         fontWeight = FontWeight.ExtraBold,
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
@@ -166,7 +168,9 @@ fun PaymentScreen(
             Column (modifier = Modifier.padding(horizontal = 16.dp)){
                 Row {
                     Text(
-                        text = if ((amount.compareTo(wallet?.available?.toDouble() ?: 0.0) < 0)) "Your balance = RM ${wallet?.available}" else "Insufficient Balance! Click here to",
+                        text = if ((amount.compareTo(wallet?.available?.toDouble() ?: 0.0) < 0)) "Your balance = RM ${String.format("%.2f",
+                            wallet?.available?.toDouble() ?: ""
+                        )}" else "Insufficient Balance! Click here to",
                         color = Color.Gray,
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier.padding(start = 8.dp)

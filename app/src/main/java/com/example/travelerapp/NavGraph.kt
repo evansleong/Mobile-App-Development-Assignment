@@ -151,12 +151,19 @@ fun SetUpNavGraph(
             AgencySignUpScreen(navController, context = LocalContext.current, viewModel = agencyViewModel)
         }
         composable(
+            route = Screen.AgencyChangePw.route
+        ){
+            AgencyChangePwScreen(navController, context = LocalContext.current, agencyViewModel)
+        }
+        composable(
+            route = Screen.AgencyChangeUsername.route
+        ){
+            AgencyChangeUsernameScreen(navController, context = LocalContext.current, agencyViewModel)
+        }
+        composable(
             route = Screen.AgencyForgotPw.route
         ) {
-            AgencyForgotPwScreen(
-                navController,
-                context = LocalContext.current,
-                viewModel = agencyViewModel
+            AgencyForgotPwScreen(navController, context = LocalContext.current, viewModel = agencyViewModel
             )
         }
         composable(
@@ -187,10 +194,7 @@ fun SetUpNavGraph(
         composable(
             route = Screen.AgencySetting.route
         ) {
-            AgencySettingScreen(
-                navController,
-                context = LocalContext.current,
-                viewModel = agencyViewModel
+            AgencySettingScreen(navController, context = LocalContext.current, darkTheme = darkTheme, onDarkThemeChanged = onDarkThemeChanged, viewModel = agencyViewModel,
             )
         }
     }

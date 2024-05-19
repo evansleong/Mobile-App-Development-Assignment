@@ -33,13 +33,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.travelerapp.data.Trip
+import com.example.travelerapp.ui.theme.CusFont3
 import com.example.travelerapp.viewModel.TripViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.FirebaseFirestore
@@ -65,7 +68,8 @@ fun UserPackageListScreen(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
         val dbHandler = DBHandler(context)
@@ -136,15 +140,22 @@ fun PurchaseableTripItem(
                         text = trip.tripName,
                         fontWeight = FontWeight.Bold
                     )
+                    Spacer(modifier = Modifier.height(5.dp))
                     Text(
-                        text = "RM${trip.tripFees}/PAX"
+                        text = "RM${String.format("%.2f", trip.tripFees)}/PAX",
+                        style = TextStyle(fontSize = 13.sp, fontFamily = CusFont3)
                     )
                     Text(
-                        text = trip.agencyUsername
+                        text = trip.agencyUsername,
+                        fontWeight = FontWeight.ExtraBold
                     )
                     Text(
-                        text = trip.tripLength
+                        text = trip.tripLength,
+                        fontSize = 13.sp,
+                        fontFamily = CusFont3
                     )
+
+                    Spacer(modifier = Modifier.height(10.dp))
                     Text(
                         text = "Available: ${trip.isAvailable}",
                         fontWeight = FontWeight.Bold

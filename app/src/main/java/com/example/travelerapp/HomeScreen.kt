@@ -1,6 +1,7 @@
 package com.example.travelerapp
 
 import ReuseComponents
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,12 +32,15 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,10 +60,12 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.travelerapp.data.Trip
 import com.example.travelerapp.ui.theme.CusFont1
+import com.example.travelerapp.ui.theme.CusFont3
 import com.example.travelerapp.ui.theme.HeadingTxt
 import com.example.travelerapp.viewModel.TripViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
@@ -69,6 +75,17 @@ fun HomeScreen(
     val db = Firebase.firestore
 
     val tripListState = remember { mutableStateOf<List<Trip>>(emptyList()) }
+
+    // Intercept the back button press to prevent navigating back
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+
+    // Intercept the back button press to prevent navigating back and show a Snackbar
+    BackHandler {
+        coroutineScope.launch {
+            snackbarHostState.showSnackbar("Cannot log out by pressing the back button")
+        }
+    }
 
     LaunchedEffect(key1 = true) {
         tripViewModel.readTrip(db) { trips ->
@@ -105,7 +122,7 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, fontFamily = CusFont1),
+                style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, fontFamily = CusFont3),
                 color = MaterialTheme.colorScheme.onSecondary
             )
 //            Text(text = "calendar")
@@ -126,12 +143,13 @@ fun HomeScreen(
                 Text(
                     text = "Explore Travel Package",
                     modifier = Modifier
+                        .padding(16.dp)
 //                        .fillMaxWidth()
                         ,
                     style = TextStyle(
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = CusFont1
+                        fontFamily = CusFont3
                     ),
                     color = MaterialTheme.colorScheme.onSecondary
                 )
@@ -207,6 +225,7 @@ fun HomeScreen(
         }
 
         ReuseComponents.NavBar(text = title, navController = navController)
+        SnackbarHost(snackbarHostState)
     }
 }
 
@@ -267,11 +286,13 @@ fun HomeTripItem(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "RM${trip.tripFees}/pax", // Displaying the price
-                            style = TextStyle(fontSize = 12.sp) // Adjust font size as needed
+                            text = "RM${String.format("%.2f", trip.tripFees)}/pax",
+                            style = TextStyle(fontSize = 11.sp, fontFamily = CusFont3)
                         )
                         Text(
-                            text = trip.tripLength
+                            text = trip.tripLength,
+                            fontSize = 13.sp,
+                            fontFamily = CusFont3
                         )
                     }
                 }

@@ -16,10 +16,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -58,10 +60,25 @@ fun AgencyPackageDetail(
     tripViewModel: TripViewModel
 ) {
     val db = Firebase.firestore
-    val activity = context as Activity
     val tripState = remember { mutableStateOf<Trip?>(null) }
 
     val selectedPackage = tripViewModel.selectedTripId
+
+    val tripId = tripViewModel.selectedTripId.toString()
+
+    var isDialogOpen by remember { mutableStateOf(false) }
+
+
+    // Store all the pax and user data received from Firestore
+    var purchasedTripsData by remember { mutableStateOf<List<Pair<Int, String>>?>(null) }
+
+    // LaunchedEffect block to read purchased trips data
+    LaunchedEffect(tripId) {
+        tripViewModel.readPurchasedTripsUserAndNoPax(db, tripId) { result ->
+            purchasedTripsData = result
+//            fetchUsername(db, result)
+        }
+    }
 
     LaunchedEffect(selectedPackage) {
         tripViewModel.readSingleTrip(db, selectedPackage.toString()) { trip ->
@@ -70,13 +87,6 @@ fun AgencyPackageDetail(
     }
 
     tripState.value?.let { trip ->
-        var isEditing by remember { mutableStateOf(false) }
-
-        var editedTripName by remember { mutableStateOf(trip.tripName) }
-        var editedTripLength by remember { mutableStateOf(trip.tripLength) }
-        var editedTripFees by remember { mutableStateOf(trip.tripFees) }
-        var editedTripDesc by remember { mutableStateOf(trip.tripDesc) }
-
         Scaffold(
             topBar = {
                 ReuseComponents.TopBar(
@@ -84,6 +94,7 @@ fun AgencyPackageDetail(
                     navController,
                     showBackButton = true,
                     showLogoutButton = true,
+                    isAtSettingPage = true,
                     onLogout = {
                         navController.navigate(route = Screen.UserOrAdmin.route) {
                             popUpTo(Screen.UserOrAdmin.route) {
@@ -218,13 +229,74 @@ fun AgencyPackageDetail(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        Button(
-                            onClick = {
-                                navController.navigate(route = Screen.AgencyEditPackage.route)
+                        Row (
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ){
+                            Button(
+                                onClick = {
+                                    navController.navigate(route = Screen.AgencyEditPackage.route)
+                                }
+                            ) {
+                                Text("Edit Package")
                             }
-                        ) {
-                            Text("Edit Package")
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Button to open the dialog
+                            Button(
+                                onClick = { isDialogOpen = true }
+                            ) {
+                                Text("Check Buyer Details")
+                            }
                         }
+
+                        // Dialog to display buyer details
+                        if (isDialogOpen) {
+                            AlertDialog(
+                                onDismissRequest = { isDialogOpen = false },
+                                title = { Text("Buyer Details") },
+                                text = {
+                                    LazyColumn(
+                                        modifier = Modifier.padding((16.dp))
+                                    ) {
+                                        // Display the pax and user IDs received from Firestore
+                                        purchasedTripsData?.let { data ->
+                                            var totalPax = 0
+                                            item {
+                                                Column {
+                                                    data.forEachIndexed { index, (pax, user) ->
+                                                        totalPax += pax
+                                                        Text("${index + 1}. \t \t $user x $pax")
+                                                        Spacer(
+                                                            modifier = Modifier
+                                                                .height(20.dp)
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                            // Display the total pax count after the list of user IDs
+                                            item {
+                                                Spacer(modifier = Modifier.height(20.dp))
+                                                Text(
+                                                    text = "Total Number Of User Booked: $totalPax",
+                                                    fontSize = 15.sp,
+                                                    fontWeight = FontWeight.ExtraBold
+                                                    )
+                                            }
+                                        }
+                                    }
+                                },
+                                confirmButton = {
+                                    Button(
+                                        onClick = { isDialogOpen = false }
+                                    ) {
+                                        Text("Close")
+                                    }
+                                }
+                            )
+                        }
+
                 }
             }
         }

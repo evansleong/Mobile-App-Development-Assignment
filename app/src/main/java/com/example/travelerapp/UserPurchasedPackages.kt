@@ -123,7 +123,7 @@ fun UserPackagePurchased(
                     )
                 }
             }
-                Text("Total number of trips purchased: \n ${tripListStatePT.value.size}",
+                Text("Number of trips: \n ${tripListStatePT.value.size}",
                     modifier = Modifier
                         .fillMaxWidth(),
                     color = Color(0xff9f9f9f),
@@ -193,10 +193,6 @@ fun PTripListItem(
                     Text(
                         text = trip.tripLength,
                         fontSize = 14.sp
-                    )
-                    Text(
-                        text = "No. of booked user: $bookedUsers",
-                        fontSize = 15.sp
                     )
                 }
 

@@ -52,6 +52,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
+import com.example.travelerapp.ui.theme.CusFont3
 
 @Composable
 fun UserBookingTripScreen(
@@ -121,25 +122,28 @@ fun UserBookingTripScreen(
                                 modifier = Modifier.padding(16.dp)
                             ) {
                                 Text(
-                                    text = "${trip.tripLength} - RM${trip.tripFees}/pax",
+                                    text = "${trip.tripLength} - RM${String.format("%.2f", trip.tripFees)}/pax",
                                     fontSize = 20.sp,
-                                    fontWeight = FontWeight.ExtraBold
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontFamily = CusFont3
                                 )
+                                Spacer(modifier = Modifier.height(8.dp))
 
                                 // Display trip departure date
                                 Text(
                                     text = "Departure Date: ${trip.depDate}",
                                     fontSize = 16.sp,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontFamily = CusFont3
                                 )
 
-                                Spacer(modifier = Modifier.height(8.dp))
 
                                 // Display trip return date
                                 Text(
-                                    text = "Return Date: ${trip.retDate}",
+                                    text = "Return Date      : ${trip.retDate}",
                                     fontSize = 16.sp,
-                                    fontWeight = FontWeight.SemiBold
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontFamily = CusFont3
                                 )
 
                                 Spacer(modifier = Modifier.height(10.dp))
@@ -185,7 +189,8 @@ fun UserBookingTripScreen(
                                 Text(
                                     text = "Available: ${trip.isAvailable}",
                                     fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = CusFont3
                                 )
                             }
 
@@ -218,9 +223,10 @@ fun UserBookingTripScreen(
                                 )
 
                                 Text(
-                                    text = "Booking Fee: RM ${trip.tripDeposit}",
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold
+                                    text = "Booking Fee: RM ${trip.tripDeposit}/PAX",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = CusFont3
                                 )
 
                                 Button(onClick = {

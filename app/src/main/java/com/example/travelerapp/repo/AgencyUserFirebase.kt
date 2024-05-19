@@ -131,12 +131,12 @@
             agencyRef
                 .update(newData)
                 .addOnSuccessListener {
-                    Log.d("Firestore", "Trip edited successfully")
-                    Toast.makeText(context, "Trip edited successfully", Toast.LENGTH_SHORT).show()
+                    Log.d("Firestore", "Profile picture edited successfully")
+                    Toast.makeText(context, "Profile picture successfully", Toast.LENGTH_SHORT).show()
                 }
                 .addOnFailureListener { e ->
-                    Log.e("Firestore", "Error editing trip: ${e.message}", e)
-                    Toast.makeText(context, "Error editing trip", Toast.LENGTH_SHORT).show()
+                    Log.e("Firestore", "Error editing Profile picture: ${e.message}", e)
+                    Toast.makeText(context, "Error editing Profile picture", Toast.LENGTH_SHORT).show()
                 }
         }
 
@@ -153,6 +153,28 @@
                 }
                 .addOnFailureListener { exception ->
                     onFailure(exception)
+                }
+        }
+
+        fun changeAgencyData(
+            context: Context,
+            db: FirebaseFirestore,
+            agencyId: String,
+            newUsername: String,
+            newAgencyPw: String,
+        ){
+            val newAgencyData = hashMapOf<String, Any?>(
+                "agencyPassword" to newAgencyPw
+            )
+
+            db.collection("agencyUser").document(agencyId)
+                .update(newAgencyData)
+                .addOnSuccessListener {
+                    Log.d("Firestore","Agency Data Updated")
+                    Toast.makeText(context,"Agency Data Updated",Toast.LENGTH_SHORT).show()
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(context, "Error occur in fetching document, $e", Toast.LENGTH_LONG).show()
                 }
         }
 

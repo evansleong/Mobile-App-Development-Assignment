@@ -155,25 +155,46 @@ class TripFirebase {
         numPax: Int,
         tripId: String,
         callback: (Boolean) -> Unit
-    ){
+    ) {
         val balance: Int = available - numPax
-        val numBooked: Int = numPax
+
+        // First, get the current noOfUserBooked value
         db.collection("trips")
             .document(tripId)
-            .update(
-                mapOf(
-                    "isAvailable" to balance,
-                    "noOfUserBooked" to numBooked
-                )
-            )
+            .get()
             .addOnSuccessListener { documentSnapshot ->
-                callback(true) // Success, document updated
+                if (documentSnapshot.exists()) {
+                    // Retrieve the current noOfUserBooked value
+                    val currentNumBooked = documentSnapshot.getLong("noOfUserBooked")?.toInt() ?: 0
+                    val newNumBooked = currentNumBooked + numPax
+
+                    // Update the document with the new values
+                    db.collection("trips")
+                        .document(tripId)
+                        .update(
+                            mapOf(
+                                "isAvailable" to balance,
+                                "noOfUserBooked" to newNumBooked
+                            )
+                        )
+                        .addOnSuccessListener {
+                            callback(true) // Success, document updated
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("Firestore", "Error updating document: ${e.message}", e)
+                            callback(false)
+                        }
+                } else {
+                    Log.e("Firestore", "Document not found")
+                    callback(false)
+                }
             }
             .addOnFailureListener { e ->
                 Log.e("Firestore", "Error getting document: ${e.message}", e)
                 callback(false)
             }
     }
+
 
     fun readSingleTripFromFirestore(
         db: FirebaseFirestore,
@@ -294,6 +315,101 @@ class TripFirebase {
                 callback(0) // If there's an error, pass 0 as the total number of passengers
             }
     }
+
+//    fun readPurchasedTripsUserAndNoPax(
+//        db: FirebaseFirestore,
+//        tripId: String,
+//        callback: (List<Pair<Int, String>>) -> Unit
+//    ) {
+//        db.collection("purchasedTrips")
+//            .whereEqualTo("tripId", tripId)
+//            .get()
+//            .addOnSuccessListener { documents ->
+//                val tripUserPairs = mutableListOf<Pair<Int, String>>()
+//                val userIdMap = mutableMapOf<String, Int>()
+//
+//                for (document in documents) {
+//                    val userId = document.getString("userName") ?: ""
+//                    val noPax = document.getLong("noPax")?.toInt() ?: 0
+//
+//                    // Check if the user ID already exists in the map
+//                    if (userIdMap.containsKey(userId)) {
+//                        // If the user ID exists, add the number of pax to the existing count
+//                        userIdMap[userId] = userIdMap.getValue(userId) + noPax
+//                    } else {
+//                        // If the user ID doesn't exist, add it to the map with the number of pax
+//                        userIdMap[userId] = noPax
+//                    }
+//                }
+//
+//                // Convert the userIdMap entries to a list of Pair<Int, String>
+//                tripUserPairs.addAll(userIdMap.entries.map { Pair(it.value, it.key) })
+//
+//                callback(tripUserPairs)
+//            }
+//            .addOnFailureListener { e ->
+//                Log.e("Firestore", "Error getting purchased trip details: ${e.message}", e)
+//                callback(emptyList())
+//            }
+//    }
+
+    fun readPurchasedTripsUserAndNoPax(
+        db: FirebaseFirestore,
+        tripId: String,
+        callback: (List<Pair<Int, String>>) -> Unit
+    ) {
+        db.collection("purchasedTrips")
+            .whereEqualTo("tripId", tripId)
+            .get()
+            .addOnSuccessListener { documents ->
+                val tripUserPairs = mutableListOf<Pair<Int, String>>()
+                val userIds = mutableSetOf<String>()
+
+                // First pass: collect userIds and create pairs with noPax and userId
+                for (document in documents) {
+                    val userId = document.getString("userId") ?: ""
+                    val noPax = document.getLong("noPax")?.toInt() ?: 0
+
+                    tripUserPairs.add(Pair(noPax, userId))
+                    userIds.add(userId)
+                }
+
+                // Fetch userNames for the collected userIds
+                if (userIds.isNotEmpty()) {
+                    db.collection("User")
+                        .whereIn("userId", userIds.toList())
+                        .get()
+                        .addOnSuccessListener { userDocuments ->
+                            val userIdToUserNameMap = mutableMapOf<String, String>()
+
+                            for (userDocument in userDocuments) {
+                                val userId = userDocument.getString("userId") ?: ""
+                                val userName = userDocument.getString("userName") ?: ""
+                                userIdToUserNameMap[userId] = userName
+                            }
+
+                            // Replace userId with userName in tripUserPairs
+                            val tripUserPairsWithNames = tripUserPairs.map { pair ->
+                                val userName = userIdToUserNameMap[pair.second] ?: pair.second
+                                Pair(pair.first, userName)
+                            }
+
+                            callback(tripUserPairsWithNames)
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("Firestore", "Error getting user details: ${e.message}", e)
+                            callback(emptyList())
+                        }
+                } else {
+                    callback(tripUserPairs) // No userIds to look up
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Error getting purchased trip details: ${e.message}", e)
+                callback(emptyList())
+            }
+    }
+
 
     fun readTripsWithBookingCounts(db: FirebaseFirestore, agencyUsername: String, agencyId: String, onTripsRead: (List<Trip>) -> Unit) {
         db.collection("trips")

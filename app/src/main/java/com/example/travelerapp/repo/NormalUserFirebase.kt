@@ -30,6 +30,9 @@ class NormalUserFirebase {
         db.collection("User")
             .add(userData)
             .addOnSuccessListener { documentReference ->
+                val userId = documentReference.id
+                db.collection("User").document(userId)
+                    .update("userId", userId)
                 Log.d("Firestore", "User added with ID: ${documentReference.id}")
                 Toast.makeText(context, "User added to Firestore with ID: ${documentReference.id}", Toast.LENGTH_SHORT).show()
                 callback(documentReference.id)

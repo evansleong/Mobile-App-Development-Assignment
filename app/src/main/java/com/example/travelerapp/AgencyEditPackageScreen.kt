@@ -1,5 +1,6 @@
 package com.example.travelerapp
 
+import ReuseComponents
 import android.content.Context
 import android.net.Uri
 import android.util.Log
@@ -26,7 +27,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -45,7 +45,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,7 +52,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -128,10 +126,14 @@ fun AgencyEditPackageScreen(
     }
 
     fun handleSaveButtonClick() {
-            showConfirmationDialog()
+        showConfirmationDialog()
     }
 
-    fun calculateTripLength(departureMillis: Long?, returnMillis: Long?,existingTripLength: String): String {
+    fun calculateTripLength(
+        departureMillis: Long?,
+        returnMillis: Long?,
+        existingTripLength: String
+    ): String {
         if (departureMillis != null && returnMillis != null) {
             val departureDate = DateUtils().convertMillisToLocalDate(departureMillis)
             val returnDate = DateUtils().convertMillisToLocalDate(returnMillis)
@@ -152,12 +154,23 @@ fun AgencyEditPackageScreen(
         var editedDepartureDate by remember { mutableStateOf(trip.depDate) }
         var editedReturnDate by remember { mutableStateOf(trip.retDate) }
         var readTripLength by remember { mutableStateOf(trip.tripLength) }
-        var editedTripLength by remember { mutableStateOf(calculateTripLength(tripPackageDeptDate.selectedDateMillis, tripPackageRetDate.selectedDateMillis, readTripLength)) }
+        var editedTripLength by remember {
+            mutableStateOf(
+                calculateTripLength(
+                    tripPackageDeptDate.selectedDateMillis,
+                    tripPackageRetDate.selectedDateMillis,
+                    readTripLength
+                )
+            )
+        }
 //        val editedTripLength = remember { mutableStateOf(calculateTripLength(tripPackageDeptDate.selectedDateMillis, tripPackageRetDate.selectedDateMillis)) }
         var editedOptions by remember { mutableStateOf(trip.options.joinToString(separator = "\n")) }
         var readOldImageUri by remember { mutableStateOf(trip.tripUri) }
 
-        LaunchedEffect(tripPackageDeptDate.selectedDateMillis, tripPackageRetDate.selectedDateMillis) {
+        LaunchedEffect(
+            tripPackageDeptDate.selectedDateMillis,
+            tripPackageRetDate.selectedDateMillis
+        ) {
             editedTripLength = calculateTripLength(
                 tripPackageDeptDate.selectedDateMillis,
                 tripPackageRetDate.selectedDateMillis,
@@ -177,8 +190,10 @@ fun AgencyEditPackageScreen(
                     )
         }
 
-        LaunchedEffect(editedTripName, editedTripDesc, editedTripFees, editedTripDeposit,
-            editedDepartureDate, editedReturnDate, selectedOptions) {
+        LaunchedEffect(
+            editedTripName, editedTripDesc, editedTripFees, editedTripDeposit,
+            editedDepartureDate, editedReturnDate, selectedOptions
+        ) {
             validateInputFields()
         }
 
@@ -205,7 +220,10 @@ fun AgencyEditPackageScreen(
             imagePicker.launch("image/*")
         }
 
-        LaunchedEffect(tripPackageDeptDate.selectedDateMillis, tripPackageRetDate.selectedDateMillis) {
+        LaunchedEffect(
+            tripPackageDeptDate.selectedDateMillis,
+            tripPackageRetDate.selectedDateMillis
+        ) {
             editedTripLength = calculateTripLength(
                 tripPackageDeptDate.selectedDateMillis,
                 tripPackageRetDate.selectedDateMillis,
@@ -224,13 +242,14 @@ fun AgencyEditPackageScreen(
                 navController,
                 showBackButton = true,
                 showLogoutButton = true,
+                isAtSettingPage = true,
                 onLogout = {
-                navController.navigate(route = Screen.UserOrAdmin.route) {
-                    popUpTo(Screen.UserOrAdmin.route) {
-                        inclusive = true
+                    navController.navigate(route = Screen.UserOrAdmin.route) {
+                        popUpTo(Screen.UserOrAdmin.route) {
+                            inclusive = true
+                        }
                     }
-                }
-            })
+                })
 
             Box(
                 modifier = Modifier
@@ -239,22 +258,22 @@ fun AgencyEditPackageScreen(
                     .background(Color.Gray)
             ) {
                 val displayImageUri = editedImageUri ?: readOldImageUri
-                    Image(
-                        painter = rememberAsyncImagePainter(displayImageUri),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(16f / 9f)
-                    )
-                    IconButton(
-                        onClick = {
-                            pickImage(imagePicker)
-                        },
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(8.dp)
-                    ) {}
-                }
+                Image(
+                    painter = rememberAsyncImagePainter(displayImageUri),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f)
+                )
+                IconButton(
+                    onClick = {
+                        pickImage(imagePicker)
+                    },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                ) {}
+            }
             Spacer(modifier = Modifier.height(20.dp))
 
             Box(
@@ -266,15 +285,6 @@ fun AgencyEditPackageScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    item {
-                        Text(text = "Trip Name", fontWeight = FontWeight.Bold)
-                        EditableStringFieldWithButton(
-                            text = editedTripName,
-                            onTextChanged = { editedTripName = it },
-                        )
-                        Spacer(modifier = Modifier.height(20.dp))
-                    }
-
                     item {
                         Text(text = "Trip Name", fontWeight = FontWeight.Bold)
                         EditableStringFieldWithButton(
@@ -359,15 +369,26 @@ fun AgencyEditPackageScreen(
                         Spacer(modifier = Modifier.height(20.dp))
                         Text("Options (Select at least 1):", fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.height(16.dp))
-                        val allOptions = listOf("Included breakfast", "Free Parking", "Travel Insurance", "Tipping and Taxes", "Full Board Meals", "Airport Transport")
+                        val allOptions = listOf(
+                            "Included breakfast",
+                            "Free Parking",
+                            "Travel Insurance",
+                            "Tipping and Taxes",
+                            "Full Board Meals",
+                            "Airport Transport"
+                        )
                         allOptions.forEach { option ->
-                            OptionsCheckbox(option, selectedOptions, trip, onOptionCheckedChange = {isChecked ->
-                                if (isChecked) {
-                                    selectedOptions.add(option)
-                                } else {
-                                    selectedOptions.remove(option)
-                                }
-                            })
+                            OptionsCheckbox(
+                                option,
+                                selectedOptions,
+                                trip,
+                                onOptionCheckedChange = { isChecked ->
+                                    if (isChecked) {
+                                        selectedOptions.add(option)
+                                    } else {
+                                        selectedOptions.remove(option)
+                                    }
+                                })
                         }
                         Spacer(modifier = Modifier.height(20.dp))
                     }
@@ -377,16 +398,22 @@ fun AgencyEditPackageScreen(
                             text = "Save Changes",
                             onClick = {
                                 if (selectedOptions.isEmpty()) {
-                                    selectedOptions = trip.options.toMutableSet() // Keep previous options
+                                    selectedOptions =
+                                        trip.options.toMutableSet() // Keep previous options
                                 }
 
                                 validateInputFields()
 
                                 if (isInputValid) {
                                     handleSaveButtonClick()
-                            } else {
-                                Toast.makeText(context, "Please fill in all required fields", Toast.LENGTH_SHORT).show()
-                            }                            }
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "Please fill in all required fields",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
                         )
                     }
 
@@ -408,7 +435,8 @@ fun AgencyEditPackageScreen(
                                                 context = navController.context,
                                                 db = Firebase.firestore,
                                                 tripId = trip.tripId,
-                                                newTripUri = editedImageUri?.toString() ?: trip.tripUri,
+                                                newTripUri = editedImageUri?.toString()
+                                                    ?: trip.tripUri,
                                                 newTripName = editedTripName.uppercase(),
                                                 newTripLength = editedTripLength,
                                                 newTripFees = editedTripFees,
@@ -470,7 +498,8 @@ fun EditableStringFieldWithButton(
             value = text,
             onValueChange = {
                 onTextChanged(it)
-                showError = it.isBlank()},
+                showError = it.isBlank()
+            },
             shape = RoundedCornerShape(20.dp),
             modifier = Modifier.weight(1f)
         )
@@ -607,10 +636,13 @@ fun EditableDateFieldWithButton(
 }
 
 
-
-
 @Composable
-fun OptionsCheckbox(option: String, selectedOptions: MutableSet<String>, trip: Trip, onOptionCheckedChange: (Boolean) -> Unit) {
+fun OptionsCheckbox(
+    option: String,
+    selectedOptions: MutableSet<String>,
+    trip: Trip,
+    onOptionCheckedChange: (Boolean) -> Unit
+) {
     var isChecked by remember { mutableStateOf(option in selectedOptions) }
 
     LaunchedEffect(selectedOptions) {

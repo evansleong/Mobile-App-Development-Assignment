@@ -1,7 +1,6 @@
 package com.example.travelerapp
 
 import ReuseComponents
-import android.app.Activity
 import android.content.Context
 import android.net.Uri
 import android.util.Log
@@ -31,6 +30,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -43,11 +43,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -90,13 +94,19 @@ fun AgencyAddPackageScreen(
 
     val db = Firebase.firestore
 
-    val activity = context as Activity
-
     var uploadedImageUri by remember {
         mutableStateOf<Uri?>(null)
     }
 
-    var expanded by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Show Snackbar immediately when the composable is executed
+    LaunchedEffect(true) {
+        snackbarHostState.showSnackbar(
+            message = "Please complete all fields",
+            actionLabel = "Dismiss"
+        )
+    }
 
     var showConfirmDialog by remember { mutableStateOf(false) }
 
@@ -107,8 +117,6 @@ fun AgencyAddPackageScreen(
     var showRetDateDialog by remember { mutableStateOf(false) }
 
     val customTripLength = remember { mutableStateOf(TextFieldValue()) }
-
-    val tripLengthOptions = listOf("1 DAY TRIP", "2 DAYS 1 NIGHT", "3 DAYS 2 NIGHTS", "OTHERS")
 
     val tripId = UUID.randomUUID().toString().substring(0, 6)
 
@@ -160,10 +168,6 @@ fun AgencyAddPackageScreen(
         imagePicker.launch("image/*")
     }
 
-    fun handleOthersOptionClick() {
-        isOthersSelected = true
-    }
-
     fun handleImageUpload(context: Context, imageUri: Uri?) {
         tripViewModel.uploadImage(
             context = context,
@@ -185,10 +189,10 @@ fun AgencyAddPackageScreen(
             val days = ChronoUnit.DAYS.between(departureDate, returnDate) + 1
             val nights = if (days > 1) days - 1 else 0
             return if (days < 2) "1 DAY TRIP"
-                    else if (days < 0) "INVALID DEPARTURE AND RETURN DATE"
+                    else if (days < 0) "invalid field"
                     else "$days DAYS $nights NIGHTS"
         }
-        return "INVALID DEPARTURE AND RETURN DATE" // Default to 1 DAY TRIP if dates are not selected
+        return "invalid field"
     }
 
     val imagePicker = rememberLauncherForActivityResult(
@@ -197,22 +201,17 @@ fun AgencyAddPackageScreen(
         handleImageUpload(context, uri)
     }
 
-    // Check if an image has been uploaded
     val isImageUploaded = uploadedImageUri != null
 
-    // Calculate trip length based on departure and return dates
     val tripLength = remember {
         mutableStateOf(calculateTripLength(tripPackageDeptDate.selectedDateMillis, tripPackageRetDate.selectedDateMillis))
-    }
-
-    fun saveCustomTripLength() {
-        tripLength.value = customTripLength.value.text
-        isDialogOpen = false
     }
 
     var tripPackageNameError by remember { mutableStateOf(false) }
 
     var tripPackageFeesError by remember { mutableStateOf(false) }
+
+    var numberOfPaxError by remember { mutableStateOf(false) }
 
     var tripPackageDepositError by remember { mutableStateOf(false) }
 
@@ -244,19 +243,19 @@ fun AgencyAddPackageScreen(
         }
 
         // Trip Fees validation
-        if (tripPackageFees.value.text.isEmpty() || tripPackageFees.value.text.toDoubleOrNull() == null) {
+        if (tripPackageFees.value.text.isEmpty() || tripPackageFees.value.text.toDoubleOrNull() == null || tripPackageFees.value.text.toDouble() < 1) {
             isValid = false
             tripPackageFeesError = true
-            Toast.makeText(context, "Please enter valid trip fees", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Please enter valid trip fees (minimum 1)", Toast.LENGTH_SHORT).show()
         } else {
             tripPackageFeesError = false
         }
 
         // Trip Deposit validation
-        if (tripPackageDeposit.value.text.isEmpty() || tripPackageDeposit.value.text.toDoubleOrNull() == null) {
+        if (tripPackageDeposit.value.text.isEmpty() || tripPackageDeposit.value.text.toDoubleOrNull() == null || tripPackageDeposit.value.text.toDouble() < 1) {
             isValid = false
             tripPackageDepositError = true
-            Toast.makeText(context, "Please enter valid trip deposit", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Please enter valid trip deposit (minimum 1 and no decimal points allowed)", Toast.LENGTH_SHORT).show()
         } else {
             tripPackageDepositError = false
         }
@@ -268,6 +267,15 @@ fun AgencyAddPackageScreen(
             Toast.makeText(context, "Please enter trip description", Toast.LENGTH_SHORT).show()
         } else {
             tripPackageDescError = false
+        }
+
+        // Available validation
+        if (tripAvailable.value.text.isEmpty() || tripAvailable.value.text.toIntOrNull() == null || tripAvailable.value.text.toInt() < 1) {
+            isValid = false
+            numberOfPaxError  = true
+            Toast.makeText(context, "Please enter valid number (minimum 1)", Toast.LENGTH_SHORT).show()
+        } else {
+            numberOfPaxError = false
         }
 
         // Departure Date validation
@@ -314,7 +322,6 @@ fun AgencyAddPackageScreen(
         }
     }
 
-
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -328,6 +335,7 @@ fun AgencyAddPackageScreen(
             navController,
             showBackButton = true,
             showLogoutButton = true,
+            isAtSettingPage = true,
             isAgencySide = true,
             onLogout = {
                 navController.navigate(route = Screen.UserOrAdmin.route) {
@@ -388,7 +396,7 @@ fun AgencyAddPackageScreen(
                     TextField(
                         value = tripPackageName.value,
                         onValueChange = { tripPackageName.value = it },
-                        placeholder = { Text(text = "Enter the trip location") },
+                        label = { Text(text = "Enter the trip location", color = Color.Black.copy(alpha = 0.32f), fontWeight = FontWeight.Light) },
                         singleLine = true,
                         isError = tripPackageNameError,
                         modifier = Modifier
@@ -397,7 +405,7 @@ fun AgencyAddPackageScreen(
                     )
                     if (tripPackageNameError) {
                         Text(
-                            text = "DO NOT LEAVE BLANK",
+                            text = "invalid field",
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(start = 16.dp)
@@ -411,7 +419,7 @@ fun AgencyAddPackageScreen(
                     TextField(
                         value = tripPackageFees.value,
                         onValueChange = { tripPackageFees.value = it },
-                        placeholder = { Text(text = "MYR") },
+                        label = { Text(text = "MYR", color = Color.Black.copy(alpha = 0.32f), fontWeight = FontWeight.Light) },
                         singleLine = true,
                         isError = tripPackageFeesError,
                         modifier = Modifier
@@ -423,7 +431,7 @@ fun AgencyAddPackageScreen(
                     )
                     if (tripPackageFeesError) {
                         Text(
-                            text = "DO NOT LEAVE BLANK",
+                            text = "invalid field",
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(start = 16.dp)
@@ -437,7 +445,7 @@ fun AgencyAddPackageScreen(
                     TextField(
                         value = tripPackageDeposit.value,
                         onValueChange = { tripPackageDeposit.value = it },
-                        placeholder = { Text(text = "MYR") },
+                        label = { Text(text = "MYR", color = Color.Black.copy(alpha = 0.32f), fontWeight = FontWeight.Light) },
                         singleLine = true,
                         isError = tripPackageDepositError,
                         modifier = Modifier
@@ -449,7 +457,7 @@ fun AgencyAddPackageScreen(
                     )
                     if (tripPackageDepositError) {
                         Text(
-                            text = "DO NOT LEAVE BLANK",
+                            text = "invalid field",
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(start = 16.dp)
@@ -463,7 +471,7 @@ fun AgencyAddPackageScreen(
                     TextField(
                         value = tripPackageDesc.value,
                         onValueChange = { tripPackageDesc.value = it },
-                        placeholder = { Text(text = "Enter the trip desc:") },
+                        label = { Text(text = "Enter the trip description", color = Color.Black.copy(alpha = 0.32f), fontWeight = FontWeight.Light) },
                         singleLine = true,
                         isError = tripPackageDescError,
                         modifier = Modifier.fillMaxWidth(),
@@ -471,7 +479,7 @@ fun AgencyAddPackageScreen(
                     )
                     if (tripPackageDescError) {
                         Text(
-                            text = "DO NOT LEAVE BLANK",
+                            text = "invalid field",
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(start = 16.dp)
@@ -485,9 +493,9 @@ fun AgencyAddPackageScreen(
                     TextField(
                         value = tripAvailable.value,
                         onValueChange = { tripAvailable.value = it },
-                        placeholder = { Text(text = "No. of PAX") },
+                        label = { Text(text = "No. of PAX", color = Color.Black.copy(alpha = 0.32f), fontWeight = FontWeight.Light) },
                         singleLine = true,
-                        isError = tripPackageFeesError,
+                        isError = numberOfPaxError,
                         modifier = Modifier
                             .fillMaxWidth(),
                         shape = RoundedCornerShape(20.dp),
@@ -495,9 +503,9 @@ fun AgencyAddPackageScreen(
                             keyboardType = KeyboardType.Number
                         )
                     )
-                    if (tripPackageFeesError) {
+                    if (numberOfPaxError) {
                         Text(
-                            text = "DO NOT LEAVE BLANK",
+                            text = "invalid field",
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(start = 16.dp)
@@ -847,11 +855,29 @@ fun AgencyAddPackageScreen(
                 }
             }
             }
+            // Add a SnackbarHost at the end of your UI hierarchy
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            ) {
+                // Snackbar with action to dismiss
+                Snackbar(
+                    action = {
+                        IconButton(
+                            onClick = { snackbarHostState.currentSnackbarData?.dismiss() }
+                        ) {
+                            Icon(Icons.Default.Close, contentDescription = "Close")
+                        }
+                    }
+                ) {
+                    Text(
+                        text = "All fields must not be empty"
+                    )
+                }
+            }
         }
     }
 }
-
-
 
 @Preview
 @Composable

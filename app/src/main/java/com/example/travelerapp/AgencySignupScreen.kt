@@ -31,11 +31,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -377,17 +381,25 @@ fun AgencySignUpScreen(
                     showSecurityQuestionDialog.value = true
                 }
 
+                val annotatedString = buildAnnotatedString {
+                    append("Already have an account? ")
+                    pushStringAnnotation(tag = "LOGIN", annotation = "Login now")
+                    withStyle(style = SpanStyle(color = Color.Blue, fontSize = 14.sp, fontWeight = FontWeight.Bold, textDecoration = TextDecoration.Underline)) {
+                        append("Login now")
+                    }
+                    pop()
+                }
+
                 Text(
-                    text = "Already have an account? Login now",
-                    color = Color.Blue,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
+                    text = annotatedString,
                     modifier = Modifier
                         .padding(top = 16.dp)
                         .clickable {
-                            navController.navigate(Screen.AgencyLogin.route) {
-                                popUpTo(Screen.AgencyLogin.route) {
-                                    inclusive = true
+                            annotatedString.getStringAnnotations(tag = "LOGIN", start = 0, end = annotatedString.length).firstOrNull()?.let { _ ->
+                                navController.navigate(Screen.AgencyLogin.route) {
+                                    popUpTo(Screen.AgencyLogin.route) {
+                                        inclusive = true
+                                    }
                                 }
                             }
                         }

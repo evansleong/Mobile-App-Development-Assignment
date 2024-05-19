@@ -25,6 +25,8 @@ sealed class Screen(val route: String) {
     object Settings: Screen(route = "settings_screen")
     object AgencyLogin: Screen(route = "agency_login_screen")
     object AgencySignup: Screen(route = "agency_signup_screen")
+    object AgencyChangePw: Screen(route = "agency_change_password_screen")
+    object AgencyChangeUsername: Screen(route = "agency_change_username_screen")
     object AgencyForgotPw: Screen(route = "agency_forgot_password_screen")
     object AgencyHome: Screen(route = "agency_home_screen")
     object AgencyAddPackage: Screen(route = "agency_add_package_screen")

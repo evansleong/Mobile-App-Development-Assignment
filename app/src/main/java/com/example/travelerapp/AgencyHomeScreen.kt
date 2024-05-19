@@ -1,41 +1,36 @@
 package com.example.travelerapp
 
+//import androidx.compose.ui.graphics.Paint
+import ReuseComponents
 import ReuseComponents.TopBar
-import android.graphics.Paint
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.items
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import java.text.SimpleDateFormat
-import java.util.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,55 +38,36 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
-//import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.drawText
-import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import com.example.travelerapp.data.PieChartInput
-import com.example.travelerapp.data.Test
 import com.example.travelerapp.data.Trip
 import com.example.travelerapp.ui.theme.CusFont3
-import com.example.travelerapp.ui.theme.blueGray
-import com.example.travelerapp.ui.theme.brightBlue
-import com.example.travelerapp.ui.theme.gray
-import com.example.travelerapp.ui.theme.green
-import com.example.travelerapp.ui.theme.orange
-import com.example.travelerapp.ui.theme.purple
-import com.example.travelerapp.ui.theme.redOrange
-import com.example.travelerapp.ui.theme.white
 import com.example.travelerapp.viewModel.AgencyViewModel
 import com.example.travelerapp.viewModel.TripViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.launch
-import kotlin.math.PI
-import kotlin.math.atan2
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun AgencyHomeScreen(
@@ -101,14 +77,12 @@ fun AgencyHomeScreen(
 ) {
     val db = Firebase.firestore
 
-    val isLoggedIn = remember { mutableStateOf(true) }
     val loggedInAgency = viewModel.loggedInAgency
 
     val top3TripsState = remember { mutableStateOf<List<Trip>>(emptyList()) }
     val tripListState = remember { mutableStateOf<List<Trip>>(emptyList()) }
     val totalUsersState = remember { mutableStateOf(0) }
 
-    val purchasedTripsState = remember { mutableStateOf<List<Trip>>(emptyList()) }
 
     // Intercept the back button press to prevent navigating back
     val snackbarHostState = remember { SnackbarHostState() }
@@ -130,14 +104,17 @@ fun AgencyHomeScreen(
             tripListState.value = filteredTrips
         }
 
-        tripViewModel.readPurchasedTrips(db, loggedInAgency?.agencyId ?: "",
+        tripViewModel.readPurchasedTrips(
+            db, loggedInAgency?.agencyId ?: "",
             loggedInAgency?.agencyId ?: ""
         ) { totalUsers ->
             totalUsersState.value = totalUsers
         }
 
-        tripViewModel.readTripsWithBookingCount(db, loggedInAgency?.agencyUsername ?: "",
-            loggedInAgency?.agencyId ?: "") { trips ->
+        tripViewModel.readTripsWithBookingCount(
+            db, loggedInAgency?.agencyUsername ?: "",
+            loggedInAgency?.agencyId ?: ""
+        ) { trips ->
             tripListState.value = trips
             val sortedTrips = trips.sortedByDescending { it.noOfUserBooked }
             top3TripsState.value = sortedTrips.take(3)
@@ -171,18 +148,18 @@ fun AgencyHomeScreen(
                 .fillMaxSize()
                 .padding(contentPadding)
         ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(40f / 9f)
-                ) {
-                    Image(
-                        painter = rememberAsyncImagePainter(R.drawable.traveler_banner),
-                        contentDescription = "Traveler banner",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(40f / 9f)
+            ) {
+                Image(
+                    painter = rememberAsyncImagePainter(R.drawable.traveler_banner),
+                    contentDescription = "Traveler banner",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
 
             val currentDate = remember {
                 SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(Date())
@@ -200,7 +177,10 @@ fun AgencyHomeScreen(
                 fontSize = 18.sp // Larger font size for "current date" text
             )
 
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(10.dp))
+            Divider(color = Color.LightGray, thickness = 2.dp)
+
+            Spacer(modifier = Modifier.height(20.dp))
 
 
             // Top 3 most booked trips
@@ -258,7 +238,7 @@ fun AgencyHomeScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -329,7 +309,11 @@ fun AgencyHomeScreen(
                             }
                         } else {
                             items(tripListState.value.take(3)) { trip ->
-                                AgencyHomeTripItem(trip = trip, navController = navController, tripViewModel)
+                                AgencyHomeTripItem(
+                                    trip = trip,
+                                    navController = navController,
+                                    tripViewModel
+                                )
                             }
                         }
                     }
@@ -347,20 +331,22 @@ fun AgencyHomeTripItem(
     navController: NavController,
     tripViewModel: TripViewModel,
 ) {
-//    val painter =
-//        rememberAsyncImagePainter(ImageRequest.Builder
-//            (LocalContext.current).data(data = trip.tripUri).apply(block = fun ImageRequest.Builder.() {
-//            crossfade(true)
-//            placeholder(R.drawable.loading)
-//        }).build()
-//        )
-    val imageUrl = trip.tripUri
-    val painter = rememberAsyncImagePainter(
-        ImageRequest.Builder(LocalContext.current)
-            .data(trip.tripUri.takeIf { it.isNotEmpty() })
-            .crossfade(true)
-            .build()
-    )
+    val painter =
+        rememberAsyncImagePainter(
+            ImageRequest.Builder
+                (LocalContext.current).data(data = trip.tripUri)
+                .apply(block = fun ImageRequest.Builder.() {
+                    crossfade(true)
+                    placeholder(R.drawable.loading)
+                }).build()
+        )
+//    val imageUrl = trip.tripUri
+//    val painter = rememberAsyncImagePainter(
+//        ImageRequest.Builder(LocalContext.current)
+//            .data(trip.tripUri.takeIf { it.isNotEmpty() })
+//            .crossfade(true)
+//            .build()
+//    )
 
     Card(
         modifier = Modifier
@@ -383,44 +369,33 @@ fun AgencyHomeTripItem(
                     navController.navigate(route = Screen.AgencyPackageDetail.route)
                 }
         ) {
-            if (imageUrl.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .height(100.dp)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            } else {
-                Image(
-                    painter = painter,
-                    contentDescription = trip.tripName,
-                    modifier = Modifier
-                        .height(100.dp)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
-                )
-            }
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = trip.tripName,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = trip.tripLength,
-                    fontSize = 13.sp,
-                    fontFamily = CusFont3
-                )
-            }
+            Image(
+                painter = painter,
+                contentDescription = trip.tripName,
+                modifier = Modifier
+                    .height(100.dp)
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
+        }
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = trip.tripName,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = trip.tripLength,
+                fontSize = 13.sp,
+                fontFamily = CusFont3
+            )
         }
     }
+
 }
 
 @OptIn(ExperimentalCoilApi::class)
@@ -432,15 +407,17 @@ fun AgencyHomeTop3Item(
     rank: Int
 ) {
     val painter =
-        rememberAsyncImagePainter(ImageRequest.Builder
-            (LocalContext.current).data(data = trip.tripUri).apply(block = fun ImageRequest.Builder.() {
-            crossfade(true)
-            placeholder(R.drawable.loading)
-        }).build()
+        rememberAsyncImagePainter(
+            ImageRequest.Builder
+                (LocalContext.current).data(data = trip.tripUri)
+                .apply(block = fun ImageRequest.Builder.() {
+                    crossfade(true)
+                    placeholder(R.drawable.loading)
+                }).build()
         )
 
     // Determine the border color based on the rank
-    val borderColor = when(rank) {
+    val borderColor = when (rank) {
         1 -> Color(0xFFFFD700) // Gold
         2 -> Color(0xFFC0C0C0) // Silver
         3 -> Color(0xFFCD7F32) // Bronze
@@ -498,6 +475,7 @@ fun AgencyHomeTop3Item(
                             .align(Alignment.Start)
                     )
                 }
+
                 2 -> {
                     Text(
                         text = "Top2",
@@ -511,6 +489,7 @@ fun AgencyHomeTop3Item(
                             .align(Alignment.Start)
                     )
                 }
+
                 3 -> {
                     Text(
                         text = "Top3",
@@ -536,7 +515,7 @@ fun AgencyHomeTop3Item(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "No of user booked: ${trip.noOfUserBooked}",
+                    text = "Total no. of user booked: ${trip.noOfUserBooked}",
                     fontSize = 13.sp,
                     fontFamily = CusFont3
                 )
@@ -544,7 +523,6 @@ fun AgencyHomeTop3Item(
         }
     }
 }
-
 
 
 @Preview

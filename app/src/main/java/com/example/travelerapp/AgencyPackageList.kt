@@ -97,6 +97,7 @@ fun AgencyPackageList(
                 navController,
                 showBackButton = true,
                 isAgencySide = true,
+                isAtSettingPage = true,
                 showLogoutButton = true,
                 onLogout = {
                     navController.navigate(route = Screen.UserOrAdmin.route) {

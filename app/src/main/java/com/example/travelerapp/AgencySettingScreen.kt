@@ -33,6 +33,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
@@ -42,6 +43,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -87,11 +89,10 @@ import java.util.UUID
 fun AgencySettingScreen(
     navController: NavController,
     context: Context,
+    darkTheme: Boolean,
+    onDarkThemeChanged: (Boolean) ->Unit,
     viewModel: AgencyViewModel
 ) {
-    val storage = FirebaseStorage.getInstance().reference
-    val firestore = FirebaseFirestore.getInstance()
-
     val loggedInAgency = viewModel.loggedInAgency
 
     val changeName = remember {
@@ -104,10 +105,10 @@ fun AgencySettingScreen(
         mutableStateOf<Uri?>(null)
     }
 
-//    var readOldImageUri by remember { mutableStateOf("") }
+    var isImageUploadInProgress by remember { mutableStateOf(false) }
 
-    val darkTheme = remember {
-        mutableStateOf(false)
+    val darkThemeState = remember {
+        mutableStateOf(darkTheme)
     }
 
     var dropCheck = remember {
@@ -124,16 +125,15 @@ fun AgencySettingScreen(
         }
     }
 
-//    changeImgUri = Uri.parse(loggedInAgency?.agencyPicture ?: "")
 
     fun handleImageUpload(context: Context, imageUri: Uri?) {
+        isImageUploadInProgress = true
         viewModel.uploadImage(
             context = context,
             imageUri = imageUri,
             onSuccess = { downloadUrl ->
-                viewModel.updateProfilePictureUri(downloadUrl)
-//                changeImgUri = Uri.parse(downloadUrl)
-//                readOldImageUri = downloadUrl
+                changeImgUri = Uri.parse(downloadUrl)
+                isImageUploadInProgress = false
             },
             onFailure = { exception ->
                 Log.e("ImageUpload", "Error uploading image: ${exception.message}")
@@ -144,7 +144,6 @@ fun AgencySettingScreen(
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        changeImgUri = uri
         handleImageUpload(context, uri)
     }
 
@@ -153,11 +152,6 @@ fun AgencySettingScreen(
         imagePicker.launch("image/*")
     }
 
-//    val imagePickerLauncher = rememberLauncherForActivityResult(
-//        contract = ActivityResultContracts.GetContent()
-//    ) { uri: Uri? ->
-//        handleImageUpload(context, uri)
-//    }
 
 
     Column(
@@ -183,7 +177,7 @@ fun AgencySettingScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .weight(1f)
-                .background(Color.White),
+                .background(MaterialTheme.colorScheme.background),
 //            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -201,7 +195,7 @@ fun AgencySettingScreen(
                 ) {
                     Surface (
                         modifier = Modifier.fillMaxSize(),
-                        color = Color(0xFFf9f9f9),
+                        color = MaterialTheme.colorScheme.surface,
                         shape = RoundedCornerShape(20.dp)
                     ){
                         Row(
@@ -230,22 +224,6 @@ fun AgencySettingScreen(
                                 )
                             }
 
-//                            if (changeImgUri == null) {
-//                                ReuseComponents.RoundImg(
-//                                    Modifier,
-//                                    painter = painterResource(R.drawable.blank_profile_picture_973460_1_1_1024x1024),
-//                                    contentDescription = null
-//                                )
-//                            } else {
-//                                Image(
-//                                    painter = rememberAsyncImagePainter(changeImgUri),
-//                                    contentDescription = null,
-//                                    modifier = Modifier
-//                                        .size(64.dp)
-//                                        .clip(CircleShape),
-//                                    contentScale = ContentScale.Crop
-//                                )
-//                            }
                             Column(
                                 modifier = Modifier.fillMaxSize()
                                     .clickable { pickImage(imagePicker) }
@@ -271,129 +249,97 @@ fun AgencySettingScreen(
                         .fillMaxSize()
                         .padding(16.dp)
                 ) {
-                    Text(
-                        text = "Change Username",
-                        modifier = Modifier
-                            .padding(bottom = 10.dp),
-                        style = TextStyle(fontWeight = FontWeight.Bold)
-                    )
-                    TextField(
-                        value = changeName.value,
-                        onValueChange = { changeName.value = it },
-                        shape = RoundedCornerShape(16.dp),
-                        label = { BasicText(text = "Insert New Username") },
-                        singleLine = true,
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 20.dp)
-                            .border(BorderStroke(0.dp, Color.Transparent))
-                    )
+                            .padding(16.dp)
+                            .clickable {
+                                navController.navigate(Screen.AgencyChangeUsername.route) {
+                                    popUpTo(Screen.AgencyHome.route){
+                                        inclusive = true
+                                    }
+                                }
+                            },
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Change Username",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            modifier = Modifier.padding(vertical = 10.dp)
+                        )
+                        Icon(
+                            imageVector = Icons.Default.ArrowForward,
+                            contentDescription = "Arrow Icon",
+                            tint = Color.Black
+                        )
+                    }
 
-                    Text(
-                        text = "Change Password",
-                        modifier = Modifier
-                            .padding(bottom = 10.dp),
-                        style = TextStyle(fontWeight = FontWeight.Bold)
-                    )
-                    TextField(
-                        value = changePw.value,
-                        onValueChange = { changePw.value = it },
-                        shape = RoundedCornerShape(16.dp),
-                        label = { BasicText(text = "Insert New Username") },
-                        singleLine = true,
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 20.dp)
-                            .border(BorderStroke(0.dp, Color.Transparent))
-                    )
+                            .padding(16.dp)
+                            .clickable {
+                                navController.navigate(Screen.AgencyChangePw.route) {
+                                    popUpTo(Screen.AgencyHome.route){
+                                        inclusive = true
+                                    }
+                                }
+                            },
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Change Password",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            modifier = Modifier.padding(vertical = 10.dp)
+                        )
+                        Icon(
+                            imageVector = Icons.Default.ArrowForward,
+                            contentDescription = "Arrow Icon",
+                            tint = Color.Black
+                        )
+                    }
 
                     Row (
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 16.dp),
+                            .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ){
 
                         Text(
                             text = "Dark Theme",
-                            modifier = Modifier
-                                .padding(bottom = 0.dp),
-                            style = TextStyle(fontWeight = FontWeight.Bold)
+                            modifier = Modifier.padding(vertical = 10.dp),
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
                         )
 
-                        Switch(checked = darkTheme.value,
-                            onCheckedChange = {darkTheme.value = it})
-                    }
-
-                    Text(
-                        text = "Languages",
-                        modifier = Modifier
-                            .padding(bottom = 16.dp),
-                        style = TextStyle(fontWeight = FontWeight.Bold)
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp)
-                            .clickable(onClick = { dropCheck.value = true })
-                            .border(
-                                BorderStroke(2.dp, Color.Transparent),
-                                shape = RoundedCornerShape(20.dp)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Surface(
-                            modifier = Modifier.fillMaxSize(),
-                            color = Color(0xFFf9f9f9),
-                            shape = RoundedCornerShape(20.dp)
-                        ) {
-                            Row (
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ){
-
-                                Text(
-                                    text = dropChose.value,
-                                    modifier = Modifier.padding(start = 15.dp)
-                                )
-                                DropdownMenu(
-                                    expanded = dropCheck.value,
-                                    onDismissRequest = { dropCheck.value = false },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                ) {
-                                    DropdownMenuItem(
-                                        text = {Text(text = "English")},
-                                        onClick = {
-                                            dropChose.value = "English"
-                                            dropCheck.value = false
-                                        })
-                                    DropdownMenuItem(
-                                        text = {Text(text = "Chinese")},
-                                        onClick = {
-                                            dropChose.value = "Chinese"
-                                            dropCheck.value = false
-                                        })
-                                }
-                                Icon(
-                                    imageVector = Icons.Default.KeyboardArrowDown,
-                                    contentDescription = "Settings",
-                                    tint = Color.Black,
-                                    modifier = Modifier.padding(end = 15.dp)
-                                )
+                        Switch(
+                            checked = darkThemeState.value,
+                            onCheckedChange = {
+                                darkThemeState.value = it
+                                onDarkThemeChanged(it)
                             }
-                        }
+                        )
                     }
+
                     Button(
                         onClick = {
-                            viewModel.editAgencyPicture(
-                                context = navController.context,
-                                db = Firebase.firestore,
-                                agencyId = loggedInAgency?.agencyId ?: "",
-                                newPicture = changeImgUri.toString()
-                            )
+                            if(!isImageUploadInProgress) {
+                                viewModel.editAgencyPicture(
+                                    context = navController.context,
+                                    db = Firebase.firestore,
+                                    agencyId = loggedInAgency?.agencyId ?: "",
+                                    newPicture = changeImgUri.toString()
+                                )
+                                navController.popBackStack()
+                            } else {
+                                Toast.makeText(context, "Image upload in progress", Toast.LENGTH_SHORT).show()
+                            }
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -406,37 +352,9 @@ fun AgencySettingScreen(
 
         }
     }
-    if(darkTheme.value){
-        Toast.makeText(context,"Dark Theme Applied",Toast.LENGTH_SHORT).show()
+    if( darkThemeState.value != darkThemeState.value){
+        Toast.makeText(context,"Dark Theme ${darkThemeState.value}",Toast.LENGTH_SHORT).show()
     }
-
-//    changeImgUri.let { uri ->
-//        LaunchedEffect(uri) {
-//            val imageRef: StorageReference = storage.child("agency_pictures/${UUID.randomUUID()}")
-//            try {
-//                imageRef.putFile(uri).await()
-//                val downloadUrl = imageRef.downloadUrl.await()
-//                firestore.collection("agencies")
-//                    .document(loggedInAgency?.agencyId ?: "") // Replace with the actual document ID of the agency
-//                    .update("agencyPicture", downloadUrl.toString())
-//                Toast.makeText(context, "Profile picture updated successfully", Toast.LENGTH_SHORT).show()
-//                viewModel.editAgencyPicture(
-//                    context = navController.context,
-//                    db = Firebase.firestore,
-//                    agencyId = loggedInAgency?.agencyId ?: "",
-//                    newPicture = changeImgUri.toString()
-//                )
-//            } catch (e: Exception) {
-//                withContext(Dispatchers.Main) {
-//                    Toast.makeText(
-//                        context,
-//                        "Failed to update profile picture: ${e.message}",
-//                        Toast.LENGTH_SHORT
-//                    ).show()
-//                }
-//            }
-//        }
-//    }
 
 
 }
@@ -447,6 +365,8 @@ fun AgencySettingScreenPreview(){
     AgencySettingScreen(
         navController = rememberNavController(),
         context = LocalContext.current,
+        darkTheme = false,
+        onDarkThemeChanged = {},
         viewModel = AgencyViewModel()
     )
 }

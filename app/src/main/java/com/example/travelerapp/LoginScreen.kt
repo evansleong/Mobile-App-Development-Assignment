@@ -40,12 +40,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -233,7 +236,7 @@ fun LoginScreen(
                                 if (!isChecked) {
                                     clearSavedLoginDetails()
                                 } },
-                            colors = CheckboxDefaults.colors(checkedColor = Color.Green)
+                            colors = CheckboxDefaults.colors(checkedColor = Color(0xFF5DB075))
                         )
                         Text("Remember me")
                     }
@@ -261,7 +264,7 @@ fun LoginScreen(
                                     Toast.makeText(context, "Login Up Successful", Toast.LENGTH_SHORT).show()
                                     navController.navigate(Screen.Home.route) {
                                         popUpTo(Screen.Login.route) {
-                                            inclusive = false
+                                            inclusive = true
                                         }
                                     }
                                 }else{
@@ -304,18 +307,42 @@ fun LoginScreen(
 
                 )
 
+//                Text(
+//                    text = "Don't have an account yet? Sign up now",
+//                    color = Color.Blue,
+//                    fontSize = 14.sp,
+//                    fontWeight = FontWeight.Bold,
+//                    modifier = Modifier
+//                        .padding(top = 16.dp)
+//                        .clickable {
+//                            // Navigate to the signup screen
+//                            navController.navigate(Screen.Signup.route) {
+//                                popUpTo(Screen.Signup.route) {
+//                                    inclusive = true
+//                                }
+//                            }
+//                        }
+//                )
+
+                val annotatedString = buildAnnotatedString {
+                    append("Don't have an account yet? ")
+                    pushStringAnnotation(tag = "SIGNUP", annotation = "Sign up now")
+                    withStyle(style = SpanStyle(color = Color.Blue, fontSize = 14.sp, fontWeight = FontWeight.Bold, textDecoration = TextDecoration.Underline)) {
+                        append("Sign up now")
+                    }
+                    pop()
+                }
+
                 Text(
-                    text = "Don't have an account yet? Sign up now",
-                    color = Color.Blue,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
+                    text = annotatedString,
                     modifier = Modifier
                         .padding(top = 16.dp)
                         .clickable {
-                            // Navigate to the signup screen
-                            navController.navigate(Screen.Signup.route) {
-                                popUpTo(Screen.Signup.route) {
-                                    inclusive = true
+                            annotatedString.getStringAnnotations(tag = "SIGNUP", start = 0, end = annotatedString.length).firstOrNull()?.let { _ ->
+                                navController.navigate(Screen.Signup.route) {
+                                    popUpTo(Screen.Signup.route) {
+                                        inclusive = true
+                                    }
                                 }
                             }
                         }

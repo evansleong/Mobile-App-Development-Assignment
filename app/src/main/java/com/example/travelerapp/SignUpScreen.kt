@@ -115,7 +115,7 @@ fun SignUpScreen(
     ) {
         Box(
             modifier = Modifier
-                .fillMaxSize()
+                .width(350.dp)
                 .background(Color.LightGray, RoundedCornerShape(16.dp))
                 .verticalScroll(scrollState)
         ) {
@@ -320,7 +320,7 @@ fun SignUpScreen(
                         Checkbox(
                             checked = checked.value,
                             onCheckedChange = { isChecked -> checked.value = isChecked },
-                            colors = CheckboxDefaults.colors(checkedColor = Color.Green)
+                            colors = CheckboxDefaults.colors(checkedColor = Color(0xFF5DB075))
                         )
                         Text("I had read and agreed the Term and Privacy")
                     }

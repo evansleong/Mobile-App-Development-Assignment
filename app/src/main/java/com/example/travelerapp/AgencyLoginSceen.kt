@@ -1,17 +1,28 @@
 package com.example.travelerapp
 
+import ReuseComponents
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -43,9 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.travelerapp.data.AgencyUser
-import com.example.travelerapp.data.Wallet
 import com.example.travelerapp.viewModel.AgencyViewModel
-import com.example.travelerapp.viewModel.WalletViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 
@@ -57,19 +66,12 @@ fun AgencyLoginScreen(
 ) {
     val db = Firebase.firestore
 
-    val agencyUsername = remember {
-        mutableStateOf(TextFieldValue())
-    }
     val agencyLoginEmail = remember {
         mutableStateOf(TextFieldValue())
     }
     val agencyLoginPassword = remember {
         mutableStateOf(TextFieldValue())
     }
-    val checked = remember {
-        mutableStateOf(false)
-    }
-//    val rememberMeChecked = remember { mutableStateOf(false) }
     var rememberMeChecked by rememberSaveable { mutableStateOf(viewModel.getLoginDetails(context) != null) }
 
     fun clearSavedLoginDetails() {
@@ -85,7 +87,8 @@ fun AgencyLoginScreen(
             val (email, password) = loginDetails
             agencyLoginEmail.value = TextFieldValue(email)
             agencyLoginPassword.value = TextFieldValue(password)
-            val loginSuccessful = viewModel.checkLoginCredentials(email, password, agencyUsers.value)
+            val loginSuccessful =
+                viewModel.checkLoginCredentials(email, password, agencyUsers.value)
             if (loginSuccessful != null) {
                 viewModel.loggedInAgency = loginSuccessful
                 navController.navigate(Screen.AgencyHome.route) {
@@ -202,7 +205,7 @@ fun AgencyLoginScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                Column() {
+                Column {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Start,
@@ -214,7 +217,8 @@ fun AgencyLoginScreen(
                                 rememberMeChecked = isChecked
                                 if (!isChecked) {
                                     clearSavedLoginDetails()
-                                } },
+                                }
+                            },
                             colors = CheckboxDefaults.colors(checkedColor = Color(0xFF5DB075))
                         )
                         Text("Remember me")
@@ -240,6 +244,9 @@ fun AgencyLoginScreen(
                                 popUpTo(Screen.AgencyLogin.route) {
                                     inclusive = true
                                 }
+                                popUpTo(Screen.UserOrAdmin.route) {
+                                    inclusive = true
+                                }
                             }
                         } else {
                             Toast.makeText(context, "Login failed", Toast.LENGTH_SHORT).show()
@@ -250,7 +257,14 @@ fun AgencyLoginScreen(
                 val annotatedString = buildAnnotatedString {
                     append("Don't have an account yet? ")
                     pushStringAnnotation(tag = "SIGNUP", annotation = "Sign up now")
-                    withStyle(style = SpanStyle(color = Color.Blue, fontSize = 14.sp, fontWeight = FontWeight.Bold, textDecoration = TextDecoration.Underline)) {
+                    withStyle(
+                        style = SpanStyle(
+                            color = Color.Blue,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            textDecoration = TextDecoration.Underline
+                        )
+                    ) {
                         append("Sign up now")
                     }
                     pop()
@@ -261,13 +275,20 @@ fun AgencyLoginScreen(
                     modifier = Modifier
                         .padding(top = 16.dp)
                         .clickable {
-                            annotatedString.getStringAnnotations(tag = "SIGNUP", start = 0, end = annotatedString.length).firstOrNull()?.let { _ ->
-                                navController.navigate(Screen.AgencySignup.route) {
-                                    popUpTo(Screen.Signup.route) {
-                                        inclusive = true
+                            annotatedString
+                                .getStringAnnotations(
+                                    tag = "SIGNUP",
+                                    start = 0,
+                                    end = annotatedString.length
+                                )
+                                .firstOrNull()
+                                ?.let { _ ->
+                                    navController.navigate(Screen.AgencySignup.route) {
+                                        popUpTo(Screen.AgencySignup.route) {
+                                            inclusive = true
+                                        }
                                     }
                                 }
-                            }
                         }
                 )
                 Text(

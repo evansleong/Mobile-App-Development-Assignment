@@ -88,8 +88,8 @@ fun SettingsScreen(
         mutableStateOf<Uri?>(null)
     }
 
-    val darkTheme = remember {
-        mutableStateOf(false)
+    val darkThemeState = remember {
+        mutableStateOf(darkTheme)
     }
 
     var dropCheck = remember {
@@ -292,13 +292,17 @@ fun SettingsScreen(
 
                         Text(
                             text = "Dark Theme",
-                            modifier = Modifier
-                                .padding(bottom = 0.dp),
-                            style = TextStyle(fontWeight = FontWeight.Bold)
+                            modifier = Modifier.padding(vertical = 10.dp),
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
                         )
 
-                        Switch(checked = darkTheme.value,
-                            onCheckedChange = {onDarkThemeChanged(it)}
+                        Switch(
+                            checked = darkThemeState.value,
+                            onCheckedChange = {
+                                darkThemeState.value = it
+                                onDarkThemeChanged(it)
+                            }
                         )
                     }
 
@@ -389,8 +393,8 @@ fun SettingsScreen(
 
         ReuseComponents.NavBar(text = title, navController = navController)
     }
-    if( darkTheme.value != darkTheme.value){
-        Toast.makeText(context,"Dark Theme ${darkTheme.value}",Toast.LENGTH_SHORT).show()
+    if( darkThemeState.value != darkThemeState.value){
+        Toast.makeText(context,"Dark Theme ${darkThemeState.value}",Toast.LENGTH_SHORT).show()
     }
 }
 

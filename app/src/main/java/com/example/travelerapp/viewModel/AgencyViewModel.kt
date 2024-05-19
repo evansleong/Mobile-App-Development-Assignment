@@ -74,9 +74,9 @@ class AgencyViewModel : ViewModel() {
                 // Image uploaded successfully
                 imageRef.downloadUrl.addOnSuccessListener { uri ->
                     // Get the download URL
-                    val downloadUrl = uri.toString()
-                    updateProfilePictureUri(downloadUrl) // Update the loggedInAgency
-                    onSuccess(downloadUrl)
+//                    val downloadUrl = uri.toString()
+//                    updateProfilePictureUri(downloadUrl) // Update the loggedInAgency
+                    onSuccess(uri.toString())
                 }.addOnFailureListener { exception ->
                     onFailure(exception)
                 }
@@ -132,6 +132,16 @@ class AgencyViewModel : ViewModel() {
         } else {
             null
         }
+    }
+
+    fun updateAgencyData(
+        context: Context,
+        db: FirebaseFirestore,
+        userId: String,
+        agencyUsername: String = "",
+        agencyPw: String = "",
+    ) {
+        database.changeAgencyData(context, db, userId, agencyUsername, agencyPw)
     }
 
     // Function to check if the username is available
