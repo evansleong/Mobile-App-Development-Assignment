@@ -1,17 +1,9 @@
 package com.example.travelerapp.repo
 
 import android.content.Context
-import android.graphics.Color
 import android.util.Log
 import android.widget.Toast
-import com.example.travelerapp.data.PieChartInput
 import com.example.travelerapp.data.Trip
-import com.example.travelerapp.ui.theme.blueGray
-import com.example.travelerapp.ui.theme.brightBlue
-import com.example.travelerapp.ui.theme.green
-import com.example.travelerapp.ui.theme.orange
-import com.example.travelerapp.ui.theme.purple
-import com.example.travelerapp.ui.theme.redOrange
 import com.google.firebase.firestore.FirebaseFirestore
 
 class TripFirebase {

@@ -3,7 +3,6 @@ package com.example.travelerapp.viewModel
 import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
-import com.example.travelerapp.data.PieChartInput
 import com.example.travelerapp.repo.TripFirebase
 import com.example.travelerapp.data.Trip
 import com.google.firebase.Firebase

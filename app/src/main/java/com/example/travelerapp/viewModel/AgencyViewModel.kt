@@ -74,8 +74,8 @@ class AgencyViewModel : ViewModel() {
                 // Image uploaded successfully
                 imageRef.downloadUrl.addOnSuccessListener { uri ->
                     // Get the download URL
-//                    val downloadUrl = uri.toString()
-//                    updateProfilePictureUri(downloadUrl) // Update the loggedInAgency
+                    val downloadUrl = uri.toString()
+                    updateProfilePictureUri(downloadUrl) // Update the loggedInAgency
                     onSuccess(uri.toString())
                 }.addOnFailureListener { exception ->
                     onFailure(exception)

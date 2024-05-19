@@ -1,7 +1,6 @@
 package com.example.travelerapp
 
 import ReuseComponents
-import android.text.Layout
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -31,10 +30,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.travelerapp.R
 import com.example.travelerapp.R.*
-import com.example.travelerapp.R.drawable.blank_profile_picture_973460_1_1_1024x1024
-import com.example.travelerapp.ui.theme.CusFont1
+import com.example.travelerapp.screen.Screen
 import com.example.travelerapp.ui.theme.CusFont2
 
 @Composable

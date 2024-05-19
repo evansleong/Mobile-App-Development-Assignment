@@ -87,7 +87,7 @@ class UserViewModel: ViewModel() {
         editor.apply()
     }
 
-    fun editAgencyPicture(context: Context, db: FirebaseFirestore, userId: String, newPicture: String){
+    fun editUserPicture(context: Context, db: FirebaseFirestore, userId: String, newPicture: String){
         database.editUserProfilePicture(
             context = context,
             db = db,

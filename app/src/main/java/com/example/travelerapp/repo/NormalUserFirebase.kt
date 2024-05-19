@@ -96,13 +96,13 @@ class NormalUserFirebase {
         userId: String,
         newUserPicture: String,
     ) {
-        val agencyRef = db.collection("User").document(userId)
+        val userRef = db.collection("User").document(userId)
 
         val newData = hashMapOf<String, Any>(
             "userUri" to newUserPicture,
         )
 
-        agencyRef
+        userRef
             .update(newData)
             .addOnSuccessListener {
                 Log.d("Firestore", "UserData edited successfully")

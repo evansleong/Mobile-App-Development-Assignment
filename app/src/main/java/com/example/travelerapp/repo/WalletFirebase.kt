@@ -3,7 +3,7 @@ package com.example.travelerapp.repo
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import com.example.travelerapp.DBHandler
+import com.example.travelerapp.localDb.DBHandler
 import com.example.travelerapp.data.Wallet
 import com.google.firebase.firestore.FirebaseFirestore
 
